@@ -99,6 +99,11 @@
       </table>
     </section>
     
+    <!-- Hinweis unter der Tabelle -->
+    <div class="table-hint">
+      Bearbeiten eines Eintrags durch Doppelklick auf die Person
+    </div>
+    
     <!-- Version unter der Tabelle - rechtsbündig -->
     <div id="versionUnderTable" class="version-under" role="note"></div>
 
@@ -192,7 +197,7 @@
   <dialog id="dlgPrint">
     <div class="dlg-head"><strong>Drucken</strong><button class="close-x" onclick="this.closest('dialog').close()">×</button></div>
     <div class="dlg-body">
-      <p>Bitte auswählen, что gedruckt werden soll:</p>
+      <p>Bitte auswählen, was gedruckt werden soll:</p>
       <div class="btn-row">
         <button class="btn" id="btnPrintTable">🖨️ Tabelle drucken</button>
         <button class="btn" id="btnPrintTree">🖨️ Baum drucken</button>
@@ -236,7 +241,7 @@
 
   <script>
     // central version string - change once
-    const APP_VERSION = 'v84';
+    const APP_VERSION = 'v85';
     (function(){
       const r = document.getElementById('versionRibbon');
       const u = document.getElementById('versionUnderTable');
