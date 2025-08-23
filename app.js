@@ -221,7 +221,7 @@ function renderTree() {
     });
 
     // Berechne optimale Box-Breite basierend auf Inhalten
-    let maxBoxWidth = 140; // Reduzierte minimale Breite (vorher 180)
+    let maxBoxWidth = 180; // Minimale Breite
     people.forEach(person => {
         const name = person.Name || person.Code;
         const code = person.Code;
@@ -229,15 +229,15 @@ function renderTree() {
         // Geschätzte Textlänge (etwa 8px per Zeichen)
         const estimatedWidth = text.length * 8 + 40; // +40 für Padding
         if (estimatedWidth > maxBoxWidth) {
-            maxBoxWidth = Math.min(estimatedWidth, 160); // Reduzierte maximale Breite (vorher 220)
+            maxBoxWidth = Math.min(estimatedWidth, 220); // Maximal 220px
         }
     });
 
     const boxWidth = maxBoxWidth;
     const boxHeight = 80;
-    const partnerGap = 20; // Reduzierter Abstand zwischen Partnern
+    const partnerGap = 30;
     const verticalSpacing = 180;
-    const horizontalSpacing = boxWidth + 40; // Weniger Platz zwischen Boxen
+    const horizontalSpacing = boxWidth + 60; // Mehr Platz zwischen Boxen
 
     // Positionen berechnen - Nachkommentafel-Stil
     const positions = new Map();
@@ -278,74 +278,47 @@ function renderTree() {
         });
 
         // Verteile Gruppen auf mehrere Zeilen falls nötig
-        const maxGroupsPerRow = Math.floor(2400 / (boxWidth + 40));
+        const maxGroupsPerRow = Math.floor(2400 / horizontalSpacing);
         const rows = [];
         
-        // Verteile die Gruppen auf Zeilen
-        let currentRow = [];
-        let currentRowWidth = 0;
-        
-        for (const group of groupedPersons) {
-            const groupWidth = group.length === 2 ? (boxWidth * 2 + partnerGap) : boxWidth;
-            
-            if (currentRow.length > 0 && currentRowWidth + groupWidth + 40 > 2400) {
-                rows.push(currentRow);
-                currentRow = [];
-                currentRowWidth = 0;
-            }
-            
-            currentRow.push(group);
-            currentRowWidth += groupWidth + 40;
-        }
-        
-        if (currentRow.length > 0) {
-            rows.push(currentRow);
+        for (let i = 0; i < groupedPersons.length; i += maxGroupsPerRow) {
+            rows.push(groupedPersons.slice(i, i + maxGroupsPerRow));
         }
 
         // Positioniere jede Zeile der Generation
         rows.forEach((rowGroups, rowIndex) => {
             const rowY = y + (rowIndex * 100); // Zusätzlicher vertikaler Abstand zwischen Zeilen
             const totalGroups = rowGroups.length;
-            
-            // Berechne die Gesamtbreite dieser Zeile
-            let totalRowWidth = 0;
-            rowGroups.forEach(group => {
-                totalRowWidth += (group.length === 2 ? (boxWidth * 2 + partnerGap) : boxWidth) + 40;
-            });
-            totalRowWidth -= 40; // Letzte Box braucht keinen Abstand
-            
-            const startX = (2400 - totalRowWidth) / 2;
-            let currentX = startX;
-            
-            rowGroups.forEach((group) => {
+            const totalWidth = totalGroups * horizontalSpacing;
+            const startX = 200 + (2400 - 200 - totalWidth) / 2; // Linksbündig mit 200px Abstand für Generation-Beschriftung
+
+            rowGroups.forEach((group, groupIndex) => {
+                const groupX = startX + groupIndex * horizontalSpacing;
+                
                 if (group.length === 2) {
                     // Partner nebeneinander mit mehr Abstand
                     const partner1 = group[0];
                     const partner2 = group[1];
                     
                     positions.set(partner1.Code, { 
-                        x: currentX + boxWidth/2, 
+                        x: groupX - partnerGap/2 - boxWidth/2, 
                         y: rowY, 
                         person: partner1 
                     });
                     
                     positions.set(partner2.Code, { 
-                        x: currentX + boxWidth + partnerGap + boxWidth/2, 
+                        x: groupX + partnerGap/2 + boxWidth/2, 
                         y: rowY, 
                         person: partner2 
                     });
-                    
-                    currentX += boxWidth * 2 + partnerGap + 40;
                 } else {
                     // Einzelperson zentriert
                     const person = group[0];
                     positions.set(person.Code, { 
-                        x: currentX + boxWidth/2, 
+                        x: groupX, 
                         y: rowY, 
                         person: person 
                     });
-                    
-                    currentX += boxWidth + 40;
                 }
             });
         });
@@ -365,9 +338,9 @@ function renderTree() {
                 // Senkrechte Linie von Eltern zu Kind (bis zum unteren Rand der Eltern-Box)
                 const verticalLine = document.createElementNS(svgNS, "line");
                 verticalLine.setAttribute("x1", parent.x);
-                verticalLine.setAttribute("y1", parent.y + boxHeight/2);
+                verticalLine.setAttribute("y1", parent.y + boxHeight);
                 verticalLine.setAttribute("x2", parent.x);
-                verticalLine.setAttribute("y2", child.y - boxHeight/2);
+                verticalLine.setAttribute("y2", child.y - 15); // 15px Abstand
                 verticalLine.setAttribute("stroke", "#6b7280");
                 verticalLine.setAttribute("stroke-width", "2");
                 connectionsGroup.appendChild(verticalLine);
@@ -375,19 +348,19 @@ function renderTree() {
                 // Waagerechte Linie zum Kind (bis zum oberen Rand der Kind-Box)
                 const horizontalLine = document.createElementNS(svgNS, "line");
                 horizontalLine.setAttribute("x1", parent.x);
-                horizontalLine.setAttribute("y1", child.y - boxHeight/2);
+                horizontalLine.setAttribute("y1", child.y - 15);
                 horizontalLine.setAttribute("x2", child.x);
-                horizontalLine.setAttribute("y2", child.y - boxHeight/2);
+                horizontalLine.setAttribute("y2", child.y - 15);
                 horizontalLine.setAttribute("stroke", "#6b7280");
                 horizontalLine.setAttribute("stroke-width", "2");
                 connectionsGroup.appendChild(horizontalLine);
                 
-                // Senkrechte Linie von waagerechter Linie bis zur Kind-Box
+                // Senkrechte Linie von waagerechter Linie bis zur Kind-Box (15px)
                 const verticalConnector = document.createElementNS(svgNS, "line");
                 verticalConnector.setAttribute("x1", child.x);
-                verticalConnector.setAttribute("y1", child.y - boxHeight/2);
+                verticalConnector.setAttribute("y1", child.y - 15);
                 verticalConnector.setAttribute("x2", child.x);
-                verticalConnector.setAttribute("y2", child.y - 10);
+                verticalConnector.setAttribute("y2", child.y);
                 verticalConnector.setAttribute("stroke", "#6b7280");
                 verticalConnector.setAttribute("stroke-width", "2");
                 connectionsGroup.appendChild(verticalConnector);
@@ -403,13 +376,12 @@ function renderTree() {
         if (partner1 && partner2 && Math.abs(partner1.y - partner2.y) < 10) {
             // Waagerechte Linie zwischen Partnern (von Rand zu Rand)
             const line = document.createElementNS(svgNS, "line");
-            line.setAttribute("x1", partner1.x - boxWidth/2);
-            line.setAttribute("y1", partner1.y);
+            line.setAttribute("x1", partner1.x + boxWidth/2);
+            line.setAttribute("y1", partner1.y + boxHeight/2);
             line.setAttribute("x2", partner2.x - boxWidth/2);
-            line.setAttribute("y2", partner2.y);
+            line.setAttribute("y2", partner2.y + boxHeight/2);
             line.setAttribute("stroke", "#dc2626");
             line.setAttribute("stroke-width", "3");
-            line.setAttribute("stroke-dasharray", "5,5");
             connectionsGroup.appendChild(line);
         }
     });
@@ -427,7 +399,7 @@ function renderTree() {
         // Gruppen-Element für jede Person
         const personGroup = document.createElementNS(svgNS, "g");
         personGroup.setAttribute("class", "node");
-        personGroup.setAttribute("transform", `translate(${pos.x - boxWidth/2}, ${pos.y - boxHeight/2})`);
+        personGroup.setAttribute("transform", `translate(${pos.x - boxWidth/2}, ${pos.y})`);
         personGroup.setAttribute("data-code", code);
 
         // Box-Hintergrund
@@ -441,30 +413,30 @@ function renderTree() {
         rect.setAttribute("stroke-width", "2");
         personGroup.appendChild(rect);
 
-        // 1. Zeile: Personencode / Vor- und Nachname
+        // 1. Zeile: Personen-Code: Vor- und Nachname
         const nameText = document.createElementNS(svgNS, "text");
         nameText.setAttribute("x", boxWidth/2);
-        nameText.setAttribute("y", 20);
+        nameText.setAttribute("y", 25);
         nameText.setAttribute("text-anchor", "middle");
-        nameText.setAttribute("font-size", "12");
+        nameText.setAttribute("font-size", "14");
         nameText.setAttribute("font-weight", "600");
         nameText.setAttribute("fill", "#111827");
         
         // Namen vollständig anzeigen
         const displayName = person.Name || person.Code;
         // Text kürzen falls zu lang
-        const maxLength = Math.floor((boxWidth - 40) / 7); // Geschätzte Zeichenbreite
+        const maxLength = Math.floor((boxWidth - 40) / 8); // Geschätzte Zeichenbreite
         const displayText = displayName.length > maxLength ? 
             displayName.substring(0, maxLength - 3) + "..." : displayName;
-        nameText.textContent = `${person.Code} / ${displayText}`;
+        nameText.textContent = `${person.Code}: ${displayText}`;
         personGroup.appendChild(nameText);
 
         // 2. Zeile: Geschlechtszeichen / Generation / Geburtsdatum
         const detailsText = document.createElementNS(svgNS, "text");
         detailsText.setAttribute("x", boxWidth/2);
-        detailsText.setAttribute("y", 40);
+        detailsText.setAttribute("y", 50);
         detailsText.setAttribute("text-anchor", "middle");
-        detailsText.setAttribute("font-size", "11");
+        detailsText.setAttribute("font-size", "13");
         detailsText.setAttribute("fill", "#4b5563");
         
         // Geschlechtssymbol
@@ -489,9 +461,9 @@ function renderTree() {
         if (person.BirthPlace) {
             const placeText = document.createElementNS(svgNS, "text");
             placeText.setAttribute("x", boxWidth/2);
-            placeText.setAttribute("y", 60);
+            placeText.setAttribute("y", 70);
             placeText.setAttribute("text-anchor", "middle");
-            placeText.setAttribute("font-size", "10");
+            placeText.setAttribute("font-size", "11");
             placeText.setAttribute("fill", "#6b7280");
             
             // Ort kürzen falls zu lang
@@ -519,16 +491,17 @@ function renderTree() {
         nodesGroup.appendChild(personGroup);
     });
 
-    // Generationen-Beschriftung hinzufügen
+    // Generationen-Beschriftung hinzufügen (linksbündig)
     generations.forEach((gen, genIndex) => {
-        const y = 120 + genIndex * verticalSpacing - 30;
+        const y = 120 + genIndex * verticalSpacing - 10;
         
         const labelText = document.createElementNS(svgNS, "text");
-        labelText.setAttribute("x", "80");
+        labelText.setAttribute("x", "40");
         labelText.setAttribute("y", y);
         labelText.setAttribute("font-size", "16");
         labelText.setAttribute("font-weight", "bold");
         labelText.setAttribute("fill", "#374151");
+        labelText.setAttribute("text-anchor", "start");
         
         switch(gen) {
             case "1": labelText.textContent = "Stammeltern"; break;
