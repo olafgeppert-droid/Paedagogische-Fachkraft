@@ -277,7 +277,7 @@ function renderTree() {
             }
         });
 
-    // Verteile Gruppen auf mehrere Zeilen falls nötig
+ // Verteile Gruppen auf mehrere Zeilen falls nötig
 const rows = [];
 let currentRow = [];
 let currentRowWidth = 0;
@@ -285,8 +285,8 @@ let currentRowWidth = 0;
 for (const group of groupedPersons) {
     // Berechne benötigte Breite für diese Gruppe
     const groupWidth = group.length === 2 ? 
-        (boxWidth * 2 + partnerGap + 40) : 
-        (boxWidth + 40);
+        (boxWidth * 2 + partnerGap + 60) : // Mehr Platz für Partner-Paare
+        (boxWidth + 60);
     
     // Wenn die Gruppe nicht in die aktuelle Zeile passt, neue Zeile beginnen
     if (currentRow.length > 0 && currentRowWidth + groupWidth > 2200) {
@@ -305,16 +305,16 @@ if (currentRow.length > 0) {
 
 // Positioniere jede Zeile der Generation
 rows.forEach((rowGroups, rowIndex) => {
-    const rowY = y + (rowIndex * 120); // Mehr vertikaler Abstand zwischen Zeilen
+    const rowY = y + (rowIndex * 140); // Mehr vertikaler Abstand (140px statt 100px)
     
     // Berechne Gesamtbreite dieser Zeile
     let totalRowWidth = 0;
     rowGroups.forEach(group => {
         totalRowWidth += group.length === 2 ? 
-            (boxWidth * 2 + partnerGap + 40) : 
-            (boxWidth + 40);
+            (boxWidth * 2 + partnerGap + 60) : 
+            (boxWidth + 60);
     });
-    totalRowWidth -= 40; // Letztes Element braucht keinen Abstand
+    totalRowWidth -= 60; // Letztes Element braucht keinen Abstand
     
     const startX = 200 + (2200 - totalRowWidth) / 2; // Zentriert im verfügbaren Platz
     let currentX = startX;
@@ -337,7 +337,7 @@ rows.forEach((rowGroups, rowIndex) => {
                 person: partner2 
             });
             
-            currentX += boxWidth * 2 + partnerGap + 40;
+            currentX += boxWidth * 2 + partnerGap + 60;
         } else {
             // Einzelperson
             const person = group[0];
@@ -347,7 +347,7 @@ rows.forEach((rowGroups, rowIndex) => {
                 person: person 
             });
             
-            currentX += boxWidth + 40;
+            currentX += boxWidth + 60;
         }
     });
 });
