@@ -457,23 +457,6 @@ function renderTree() {
         detailsText.textContent = details;
         personGroup.appendChild(detailsText);
 
-        // 3. Zeile: Geburtsort (falls vorhanden)
-        if (person.BirthPlace) {
-            const placeText = document.createElementNS(svgNS, "text");
-            placeText.setAttribute("x", boxWidth/2);
-            placeText.setAttribute("y", 70);
-            placeText.setAttribute("text-anchor", "middle");
-            placeText.setAttribute("font-size", "11");
-            placeText.setAttribute("fill", "#6b7280");
-            
-            // Ort kürzen falls zu lang
-            const maxPlaceLength = Math.floor((boxWidth - 20) / 6);
-            const placeTextShort = person.BirthPlace.length > maxPlaceLength ? 
-                person.BirthPlace.substring(0, maxPlaceLength - 3) + "..." : person.BirthPlace;
-            placeText.textContent = placeTextShort;
-            personGroup.appendChild(placeText);
-        }
-
         // Klick-Event für Bearbeiten
         personGroup.addEventListener("dblclick", () => openEdit(code));
         
