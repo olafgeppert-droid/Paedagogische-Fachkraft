@@ -277,51 +277,80 @@ function renderTree() {
             }
         });
 
-        // Verteile Gruppen auf mehrere Zeilen falls nötig
-        const maxGroupsPerRow = Math.floor(2400 / horizontalSpacing);
-        const rows = [];
-        
-        for (let i = 0; i < groupedPersons.length; i += maxGroupsPerRow) {
-            rows.push(groupedPersons.slice(i, i + maxGroupsPerRow));
-        }
+    // Verteile Gruppen auf mehrere Zeilen falls nötig
+const rows = [];
+let currentRow = [];
+let currentRowWidth = 0;
 
-        // Positioniere jede Zeile der Generation
-        rows.forEach((rowGroups, rowIndex) => {
-            const rowY = y + (rowIndex * 100); // Zusätzlicher vertikaler Abstand zwischen Zeilen
-            const totalGroups = rowGroups.length;
-            const totalWidth = totalGroups * horizontalSpacing;
-            const startX = 200 + (2400 - 200 - totalWidth) / 2; // Linksbündig mit 200px Abstand für Generation-Beschriftung
+for (const group of groupedPersons) {
+    // Berechne benötigte Breite für diese Gruppe
+    const groupWidth = group.length === 2 ? 
+        (boxWidth * 2 + partnerGap + 40) : 
+        (boxWidth + 40);
+    
+    // Wenn die Gruppe nicht in die aktuelle Zeile passt, neue Zeile beginnen
+    if (currentRow.length > 0 && currentRowWidth + groupWidth > 2200) {
+        rows.push(currentRow);
+        currentRow = [];
+        currentRowWidth = 0;
+    }
+    
+    currentRow.push(group);
+    currentRowWidth += groupWidth;
+}
 
-            rowGroups.forEach((group, groupIndex) => {
-                const groupX = startX + groupIndex * horizontalSpacing;
-                
-                if (group.length === 2) {
-                    // Partner nebeneinander mit mehr Abstand
-                    const partner1 = group[0];
-                    const partner2 = group[1];
-                    
-                    positions.set(partner1.Code, { 
-                        x: groupX - partnerGap/2 - boxWidth/2, 
-                        y: rowY, 
-                        person: partner1 
-                    });
-                    
-                    positions.set(partner2.Code, { 
-                        x: groupX + partnerGap/2 + boxWidth/2, 
-                        y: rowY, 
-                        person: partner2 
-                    });
-                } else {
-                    // Einzelperson zentriert
-                    const person = group[0];
-                    positions.set(person.Code, { 
-                        x: groupX, 
-                        y: rowY, 
-                        person: person 
-                    });
-                }
+if (currentRow.length > 0) {
+    rows.push(currentRow);
+}
+
+// Positioniere jede Zeile der Generation
+rows.forEach((rowGroups, rowIndex) => {
+    const rowY = y + (rowIndex * 120); // Mehr vertikaler Abstand zwischen Zeilen
+    
+    // Berechne Gesamtbreite dieser Zeile
+    let totalRowWidth = 0;
+    rowGroups.forEach(group => {
+        totalRowWidth += group.length === 2 ? 
+            (boxWidth * 2 + partnerGap + 40) : 
+            (boxWidth + 40);
+    });
+    totalRowWidth -= 40; // Letztes Element braucht keinen Abstand
+    
+    const startX = 200 + (2200 - totalRowWidth) / 2; // Zentriert im verfügbaren Platz
+    let currentX = startX;
+    
+    rowGroups.forEach((group) => {
+        if (group.length === 2) {
+            // Partner nebeneinander
+            const partner1 = group[0];
+            const partner2 = group[1];
+            
+            positions.set(partner1.Code, { 
+                x: currentX + boxWidth/2, 
+                y: rowY, 
+                person: partner1 
             });
-        });
+            
+            positions.set(partner2.Code, { 
+                x: currentX + boxWidth + partnerGap + boxWidth/2, 
+                y: rowY, 
+                person: partner2 
+            });
+            
+            currentX += boxWidth * 2 + partnerGap + 40;
+        } else {
+            // Einzelperson
+            const person = group[0];
+            positions.set(person.Code, { 
+                x: currentX + boxWidth/2, 
+                y: rowY, 
+                person: person 
+            });
+            
+            currentX += boxWidth + 40;
+        }
+    });
+});
     });
 
     // Verbindungslinien zeichnen (zuerst, damit sie hinter den Knoten liegen)
