@@ -226,7 +226,7 @@ function renderTree() {
         const name = person.Name || person.Code;
         const code = person.Code;
         const text = `${code} / ${name}`;
-        // Geschätzte Textlänge (etwa 8px pro Zeichen)
+        // Geschätzte Textlänge (etwa 8px per Zeichen)
         const estimatedWidth = text.length * 8 + 40; // +40 für Padding
         if (estimatedWidth > maxBoxWidth) {
             maxBoxWidth = Math.min(estimatedWidth, 220); // Maximal 220px
@@ -1089,4 +1089,12 @@ function ensureVersionVisibility() {
       versionRibbon.style.textAlign = 'center';
       versionRibbon.style.padding = '4px 12px';
       versionRibbon.style.color = '#fff';
-      versionRibbon.style.backgroundColor = 'rg
+      versionRibbon.style.backgroundColor = 'rgba(0,0,0,0.2)';
+      versionRibbon.style.marginTop = '4px';
+    }
+  }
+}
+
+// Beim Laden und bei Größenänderungen ausführen
+window.addEventListener('load', ensureVersionVisibility);
+window.addEventListener('resize', ensureVersionVisibility);
