@@ -156,8 +156,8 @@ mark{background:#fff3bf;padding:0 2px;border-radius:3px}
   text-align: center;
   font-size: 14px;
   color: #6b7280;
-  margin: 12px 0;
-  padding: 8px;
+  margin: 4px 0; /* Reduzierter Abstand zur Tabelle */
+  padding: 4px;
   font-style: italic;
 }
 
