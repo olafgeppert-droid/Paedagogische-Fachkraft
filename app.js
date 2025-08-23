@@ -819,7 +819,7 @@ function updateStats(){
     byGen[p.Gen] = (byGen[p.Gen]||0)+1;
   }
   let html = `<p>Gesamtanzahl Personen: <b>${total}</b></p>`;
-  html += `<p>davon männlich: <b>${m}</b> — weiblich: <b>${w</b> — divers: <b>${d}</b></p>`;
+  html += `<p>davon männlich: <b>${m}</b> — weiblich: <b>${w}</b> — divers: <b>${d}</b></p>`;
   html += `<ul>`; Object.keys(byGen).sort((a,b)=>a-b).forEach(k=> html += `<li>Generation ${k}: ${byGen[k]}</li>`); html += `</ul>`;
   $("#statsContent").innerHTML = html;
 }
@@ -1089,12 +1089,4 @@ function ensureVersionVisibility() {
       versionRibbon.style.textAlign = 'center';
       versionRibbon.style.padding = '4px 12px';
       versionRibbon.style.color = '#fff';
-      versionRibbon.style.backgroundColor = 'rgba(0,0,0,0.2)';
-      versionRibbon.style.marginTop = '4px';
-    }
-  }
-}
-
-// Beim Laden und bei Größenänderungen ausführen
-window.addEventListener('load', ensureVersionVisibility);
-window.addEventListener('resize', ensureVersionVisibility);
+      versionRibbon.style.backgroundColor = 'rg
