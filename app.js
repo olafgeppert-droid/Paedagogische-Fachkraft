@@ -393,7 +393,7 @@ function renderTree() {
         nameText.setAttribute("x", boxWidth/2);
         nameText.setAttribute("y", 25);
         nameText.setAttribute("text-anchor", "middle");
-        nameText.setAttribute("font-size", "14");
+        nameText.setAttribute("font-size", "20");
         nameText.setAttribute("font-weight", "600");
         nameText.setAttribute("fill", "#111827");
         
@@ -411,7 +411,7 @@ function renderTree() {
         detailsText.setAttribute("x", boxWidth/2);
         detailsText.setAttribute("y", 50);
         detailsText.setAttribute("text-anchor", "middle");
-        detailsText.setAttribute("font-size", "13");
+        detailsText.setAttribute("font-size", "20");
         detailsText.setAttribute("fill", "#4b5563");
         
         // Geschlechtssymbol
