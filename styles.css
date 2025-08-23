@@ -151,6 +151,16 @@ tr td:first-child, tr th:first-child{border-left:1px solid var(--border);border-
 tr td:last-child, tr th:last-child{border-right:1px solid var(--border);border-top-right-radius:6px;border-bottom-right-radius:6px}
 mark{background:#fff3bf;padding:0 2px;border-radius:3px}
 
+/* Hinweis unter der Tabelle */
+.table-hint {
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+  margin: 12px 0;
+  padding: 8px;
+  font-style: italic;
+}
+
 /* Tree panel */
 .tree-panel{padding:8px 12px}
 #tree{background:#f8fafc;border:1px solid var(--border);border-radius:8px;min-height:240px;max-height:60vh;overflow:auto;padding:8px}
