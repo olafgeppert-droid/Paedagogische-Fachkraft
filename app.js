@@ -2,7 +2,7 @@
 const STORAGE_KEY = "familyRing_upd56b";
 let people = [];
 const undoStack = []; const redoStack = [];
-const MAX_UNDO_STEPS = 50; // Begrenzung für Undo-Stack
+const MAX_UNDO_STEPS = 50;
 
 const $ = sel => document.querySelector(sel);
 const $$ = sel => Array.from(document.querySelectorAll(sel));
@@ -11,12 +11,12 @@ const $$ = sel => Array.from(document.querySelectorAll(sel));
 function saveState(pushUndo=true){
   if(pushUndo) {
     undoStack.push(JSON.stringify(people));
-    // Stack auf maximale Größe begrenzen
     if(undoStack.length > MAX_UNDO_STEPS) undoStack.shift();
   }
   redoStack.length = 0;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(people));
 }
+
 function loadState(){
   const raw = localStorage.getItem(STORAGE_KEY);
   if(raw){ people = JSON.parse(raw); }
@@ -40,19 +40,14 @@ function seedData(){
 
 /* === Plausibilitätsprüfungen === */
 function validateBirthDate(dateString) {
-  // Prüfe das Format TT.MM.JJJJ
   const regex = /^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/;
-  if (!regex.test(dateString)) {
-    return false;
-  }
+  if (!regex.test(dateString)) return false;
   
-  // Zusätzliche Validierung für realistische Daten
   const parts = dateString.split('.');
   const day = parseInt(parts[0], 10);
   const month = parseInt(parts[1], 10);
   const year = parseInt(parts[2], 10);
   
-  // Prüfe ob das Datum valide ist (z.B. nicht 31.02.)
   const date = new Date(year, month - 1, day);
   return date.getFullYear() === year && 
          date.getMonth() === month - 1 && 
@@ -60,89 +55,53 @@ function validateBirthDate(dateString) {
 }
 
 function validateRequiredFields(person) {
-  return person.Name && 
-         person.Birth && 
-         person.Gender && 
-         person.ParentCode && 
-         person.BirthPlace;
+  return person.Name && person.Birth && person.Gender && 
+         person.ParentCode && person.BirthPlace;
 }
 
-function validatePerson(person) {
-  // Prüfe Pflichtfelder
-  if (!validateRequiredFields(person)) {
-    return false;
-  }
-  
-  // Prüfe Geburtsdatum-Format
-  if (person.Birth && !validateBirthDate(person.Birth)) {
-    return false;
-  }
-  
-  return true;
-}
-
-/* Compute Gen if missing (based on code pattern / parent chain) */
+/* Compute Gen if missing */
 function computeGenFromCode(code){
   if(!code) return 1;
-  // Partner 'x' does not change generation
-  const base = code.replace(/x$/,''); // drop trailing x
-  // Gen 1: '1'
+  const base = code.replace(/x$/,'');
   if(base === "1") return 1;
-  // direct children: 1A, 1B => Gen 2
   if(/^1[A-Z]$/.test(base)) return 2;
-  // grandchildren: 1A1, 1B2, etc. => Gen 3
   if(/^1[A-Z]\d+$/.test(base)) return 3;
-  // great-grandchildren: 1A1A, 1A1B, etc. => Gen 4
   if(/^1[A-Z]\d+[A-Z]$/.test(base)) return 4;
-  // further generations: count segments
+  
   let generation = 1;
   let current = base;
-  
   while (current.length > 0) {
     if (current === "1") break;
-    
-    // Remove last character and check what type it was
     const lastChar = current.charAt(current.length - 1);
     if (/[A-Z]/.test(lastChar)) {
       generation++;
       current = current.slice(0, -1);
     } else if (/\d/.test(lastChar)) {
       generation++;
-      // Remove all trailing digits
       current = current.replace(/\d+$/, '');
     } else {
       break;
     }
   }
-  
   return Math.max(1, generation);
 }
 
 function postLoadFixups(){
-  // Ensure Gen & RingCode are present after import
   for(const p of people){
-    // Normalize codes first
     p.Code = normalizePersonCode(p.Code);
     p.ParentCode = normalizePersonCode(p.ParentCode);
     p.PartnerCode = normalizePersonCode(p.PartnerCode);
     p.InheritedFrom = normalizePersonCode(p.InheritedFrom);
-    
-    // Recompute generation
     p.Gen = computeGenFromCode(p.Code);
   }
   computeRingCodes();
 }
 
-/* Ring codes (partners keep own code, inheritance forms chain) */
+/* Ring codes */
 function computeRingCodes(){
   const byCode = Object.fromEntries(people.map(p=>[p.Code,p]));
+  for(const p of people) p.RingCode = p.Code;
   
-  // Reset all RingCodes first
-  for(const p of people){
-    p.RingCode = p.Code;
-  }
-  
-  // Process inheritance chains (max depth to prevent circular references)
   const MAX_DEPTH = 20;
   let changed;
   let iterations = 0;
@@ -150,82 +109,74 @@ function computeRingCodes(){
   do {
     changed = false;
     iterations++;
-    
     for(const p of people){
       if(p.InheritedFrom && p.InheritedFrom !== ""){
         const donor = byCode[p.InheritedFrom];
         if(donor && donor.RingCode && !donor.RingCode.includes(p.Code)) {
-          // Check for circular reference
-          if(donor.RingCode.includes("→" + p.Code) || p.Code === donor.InheritedFrom) {
-            console.warn("Circular inheritance detected:", p.Code, "->", donor.Code);
-            continue;
-          }
-          
+          if(donor.RingCode.includes("→" + p.Code) || p.Code === donor.InheritedFrom) continue;
           const newRingCode = donor.RingCode + "→" + p.Code;
           if(p.RingCode !== newRingCode) {
             p.RingCode = newRingCode;
             changed = true;
-            }
           }
         }
       }
-      
-      if(iterations >= MAX_DEPTH) {
-        console.warn("Max inheritance depth reached, possible circular reference");
-        break;
-      }
-    } while (changed);
-  }
+    }
+    if(iterations >= MAX_DEPTH) break;
+  } while (changed);
+}
 
-/* Render Table (with filter & highlight) */
+/* Render Table */
 function renderTable(){
   computeRingCodes();
   const q = ($("#search").value||"").trim().toLowerCase();
-  const tb = $("#peopleTable tbody"); tb.innerHTML="";
-  const mark = (txt)=>{
-    if(!q) return escapeHtml(String(txt||""));
-    const s = String(txt||""); const i = s.toLowerCase().indexOf(q);
-    if(i<0) return escapeHtml(s);
-    return escapeHtml(s.slice(0,i)) + "<mark>" + escapeHtml(s.slice(i,i+q.length)) + "</mark>" + escapeHtml(s.slice(i+q.length));
-  };
+  const tb = $("#peopleTable tbody"); 
+  tb.innerHTML="";
   
-  // Escape HTML function to prevent XSS
   function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
   
-  // Farben für Generationen (gleiche wie im Stammbaum)
+  function mark(txt){
+    if(!q) return escapeHtml(String(txt||""));
+    const s = String(txt||""); 
+    const i = s.toLowerCase().indexOf(q);
+    if(i<0) return escapeHtml(s);
+    return escapeHtml(s.slice(0,i)) + "<mark>" + escapeHtml(s.slice(i,i+q.length)) + "</mark>" + escapeHtml(s.slice(i+q.length));
+  }
+  
   const genColors = {
     1: "#e8f5e8", 2: "#e3f2fd", 3: "#f3e5f5", 
     4: "#fff3e0", 5: "#e8eaf6", 6: "#f1f8e9", 7: "#ffebee"
   };
   
-  // sort: Gen then Code
   people.sort((a,b)=> (a.Gen||0)-(b.Gen||0) || String(a.Code).localeCompare(String(b.Code)));
+  
   for(const p of people){
     const hay = (p.Name||"") + " " + (p.Code||"");
-    if(q && hay.toLowerCase().indexOf(q)===-1) continue; // FILTER: hide non-matches
-    const tr=document.createElement("tr");
+    if(q && hay.toLowerCase().indexOf(q)===-1) continue;
+    
+    const tr = document.createElement("tr");
     const cols = ["Gen","Code","RingCode","Name","Birth","BirthPlace","Gender","ParentCode","PartnerCode","InheritedFrom","Note"];
     
-    // Hintergrundfarbe basierend auf Generation
     const gen = p.Gen || 1;
     const bgColor = genColors[gen] || "#ffffff";
     tr.style.backgroundColor = bgColor;
     
-    cols.forEach(k=>{
-      const td=document.createElement("td");
+    cols.forEach(k => {
+      const td = document.createElement("td");
       td.innerHTML = mark(p[k] ?? "");
       tr.appendChild(td);
     });
-    tr.addEventListener("dblclick", ()=> openEdit(p.Code));
+    
+    tr.addEventListener("dblclick", () => openEdit(p.Code));
     tb.appendChild(tr);
   }
 }
 
-/* === VERBESSERTE STAMMBAUM-DARSTELLUNG (NACHKOMMENTAFEL) === */
+/* === STAMMBAUM-DARSTELLUNG === */
 function renderTree() {
     computeRingCodes();
     const el = $("#tree");
@@ -239,22 +190,19 @@ function renderTree() {
     svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
     el.appendChild(svg);
 
-    // Farben für Generationen
     const genColors = {
         1: "#e8f5e8", 2: "#e3f2fd", 3: "#f3e5f5", 
         4: "#fff3e0", 5: "#e8eaf6", 6: "#f1f8e9", 7: "#ffebee"
     };
 
-    // Personen nach Generation gruppieren und Partner zusammenfassen
     const byGeneration = {};
-    const partnerGroups = new Map(); // Speichert Partner-Gruppen
+    const partnerGroups = new Map();
     
     people.forEach(person => {
         const gen = person.Gen || 1;
         if (!byGeneration[gen]) byGeneration[gen] = [];
         byGeneration[gen].push(person);
         
-        // Partner-Gruppen erstellen
         if (person.PartnerCode) {
             const partnerKey = [person.Code, person.PartnerCode].sort().join('-');
             if (!partnerGroups.has(partnerKey)) {
@@ -263,16 +211,15 @@ function renderTree() {
         }
     });
 
-    // Berechne optimale Box-Breite basierend auf Inhalten
-    let maxBoxWidth = 220; // Vergrößerte minimale Breite
+    // Größere Boxen und Schrift
+    let maxBoxWidth = 220;
     people.forEach(person => {
         const name = person.Name || person.Code;
         const code = person.Code;
         const text = `${code} / ${name}`;
-        // Geschätzte Textlänge (etwa 9px per Zeichen)
-        const estimatedWidth = text.length * 9 + 60; // +60 für Padding
+        const estimatedWidth = text.length * 9 + 60;
         if (estimatedWidth > maxBoxWidth) {
-            maxBoxWidth = Math.min(estimatedWidth, 280); // Vergrößerte maximale Breite
+            maxBoxWidth = Math.min(estimatedWidth, 280);
         }
     });
 
@@ -281,23 +228,19 @@ function renderTree() {
     const partnerGap = 40;
     const verticalSpacing = 240;
 
-    // Positionen berechnen - Nachkommentafel-Stil
     const positions = new Map();
     const generations = Object.keys(byGeneration).sort((a, b) => a - b);
 
-    // Berechne Layout für jede Generation
     generations.forEach((gen, genIndex) => {
         const persons = byGeneration[gen];
         const y = 160 + genIndex * verticalSpacing;
         
-        // Partner zu Gruppen zusammenfassen
         const groupedPersons = [];
         const processed = new Set();
         
         persons.forEach(person => {
             if (processed.has(person.Code)) return;
             
-            // Partner finden
             let partnerCodes = [];
             if (person.PartnerCode) {
                 const partnerKey = [person.Code, person.PartnerCode].sort().join('-');
@@ -305,32 +248,25 @@ function renderTree() {
             }
             
             if (partnerCodes.length > 0) {
-                // Partner-Gruppe
                 const partnerGroup = partnerCodes.map(code => 
                     persons.find(p => p.Code === code)
                 ).filter(Boolean);
-                
                 groupedPersons.push(partnerGroup);
                 partnerCodes.forEach(code => processed.add(code));
             } else {
-                // Einzelperson
                 groupedPersons.push([person]);
                 processed.add(person.Code);
             }
         });
 
-        // Verteile Gruppen auf mehrere Zeilen falls nötig
         const rows = [];
         let currentRow = [];
         let currentRowWidth = 0;
 
         for (const group of groupedPersons) {
-            // Berechne benötigte Breite für diese Gruppe
             const groupWidth = group.length === 2 ? 
-                (boxWidth * 2 + partnerGap + 120) : // Mehr Platz für Partner-Paare
-                (boxWidth + 120);
+                (boxWidth * 2 + partnerGap + 120) : (boxWidth + 120);
             
-            // Wenn die Gruppe nicht in die aktuelle Zeile passt, neue Zeile beginnen
             if (currentRow.length > 0 && currentRowWidth + groupWidth > 2200) {
                 rows.push(currentRow);
                 currentRow = [];
@@ -341,20 +277,15 @@ function renderTree() {
             currentRowWidth += groupWidth;
         }
 
-        if (currentRow.length > 0) {
-            rows.push(currentRow);
-        }
+        if (currentRow.length > 0) rows.push(currentRow);
 
-        // Positioniere jede Zeile der Generation
         rows.forEach((rowGroups, rowIndex) => {
             const rowY = y + (rowIndex * 180);
             
-            // Berechne Gesamtbreite dieser Zeile
             let totalRowWidth = 0;
             rowGroups.forEach(group => {
                 totalRowWidth += group.length === 2 ? 
-                    (boxWidth * 2 + partnerGap + 120) : 
-                    (boxWidth + 120);
+                    (boxWidth * 2 + partnerGap + 120) : (boxWidth + 120);
             });
             totalRowWidth -= 120;
             
@@ -363,44 +294,27 @@ function renderTree() {
             
             rowGroups.forEach((group) => {
                 if (group.length === 2) {
-                    // Partner nebeneinander
                     const partner1 = group[0];
                     const partner2 = group[1];
                     
-                    positions.set(partner1.Code, { 
-                        x: currentX + boxWidth/2, 
-                        y: rowY, 
-                        person: partner1 
-                    });
-                    
-                    positions.set(partner2.Code, { 
-                        x: currentX + boxWidth + partnerGap + boxWidth/2, 
-                        y: rowY, 
-                        person: partner2 
-                    });
+                    positions.set(partner1.Code, { x: currentX + boxWidth/2, y: rowY, person: partner1 });
+                    positions.set(partner2.Code, { x: currentX + boxWidth + partnerGap + boxWidth/2, y: rowY, person: partner2 });
                     
                     currentX += boxWidth * 2 + partnerGap + 120;
                 } else {
-                    // Einzelperson
                     const person = group[0];
-                    positions.set(person.Code, { 
-                        x: currentX + boxWidth/2, 
-                        y: rowY, 
-                        person: person 
-                    });
-                    
+                    positions.set(person.Code, { x: currentX + boxWidth/2, y: rowY, person: person });
                     currentX += boxWidth + 120;
                 }
             });
         });
     });
 
-    // Personen-Boxen zeichnen (Zuerst, damit Verbindungslinien darüber liegen)
+    // Boxen zeichnen
     const nodesGroup = document.createElementNS(svgNS, "g");
     nodesGroup.setAttribute("class", "nodes");
     svg.appendChild(nodesGroup);
 
-    // Sortiere Personen nach Generation und Code für korrekte Zeichenreihenfolge
     const sortedPeople = [...people].sort((a, b) => {
         if (a.Gen !== b.Gen) return a.Gen - b.Gen;
         return a.Code.localeCompare(b.Code);
@@ -413,13 +327,12 @@ function renderTree() {
         const gen = person.Gen || 1;
         const color = genColors[gen] || "#f9fafb";
 
-        // Gruppen-Element für jede Person
         const personGroup = document.createElementNS(svgNS, "g");
         personGroup.setAttribute("class", "node");
         personGroup.setAttribute("transform", `translate(${pos.x - boxWidth/2}, ${pos.y})`);
         personGroup.setAttribute("data-code", person.Code);
 
-        // Box-Hintergrund
+        // Box
         const rect = document.createElementNS(svgNS, "rect");
         rect.setAttribute("width", boxWidth);
         rect.setAttribute("height", boxHeight);
@@ -430,7 +343,7 @@ function renderTree() {
         rect.setAttribute("stroke-width", "2");
         personGroup.appendChild(rect);
 
-        // 1. Zeile: Personen-Code: Vor- und Nachname
+        // 1. Zeile: Größere Schrift
         const nameText = document.createElementNS(svgNS, "text");
         nameText.setAttribute("x", boxWidth/2);
         nameText.setAttribute("y", 40);
@@ -439,16 +352,14 @@ function renderTree() {
         nameText.setAttribute("font-weight", "600");
         nameText.setAttribute("fill", "#111827");
         
-        // Namen vollständig anzeigen
         const displayName = person.Name || person.Code;
-        // Text kürzen falls zu lang
         const maxLength = Math.floor((boxWidth - 40) / 7);
         const displayText = displayName.length > maxLength ? 
             displayName.substring(0, maxLength - 3) + "..." : displayName;
         nameText.textContent = `${person.Code}: ${displayText}`;
         personGroup.appendChild(nameText);
 
-        // 2. Zeile: Geschlechtszeichen / Generation / Geburtsdatum
+        // 2. Zeile: Größere Schrift
         const detailsText = document.createElementNS(svgNS, "text");
         detailsText.setAttribute("x", boxWidth/2);
         detailsText.setAttribute("y", 70);
@@ -456,33 +367,22 @@ function renderTree() {
         detailsText.setAttribute("font-size", "16");
         detailsText.setAttribute("fill", "#4b5563");
         
-        // Geschlechtssymbol
         let genderSymbol = "";
-        if (person.Gender === "m") {
-            genderSymbol = "♂";
-        } else if (person.Gender === "w") {
-            genderSymbol = "♀";
-        } else if (person.Gender === "d") {
-            genderSymbol = "⚧";
-        }
+        if (person.Gender === "m") genderSymbol = "♂";
+        else if (person.Gender === "w") genderSymbol = "♀";
+        else if (person.Gender === "d") genderSymbol = "⚧";
         
         let details = genderSymbol ? `${genderSymbol} / ` : "";
         details += `Gen ${gen}`;
-        if (person.Birth) {
-            details += ` / ${person.Birth}`;
-        }
+        if (person.Birth) details += ` / ${person.Birth}`;
         detailsText.textContent = details;
         personGroup.appendChild(detailsText);
 
-        // Klick-Event für Bearbeiten
         personGroup.addEventListener("dblclick", () => openEdit(person.Code));
-        
-        // Hover-Effekte
         personGroup.addEventListener("mouseenter", function() {
             rect.setAttribute("stroke-width", "3");
             rect.setAttribute("filter", "url(#dropShadow)");
         });
-        
         personGroup.addEventListener("mouseleave", function() {
             rect.setAttribute("stroke-width", "2");
             rect.setAttribute("filter", "none");
@@ -491,18 +391,16 @@ function renderTree() {
         nodesGroup.appendChild(personGroup);
     });
 
-    // Verbindungslinien zeichnen (Nach den Boxen, damit sie darüber liegen)
+    // Verbindungslinien
     const connectionsGroup = document.createElementNS(svgNS, "g");
     connectionsGroup.setAttribute("class", "connections");
     svg.appendChild(connectionsGroup);
 
-    // Eltern-Kind-Verbindungen
     people.forEach(person => {
         if (person.ParentCode) {
             const parent = positions.get(person.ParentCode);
             const child = positions.get(person.Code);
             if (parent && child) {
-                // Senkrechte Linie von Eltern zu Kind (bis zum unteren Rand der Eltern-Box)
                 const verticalLine = document.createElementNS(svgNS, "line");
                 verticalLine.setAttribute("x1", parent.x);
                 verticalLine.setAttribute("y1", parent.y + boxHeight);
@@ -512,7 +410,6 @@ function renderTree() {
                 verticalLine.setAttribute("stroke-width", "2");
                 connectionsGroup.appendChild(verticalLine);
                 
-                // Waagerechte Linie zum Kind (bis zum oberen Rand der Kind-Box)
                 const horizontalLine = document.createElementNS(svgNS, "line");
                 horizontalLine.setAttribute("x1", parent.x);
                 horizontalLine.setAttribute("y1", child.y - 15);
@@ -522,7 +419,6 @@ function renderTree() {
                 horizontalLine.setAttribute("stroke-width", "2");
                 connectionsGroup.appendChild(horizontalLine);
                 
-                // Senkrechte Linie von waagerechter Linie bis zur Kind-Box (15px)
                 const verticalConnector = document.createElementNS(svgNS, "line");
                 verticalConnector.setAttribute("x1", child.x);
                 verticalConnector.setAttribute("y1", child.y - 15);
@@ -535,13 +431,11 @@ function renderTree() {
         }
     });
 
-    // Partner-Verbindungen (waagerechte Linien zwischen Partnern)
     partnerGroups.forEach((partnerCodes) => {
         const partner1 = positions.get(partnerCodes[0]);
         const partner2 = positions.get(partnerCodes[1]);
         
         if (partner1 && partner2 && Math.abs(partner1.y - partner2.y) < 10) {
-            // Waagerechte Linie zwischen Partnern (von Rand zu Rand)
             const line = document.createElementNS(svgNS, "line");
             line.setAttribute("x1", partner1.x + boxWidth/2);
             line.setAttribute("y1", partner1.y + boxHeight/2);
@@ -553,7 +447,7 @@ function renderTree() {
         }
     });
 
-    // Generationen-Beschriftung hinzufügen (linksbündig) mit größerer Schrift
+    // Generationen-Beschriftung mit größerer Schrift
     generations.forEach((gen, genIndex) => {
         const y = 160 + genIndex * verticalSpacing - 20;
         
@@ -576,7 +470,7 @@ function renderTree() {
         svg.appendChild(labelText);
     });
 
-    // SVG-Filter für Schatten-Effekt
+    // SVG-Filter
     const defs = document.createElementNS(svgNS, "defs");
     const filter = document.createElementNS(svgNS, "filter");
     filter.setAttribute("id", "dropShadow");
@@ -613,88 +507,24 @@ function renderTree() {
     defs.appendChild(filter);
     svg.appendChild(defs);
 
-    // Automatische Viewport-Anpassung
-    setTimeout(() => adjustTreeViewport(svg), 100);
+    setTimeout(() => {
+        try {
+            const bbox = svg.getBBox();
+            const padding = 100;
+            svg.setAttribute("viewBox", 
+                `${bbox.x - padding} ${bbox.y - padding} 
+                 ${bbox.width + 2 * padding} ${bbox.height + 2 * padding}`
+            );
+        } catch (e) {
+            console.log("Viewport-Anpassung nicht möglich:", e);
+        }
+    }, 100);
 }
 
-function adjustTreeViewport(svg) {
-    try {
-        const bbox = svg.getBBox();
-        const padding = 100;
-        svg.setAttribute("viewBox", 
-            `${bbox.x - padding} ${bbox.y - padding} 
-             ${bbox.width + 2 * padding} ${bbox.height + 2 * padding}`
-        );
-    } catch (e) {
-        console.log("Viewport-Anpassung nicht möglich:", e);
-    }
-}
-
-/* Printing only selection */
-function printHTML(inner){
-  const w = window.open("", "_blank", "noopener,noreferrer");
-  if(!w){ alert("Popup-Blocker aktiv. Bitte erlauben."); return; }
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Druck</title>
-  <style>
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;padding:12px}
-  h1{text-align:center;font-size:20px;margin:12px 0}
-  table{border-collapse:collapse;width:100%} th,td{border:1px solid #ddd;padding:6px;font-size:12px} th{background:#f4f6f8}
-  svg{max-width:100%;height:auto}
-  </style></head><body>${inner}</body></html>`);
-  w.document.close(); w.focus();
-  setTimeout(()=>w.print(), 300);
-}
-
-function printTable(){
-  const dlg = $("#dlgPrint"); if(dlg.open) dlg.close();
-  const el = resolvePrintableEl('#peopleTable');
-  elementToPdfBlob(el, 'Tabelle').then(blob => shareOrDownloadPDF(blob, 'tabelle.pdf'));
-
-}
-function printTree(){
-  const dlg = $("#dlgPrint"); if(dlg.open) dlg.close();
-  const el = resolvePrintableEl('#tree');
-  elementToPdfBlob(el, 'Stammbaum').then(blob => shareOrDownloadPDF(blob, 'stammbaum.pdf'));
-
-}
-
-/* Export with iOS Share Sheet when available */
-async function shareOrDownload(filename, blob){
-  const file = new File([blob], filename, {type: blob.type || "application/octet-stream"});
-  if(navigator.canShare && navigator.canShare({ files:[file] }) && navigator.share){
-    try{
-      await navigator.share({ files:[file], title:"Export" });
-      return;
-    }catch(e){ /* user canceled => fallback to download */ }
-  }
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
-}
-
-function exportJSON(){
-  const blob = new Blob([JSON.stringify(people,null,2)],{type:"application/json"});
-  shareOrDownload("familie.json", blob);
-}
-function exportCSV(){
-  const cols=["Gen","Code","RingCode","Name","Birth","BirthPlace","Gender","ParentCode","PartnerCode","InheritedFrom","Note"];
-  const lines=[cols.join(";")];
-  for(const p of people){ lines.push(cols.map(c=> String(p[c]??"").replace(/;/g,",")).join(";")); }
-  const blob = new Blob([lines.join("\n")],{type:"text/csv"});
-  shareOrDownload("familie.csv", blob);
-}
-
-/* CRUD */
-function parseDate(d){
-  const m = /^([0-3]?\d)\.([01]?\d)\.(\d{4})$/.exec((d||"").trim());
-  if(!m) return "";
-  return `${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`;
-}
-
-
+/* CRUD Funktionen */
 function normalizePersonCode(code){
   if(!code) return "";
   let s = String(code).trim();
-  // Convert all letters to uppercase except trailing 'x'
   if(s.endsWith('x') || s.endsWith('X')) {
     s = s.slice(0, -1).toUpperCase() + 'x';
   } else {
@@ -729,15 +559,13 @@ function addNew(){
   const inherited=normalizePersonCode($("#pInherited").value.trim());
   const note=$("#pNote").value.trim();
 
-  // Plausibilitätsprüfung
   if (!name || !birth || !place || !gender || !parent) {
-    alert("Bitte füllen Sie alle Pflichtfelder aus (Name, Geburtsdatum, Geburtsort, Geschlecht, Eltern-Code)");
+    alert("Bitte füllen Sie alle Pflichtfelder aus");
     return;
   }
 
-  // Geburtsdatum-Validierung
   if (!validateBirthDate(birth)) {
-    alert("Ungültiges Geburtsdatum-Format. Bitte verwenden Sie TT.MM.JJJJ (z.B. 04.12.2000)");
+    alert("Ungültiges Geburtsdatum-Format. Bitte verwenden Sie TT.MM.JJJJ");
     $("#pBirth").value = "";
     return;
   }
@@ -748,25 +576,37 @@ function addNew(){
     gen = parentP ? (parentP.Gen||1)+1 : 2;
     code = nextChildCode(parent);
   }else{
-    if(partner==="1"){ code="1x"; gen=1; } else { code="1"; gen=1; }
+    code = partner==="1" ? "1x" : "1";
   }
-  const p={Gen:gen, Code:code, Name:name, Birth:birth, BirthPlace:place, Gender:gender, ParentCode:parent, PartnerCode:partner, InheritedFrom:inherited, Note:note};
+  
+  const p={Gen:gen, Code:code, Name:name, Birth:birth, BirthPlace:place, Gender:gender, 
+           ParentCode:parent, PartnerCode:partner, InheritedFrom:inherited, Note:note};
   people.push(p);
-  saveState(); renderTable(); renderTree();
+  saveState(); 
+  renderTable(); 
+  renderTree();
   $("#dlgNew").close();
 }
 
 let editCode=null;
 function openEdit(code){
-  const p=people.find(x=>x.Code===code); if(!p) return;
+  const p=people.find(x=>x.Code===code); 
+  if(!p) return;
   editCode=code;
-  $("#eName").value=p.Name||""; $("#eBirth").value=p.Birth||""; $("#ePlace").value=p.BirthPlace||"";
-  $("#eGender").value=p.Gender||""; $("#eParent").value=p.ParentCode||""; $("#ePartner").value=p.PartnerCode||"";
-  $("#eInherited").value=p.InheritedFrom||""; $("#eNote").value=p.Note||"";
+  $("#eName").value=p.Name||""; 
+  $("#eBirth").value=p.Birth||""; 
+  $("#ePlace").value=p.BirthPlace||"";
+  $("#eGender").value=p.Gender||""; 
+  $("#eParent").value=p.ParentCode||""; 
+  $("#ePartner").value=p.PartnerCode||"";
+  $("#eInherited").value=p.InheritedFrom||""; 
+  $("#eNote").value=p.Note||"";
   $("#dlgEdit").showModal();
 }
+
 function saveEditFn(){
-  const p=people.find(x=>x.Code===editCode); if(!p) return;
+  const p=people.find(x=>x.Code===editCode); 
+  if(!p) return;
   
   const name=$("#eName").value.trim();
   const birth=$("#eBirth").value.trim();
@@ -774,15 +614,13 @@ function saveEditFn(){
   const gender=$("#eGender").value;
   const parent=normalizePersonCode($("#eParent").value.trim());
   
-  // Plausibilitätsprüfung
   if (!name || !birth || !place || !gender || !parent) {
-    alert("Bitte füllen Sie alle Pflichtfelder aus (Name, Geburtsdatum, Geburtsort, Geschlecht, Eltern-Code)");
+    alert("Bitte füllen Sie alle Pflichtfelder aus");
     return;
   }
 
-  // Geburtsdatum-Validierung
   if (!validateBirthDate(birth)) {
-    alert("Ungültiges Geburtsdatum-Format. Bitte verwenden Sie TT.MM.JJJJ (z.B. 04.12.2000)");
+    alert("Ungültiges Geburtsdatum-Format. Bitte verwenden Sie TT.MM.JJJJ");
     $("#eBirth").value = "";
     return;
   }
@@ -796,9 +634,10 @@ function saveEditFn(){
   p.InheritedFrom=normalizePersonCode($("#eInherited").value.trim());
   p.Note=$("#eNote").value.trim();
   
-  // Recompute gen if parent changed or code pattern changed
   p.Gen = computeGenFromCode(p.Code);
-  saveState(); renderTable(); renderTree();
+  saveState(); 
+  renderTable(); 
+  renderTree();
   $("#dlgEdit").close();
 }
 
@@ -814,7 +653,9 @@ function deletePerson(){
     if(p.PartnerCode===code) p.PartnerCode="";
     if(p.InheritedFrom===code) p.InheritedFrom="";
   });
-  saveState(); renderTable(); renderTree();
+  saveState(); 
+  renderTable(); 
+  renderTree();
 }
 
 /* Import */
@@ -831,13 +672,11 @@ function doImport(file){
       
       if(!Array.isArray(data)) throw new Error("Format");
       
-      // Validierung der importierten Daten
       const validData = [];
       let hasErrors = false;
       
       for (const item of data) {
         if (item && typeof item === 'object' && item.Code && typeof item.Code === 'string') {
-          // Prüfe Pflichtfelder und Datumsformat
           if (!validateRequiredFields(item) || (item.Birth && !validateBirthDate(item.Birth))) {
             hasErrors = true;
             break;
@@ -854,7 +693,8 @@ function doImport(file){
       people = validData;
       postLoadFixups();
       saveState(false);
-      renderTable(); renderTree();
+      renderTable(); 
+      renderTree();
     }catch(e){ 
       console.error("Import error:", e);
       $("#dlgImportError").showModal();
@@ -887,345 +727,216 @@ function parseCSV(csvText) {
   return result;
 }
 
-/* Events */
-function setupEventListeners() {
-  $("#btnNew").addEventListener("click", openNew);
-  $("#saveNew").addEventListener("click", (e)=>{ e.preventDefault(); addNew(); });
-  $("#saveEdit").addEventListener("click", (e)=>{ e.preventDefault(); saveEditFn(); });
-  $("#btnDelete").addEventListener("click", deletePerson);
-  $("#btnImport").addEventListener("click", ()=>{ 
-    const inp=document.createElement("input"); 
-    inp.type="file"; 
-    inp.accept=".json,.csv,application/json,text/csv"; 
-    inp.onchange=()=>{ if(inp.files[0]) doImport(inp.files[0]); }; 
-    inp.click(); 
-  });
-  $("#btnExport").addEventListener("click", ()=> $("#dlgExport").showModal());
-  $("#btnExportJSON").addEventListener("click", exportJSON);
-  $("#btnExportCSV").addEventListener("click", exportCSV);
-  $("#btnPrint").addEventListener("click", ()=> $("#dlgPrint").showModal());
-  $("#btnPrintTable").addEventListener("click", ()=>{ printTable(); $("#dlgPrint").close(); });
-  $("#btnPrintTree").addEventListener("click", ()=>{ printTree(); $("#dlgPrint").close(); });
-  $("#btnStats").addEventListener("click", ()=>{ updateStats(); $("#dlgStats").showModal(); });
-  $("#btnHelp").addEventListener("click", ()=>{ 
-    fetch("help.html").then(r=>r.text()).then(html=>{ 
-      $("#helpContent").innerHTML=html; 
-      $("#dlgHelp").showModal(); 
-    }).catch(() => {
-      $("#helpContent").innerHTML = "<p>Hilfedatei konnte nicht geladen werden.</p>";
-      $("#dlgHelp").showModal();
-    });
-  });
-  $("#btnReset").addEventListener("click", ()=>{ if(confirm("Sollen wirklich alle Personen gelöscht werden?")){ people=[]; saveState(); renderTable(); renderTree(); }});
-  $("#btnUndo").addEventListener("click", ()=>{ if(!undoStack.length) return; redoStack.push(JSON.stringify(people)); people=JSON.parse(undoStack.pop()); localStorage.setItem(STORAGE_KEY, JSON.stringify(people)); renderTable(); renderTree(); });
-  $("#btnRedo").addEventListener("click", ()=>{ if(!redoStack.length) return; undoStack.push(JSON.stringify(people)); people=JSON.parse(redoStack.pop()); localStorage.setItem(STORAGE_KEY, JSON.stringify(people)); renderTable(); renderTree(); });
+/* Export Funktionen */
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(people,null,2)],{type:"application/json"});
+  shareOrDownload("familie.json", blob);
+}
 
-  $("#search").addEventListener("input", renderTable);
+function exportCSV(){
+  const cols=["Gen","Code","RingCode","Name","Birth","BirthPlace","Gender","ParentCode","PartnerCode","InheritedFrom","Note"];
+  const lines=[cols.join(";")];
+  for(const p of people){ 
+    lines.push(cols.map(c=> {
+      const value = p[c] ?? "";
+      return String(value).replace(/;/g, ",").replace(/\n/g, " ");
+    }).join(";")); 
+  }
+  const blob = new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8"});
+  shareOrDownload("familie.csv", blob);
+}
 
-  // Event-Listener für Geburtsdatum-Validierung
-  $("#pBirth").addEventListener("blur", function() {
-    if (this.value && !validateBirthDate(this.value)) {
-      alert("Ungültiges Geburtsdatum-Format. Bitte verwenden Sie TT.MM.JJJJ (z.B. 04.12.2000)");
-      this.value = "";
-      this.focus();
+async function shareOrDownload(filename, blob){
+  try {
+    if(navigator.canShare && navigator.canShare({ files: [] })) {
+      const file = new File([blob], filename, { type: blob.type });
+      await navigator.share({ files: [file], title: "Export" });
+      return;
     }
-  });
+  } catch(e) { }
+  
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }, 100);
+}
 
-  $("#eBirth").addEventListener("blur", function() {
-    if (this.value && !validateBirthDate(this.value)) {
-      alert("Ungültiges Geburtsdatum-Format. Bitte verwenden Sie TT.MM.JJJJ (z.B. 04.12.2000)");
-      this.value = "";
-      this.focus();
-    }
-  });
+function printTable(){
+  $("#dlgPrint").close();
+  const tableHTML = document.getElementById('peopleTable').outerHTML;
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Wappenringe der Familie GEPPERT - Tabelle</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; }
+        </style>
+      </head>
+      <body>
+        <h1>Wappenringe der Familie GEPPERT - Tabelle</h1>
+        ${tableHTML}
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.print();
+}
+
+function printTree(){
+  $("#dlgPrint").close();
+  const treeContainer = document.getElementById('tree').cloneNode(true);
+  treeContainer.style.width = "100%";
+  treeContainer.style.height = "auto";
+  
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Wappenringe der Familie GEPPERT - Stammbaum</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          svg { width: 100%; height: auto; }
+        </style>
+      </head>
+      <body>
+        <h1>Wappenringe der Familie GEPPERT - Stammbaum</h1>
+        <div style="width: 100%">${treeContainer.outerHTML}</div>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.print();
 }
 
 /* Stats */
 function updateStats(){
-  let total=0,m=0,w=0,d=0; const byGen={};
+  let total=0, m=0, w=0, d=0; 
+  const byGen={};
+  
   for(const p of people){
     total++;
-    const g=(p.Gender||"").toLowerCase();
-    if(g==="m") m++; else if(g==="w") w++; else if(g==="d") d++;
+    const g = (p.Gender||"").toLowerCase();
+    if(g==="m") m++; 
+    else if(g==="w") w++; 
+    else if(g==="d") d++;
     byGen[p.Gen] = (byGen[p.Gen]||0)+1;
   }
+  
   let html = `<p>Gesamtanzahl Personen: <b>${total}</b></p>`;
-  html += `<p>davon männlich: <b>${m}</b> — weiblich: <b>${w</b> — divers: <b>${d}</b></p>`;
-  html += `<ul>`; Object.keys(byGen).sort((a,b)=>a-b).forEach(k=> html += `<li>Generation ${k}: ${byGen[k]}</li>`); html += `</ul>`;
+  html += `<p>davon männlich: <b>${m}</b> — weiblich: <b>${w}</b> — divers: <b>${d}</b></p>`;
+  html += `<ul>`; 
+  Object.keys(byGen).sort((a,b)=>a-b).forEach(k=> html += `<li>Generation ${k}: ${byGen[k]}</li>`); 
+  html += `</ul>`;
   $("#statsContent").innerHTML = html;
 }
 
-// Event-Listener für Baum-Interaktionen
-function setupTreeInteractions() {
-    // Zoom-Funktionalität
-    let scale = 1;
-    const treeContainer = $("#tree");
-    
-    treeContainer.addEventListener("wheel", (e) => {
-        e.preventDefault();
-        scale += e.deltaY * -0.001;
-        scale = Math.min(Math.max(0.5, scale), 3);
-        treeContainer.style.transform = `scale(${scale})`;
-    });
+/* Events */
+function setupEventListeners() {
+  // Haupt-Buttons
+  $("#btnNew").addEventListener("click", openNew);
+  $("#btnDelete").addEventListener("click", deletePerson);
+  $("#btnImport").addEventListener("click", handleImport);
+  $("#btnExport").addEventListener("click", () => $("#dlgExport").showModal());
+  $("#btnPrint").addEventListener("click", () => $("#dlgPrint").showModal());
+  $("#btnStats").addEventListener("click", showStats);
+  $("#btnHelp").addEventListener("click", showHelp);
+  $("#btnReset").addEventListener("click", resetData);
+  $("#btnUndo").addEventListener("click", undo);
+  $("#btnRedo").addEventListener("click", redo);
+  
+  // Dialog-Buttons
+  $("#saveNew").addEventListener("click", (e) => { e.preventDefault(); addNew(); });
+  $("#saveEdit").addEventListener("click", (e) => { e.preventDefault(); saveEditFn(); });
+  $("#btnExportJSON").addEventListener("click", () => { exportJSON(); $("#dlgExport").close(); });
+  $("#btnExportCSV").addEventListener("click", () => { exportCSV(); $("#dlgExport").close(); });
+  $("#btnPrintTable").addEventListener("click", () => { printTable(); $("#dlgPrint").close(); });
+  $("#btnPrintTree").addEventListener("click", () => { printTree(); $("#dlgPrint").close(); });
+  
+  // Suche
+  $("#search").addEventListener("input", renderTable);
+  
+  // Datumsvalidierung
+  $("#pBirth").addEventListener("blur", validateDateField);
+  $("#eBirth").addEventListener("blur", validateDateField);
+}
 
-    // Pan-Funktionalität für Touch-Geräte
-    let startX, startY, scrollLeft, scrollTop;
-    let isDragging = false;
+function handleImport() {
+  const inp = document.createElement("input"); 
+  inp.type = "file"; 
+  inp.accept = ".json,.csv,application/json,text/csv"; 
+  inp.onchange = () => { if(inp.files[0]) doImport(inp.files[0]); }; 
+  inp.click();
+}
 
-    treeContainer.addEventListener("mousedown", (e) => {
-        isDragging = true;
-        startX = e.pageX - treeContainer.offsetLeft;
-        startY = e.pageY - treeContainer.offsetTop;
-        scrollLeft = treeContainer.scrollLeft;
-        scrollTop = treeContainer.scrollTop;
-    });
+function validateDateField(e) {
+  if (e.target.value && !validateBirthDate(e.target.value)) {
+    alert("Ungültiges Geburtsdatum-Format. Bitte verwenden Sie TT.MM.JJJJ (z.B. 04.12.2000)");
+    e.target.value = "";
+    e.target.focus();
+  }
+}
 
-    treeContainer.addEventListener("mouseleave", () => {
-        isDragging = false;
-    });
+function showStats() {
+  updateStats(); 
+  $("#dlgStats").showModal();
+}
 
-    treeContainer.addEventListener("mouseup", () => {
-        isDragging = false;
+function showHelp() {
+  $("#helpContent").innerHTML = "<p>Hilfedatei wird geladen...</p>";
+  $("#dlgHelp").showModal();
+  fetch("help.html")
+    .then(r => r.text())
+    .then(html => { 
+      $("#helpContent").innerHTML = html; 
+    })
+    .catch(() => {
+      $("#helpContent").innerHTML = "<p>Hilfedatei konnte nicht geladen werden.</p>";
     });
+}
 
-    treeContainer.addEventListener("mousemove", (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        const x = e.pageX - treeContainer.offsetLeft;
-        const y = e.pageY - treeContainer.offsetTop;
-        const walkX = (x - startX) * 2;
-        const walkY = (y - startY) * 2;
-        treeContainer.scrollLeft = scrollLeft - walkX;
-        treeContainer.scrollTop = scrollTop - walkY;
-    });
+function resetData() {
+  if(confirm("Sollen wirklich alle Personen gelöscht werden?")){ 
+    people = []; 
+    saveState(); 
+    renderTable(); 
+    renderTree(); 
+  }
+}
+
+function undo() {
+  if(!undoStack.length) return; 
+  redoStack.push(JSON.stringify(people)); 
+  people = JSON.parse(undoStack.pop()); 
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(people)); 
+  renderTable(); 
+  renderTree(); 
+}
+
+function redo() {
+  if(!redoStack.length) return; 
+  undoStack.push(JSON.stringify(people)); 
+  people = JSON.parse(redoStack.pop()); 
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(people)); 
+  renderTable(); 
+  renderTree(); 
 }
 
 /* Init */
 document.addEventListener('DOMContentLoaded', function() {
-    loadState(); 
-    setupEventListeners();
-    renderTable(); 
-    renderTree();
-
-    // Baum-Interaktionen initialisieren
-    setTimeout(setupTreeInteractions, 1000);
+  setupEventListeners();
+  loadState(); 
+  renderTable(); 
+  renderTree();
 });
-
-/* === PDF Export (Table or Tree) === */
-
-// Fix: resolve printable element robustly
-function resolvePrintableEl(sel, fallbackSel){
-  let el = document.querySelector(sel);
-  if(!el && fallbackSel) el = document.querySelector(fallbackSel);
-  if(!el) { 
-    // try to find by common ids/classes
-    if(sel.includes('table')) {
-      el = document.getElementById('peopleTable') || document.querySelector('table');
-    } else if(sel.includes('tree')) {
-      el = document.getElementById('tree') || document.querySelector('svg');
-    }
-  }
-  return el;
-}
-
-async function elementToPdfBlob(el, title){
-  if(!el) {
-    console.error("Element for PDF not found:", title);
-    alert("Element zum Drucken nicht gefunden.");
-    return null;
-  }
-  
-  // Clone to avoid layout shifts
-  const clone = el.cloneNode(true);
-  const wrapper = document.createElement('div');
-  
-  // Header with wappen & title - safely
-  const titleWrap = document.querySelector('.ribbon .title-wrap');
-  if(titleWrap) {
-    const header = titleWrap.cloneNode(true);
-    header.style.marginBottom = '12px';
-    wrapper.appendChild(header);
-  } else {
-    // Fallback header
-    const fallbackHeader = document.createElement('div');
-    fallbackHeader.style.textAlign = 'center';
-    fallbackHeader.style.marginBottom = '12px';
-    fallbackHeader.innerHTML = '<h2>Wappenringe der Familie GEPPERT</h2>';
-    wrapper.appendChild(fallbackHeader);
-  }
-  
-  wrapper.appendChild(clone);
-  wrapper.style.padding = '16px';
-  wrapper.style.background = '#ffffff';
-  document.body.appendChild(wrapper);
-  
-  try {
-    // Render to canvas
-    const canvas = await html2canvas(wrapper, {scale: 2, backgroundColor: '#ffffff', useCORS: true});
-    const img = canvas.toDataURL('image/jpeg', 0.92);
-
-    // Auto orientation
-    const { jsPDF } = window.jspdf;
-    const orientation = canvas.width > canvas.height ? 'l' : 'p';
-    const doc = new jsPDF({orientation, unit:'pt', format:'a4'});
-    const pageW = doc.internal.pageSize.getWidth();
-    const pageH = doc.internal.pageSize.getHeight();
-    const margin = 24;
-    
-    // Fit image into page while preserving aspect
-    let w = pageW - margin*2;
-    let h = canvas.height * (w / canvas.width);
-    if(h > pageH - margin*2){ h = pageH - margin*2; w = canvas.width * (h / canvas.height); }
-    const x = (pageW - w)/2, y = margin;
-    
-    doc.addImage(img, 'JPEG', x, y, w, h);
-    const blob = doc.output('blob');
-    return blob;
-  } catch (error) {
-    console.error("PDF generation error:", error);
-    return null;
-  } finally {
-    wrapper.remove();
-  }
-}
-
-async function shareOrDownloadPDF(blob, filename){
-  if(!blob) return;
-  
-  try{
-    const file = new File([blob], filename, {type:'application/pdf'});
-    if(navigator.canShare && navigator.canShare({ files:[file] })){
-      await navigator.share({ files:[file], title: 'Wappenringe der Familie GEPPERT' });
-      return;
-    }
-  }catch(e){
-    // fall through to download/print fallback
-  }
-  
-  if(isIOS()){
-    // iOS fallback: open a print window
-    if(filename.includes('tabelle')) { printSection('table'); }
-    else { printSection('tree'); }
-    return;
-  }
-  
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-}
-
-const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-function printSection(what){
-  const title = 'Wappenringe der Familie GEPPERT';
-  const when = new Date().toLocaleString('de-DE');
-
-  const content = document.createElement('div');
-  content.style.padding = '16px';
-  
-  const h = document.createElement('div');
-  h.style.display='flex'; h.style.justifyContent='center'; h.style.alignItems='center'; h.style.gap='12px';
-  
-  // Try to get wappen images safely
-  const wappenImg = document.querySelector('.coa');
-  if(wappenImg && wappenImg.src) {
-    h.innerHTML = `<img src="${wappenImg.src}" style="height:40px"/><h2 style="margin:0">${title}</h2><img src="${wappenImg.src}" style="height:40px"/>`;
-  } else {
-    h.innerHTML = `<h2 style="margin:0">${title}</h2>`;
-  }
-  content.appendChild(h);
-
-  const section = document.createElement('div');
-  if(what==='table'){
-    const tableWrap = document.querySelector('.table-wrap');
-    if(tableWrap) {
-      section.innerHTML = tableWrap.innerHTML;
-    }
-  }else{
-    const treeEl = document.getElementById('tree');
-    if(treeEl) {
-      section.appendChild(treeEl.cloneNode(true));
-    }
-  }
-  content.appendChild(section);
-
-  const f = document.createElement('div');
-  f.style.marginTop='12px'; f.style.fontSize='12px'; f.style.textAlign='right'; 
-  f.textContent = `Stand: ${when}`;
-  content.appendChild(f);
-
-  const win = window.open('', '_blank');
-  if(!win){ alert('Popup-Blocker verhindert den Druck. Bitte erlauben.'); return; }
-  
-  win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title>
-    <style>
-      body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;padding:20px}
-      table{width:100%;border-collapse:collapse;margin:10px 0}
-      th,td{border:1px solid #ddd;padding:8px;font-size:14px}
-      thead th{background:#f1f5f9;font-weight:bold}
-      svg{width:100%;height:auto;max-height:600px}
-      @media print{
-        body{margin:0;padding:10px}
-        table{font-size:12px}
-      }
-    </style>
-  </head><body></body></html>`);
-  
-  win.document.body.appendChild(content);
-  
-  // wait for images to load
-  const imgs = win.document.images;
-  let pending = imgs.length;
-  
-  const go = () => {
-    win.focus(); 
-    win.print();
-  };
-  
-  if(pending === 0){
-    setTimeout(go, 100);
-  }else{
-    for(const im of imgs){
-      im.addEventListener('load', ()=>{ if(--pending===0) setTimeout(go,100); });
-      im.addEventListener('error', ()=>{ if(--pending===0) setTimeout(go,100); });
-    }
-  }
-  
-  // close after print
-  win.addEventListener('afterprint', ()=> setTimeout(()=>win.close(), 200));
-}
-
-// Sicherstellen, dass die Version auf iPad sichtbar ist
-function ensureVersionVisibility() {
-  const versionRibbon = document.getElementById('versionRibbon');
-  if (versionRibbon) {
-    // Styling direkt anwenden
-    versionRibbon.style.position = 'absolute';
-    versionRibbon.style.right = '12px';
-    versionRibbon.style.bottom = '8px';
-    versionRibbon.style.fontSize = '12px';
-    versionRibbon.style.color = '#fff';
-    versionRibbon.style.opacity = '0.9';
-    versionRibbon.style.pointerEvents = 'none';
-    versionRibbon.style.textAlign = 'right';
-    versionRibbon.style.zIndex = '10';
-    versionRibbon.style.display = 'block';
-    
-    // Für sehr kleine Bildschirme anpassen
-    if (window.innerWidth <= 480) {
-      versionRibbon.style.position = 'static';
-      versionRibbon.style.textAlign = 'center';
-      versionRibbon.style.padding = '4px 12px';
-      versionRibbon.style.color = '#fff';
-      versionRibbon.style.backgroundColor = 'rgba(0,0,0,0.2)';
-      versionRibbon.style.marginTop = '4px';
-    }
-  }
-}
-
-// Beim Laden und bei Größenänderungen ausführen
-window.addEventListener('load', ensureVersionVisibility);
-window.addEventListener('resize', ensureVersionVisibility);
