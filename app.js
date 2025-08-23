@@ -221,7 +221,7 @@ function renderTree() {
     });
 
     // Berechne optimale Box-Breite basierend auf Inhalten
-    let maxBoxWidth = 180; // Minimale Breite
+    let maxBoxWidth = 140; // Reduzierte minimale Breite (vorher 180)
     people.forEach(person => {
         const name = person.Name || person.Code;
         const code = person.Code;
@@ -229,15 +229,15 @@ function renderTree() {
         // Geschätzte Textlänge (etwa 8px per Zeichen)
         const estimatedWidth = text.length * 8 + 40; // +40 für Padding
         if (estimatedWidth > maxBoxWidth) {
-            maxBoxWidth = Math.min(estimatedWidth, 220); // Maximal 220px
+            maxBoxWidth = Math.min(estimatedWidth, 160); // Reduzierte maximale Breite (vorher 220)
         }
     });
 
     const boxWidth = maxBoxWidth;
     const boxHeight = 80;
-    const partnerGap = 30;
+    const partnerGap = 20; // Reduzierter Abstand zwischen Partnern
     const verticalSpacing = 180;
-    const horizontalSpacing = boxWidth + 60; // Mehr Platz zwischen Boxen
+    const horizontalSpacing = boxWidth + 40; // Weniger Platz zwischen Boxen
 
     // Positionen berechnen - Nachkommentafel-Stil
     const positions = new Map();
@@ -278,47 +278,74 @@ function renderTree() {
         });
 
         // Verteile Gruppen auf mehrere Zeilen falls nötig
-        const maxGroupsPerRow = Math.floor(2400 / horizontalSpacing);
+        const maxGroupsPerRow = Math.floor(2400 / (boxWidth + 40));
         const rows = [];
         
-        for (let i = 0; i < groupedPersons.length; i += maxGroupsPerRow) {
-            rows.push(groupedPersons.slice(i, i + maxGroupsPerRow));
+        // Verteile die Gruppen auf Zeilen
+        let currentRow = [];
+        let currentRowWidth = 0;
+        
+        for (const group of groupedPersons) {
+            const groupWidth = group.length === 2 ? (boxWidth * 2 + partnerGap) : boxWidth;
+            
+            if (currentRow.length > 0 && currentRowWidth + groupWidth + 40 > 2400) {
+                rows.push(currentRow);
+                currentRow = [];
+                currentRowWidth = 0;
+            }
+            
+            currentRow.push(group);
+            currentRowWidth += groupWidth + 40;
+        }
+        
+        if (currentRow.length > 0) {
+            rows.push(currentRow);
         }
 
         // Positioniere jede Zeile der Generation
         rows.forEach((rowGroups, rowIndex) => {
             const rowY = y + (rowIndex * 100); // Zusätzlicher vertikaler Abstand zwischen Zeilen
             const totalGroups = rowGroups.length;
-            const totalWidth = totalGroups * horizontalSpacing;
-            const startX = (2400 - totalWidth) / 2 + horizontalSpacing / 2;
-
-            rowGroups.forEach((group, groupIndex) => {
-                const groupX = startX + groupIndex * horizontalSpacing;
-                
+            
+            // Berechne die Gesamtbreite dieser Zeile
+            let totalRowWidth = 0;
+            rowGroups.forEach(group => {
+                totalRowWidth += (group.length === 2 ? (boxWidth * 2 + partnerGap) : boxWidth) + 40;
+            });
+            totalRowWidth -= 40; // Letzte Box braucht keinen Abstand
+            
+            const startX = (2400 - totalRowWidth) / 2;
+            let currentX = startX;
+            
+            rowGroups.forEach((group) => {
                 if (group.length === 2) {
                     // Partner nebeneinander mit mehr Abstand
                     const partner1 = group[0];
                     const partner2 = group[1];
                     
                     positions.set(partner1.Code, { 
-                        x: groupX - partnerGap/2 - boxWidth/2, 
+                        x: currentX + boxWidth/2, 
                         y: rowY, 
                         person: partner1 
                     });
                     
                     positions.set(partner2.Code, { 
-                        x: groupX + partnerGap/2 + boxWidth/2, 
+                        x: currentX + boxWidth + partnerGap + boxWidth/2, 
                         y: rowY, 
                         person: partner2 
                     });
+                    
+                    currentX += boxWidth * 2 + partnerGap + 40;
                 } else {
                     // Einzelperson zentriert
                     const person = group[0];
                     positions.set(person.Code, { 
-                        x: groupX, 
+                        x: currentX + boxWidth/2, 
                         y: rowY, 
                         person: person 
                     });
+                    
+                    currentX += boxWidth + 40;
                 }
             });
         });
@@ -338,9 +365,9 @@ function renderTree() {
                 // Senkrechte Linie von Eltern zu Kind (bis zum unteren Rand der Eltern-Box)
                 const verticalLine = document.createElementNS(svgNS, "line");
                 verticalLine.setAttribute("x1", parent.x);
-                verticalLine.setAttribute("y1", parent.y + boxHeight);
+                verticalLine.setAttribute("y1", parent.y + boxHeight/2);
                 verticalLine.setAttribute("x2", parent.x);
-                verticalLine.setAttribute("y2", child.y - 10);
+                verticalLine.setAttribute("y2", child.y - boxHeight/2);
                 verticalLine.setAttribute("stroke", "#6b7280");
                 verticalLine.setAttribute("stroke-width", "2");
                 connectionsGroup.appendChild(verticalLine);
@@ -348,9 +375,9 @@ function renderTree() {
                 // Waagerechte Linie zum Kind (bis zum oberen Rand der Kind-Box)
                 const horizontalLine = document.createElementNS(svgNS, "line");
                 horizontalLine.setAttribute("x1", parent.x);
-                horizontalLine.setAttribute("y1", child.y - 10);
+                horizontalLine.setAttribute("y1", child.y - boxHeight/2);
                 horizontalLine.setAttribute("x2", child.x);
-                horizontalLine.setAttribute("y2", child.y - 10);
+                horizontalLine.setAttribute("y2", child.y - boxHeight/2);
                 horizontalLine.setAttribute("stroke", "#6b7280");
                 horizontalLine.setAttribute("stroke-width", "2");
                 connectionsGroup.appendChild(horizontalLine);
@@ -358,9 +385,9 @@ function renderTree() {
                 // Senkrechte Linie von waagerechter Linie bis zur Kind-Box
                 const verticalConnector = document.createElementNS(svgNS, "line");
                 verticalConnector.setAttribute("x1", child.x);
-                verticalConnector.setAttribute("y1", child.y - 10);
+                verticalConnector.setAttribute("y1", child.y - boxHeight/2);
                 verticalConnector.setAttribute("x2", child.x);
-                verticalConnector.setAttribute("y2", child.y);
+                verticalConnector.setAttribute("y2", child.y - 10);
                 verticalConnector.setAttribute("stroke", "#6b7280");
                 verticalConnector.setAttribute("stroke-width", "2");
                 connectionsGroup.appendChild(verticalConnector);
@@ -376,12 +403,13 @@ function renderTree() {
         if (partner1 && partner2 && Math.abs(partner1.y - partner2.y) < 10) {
             // Waagerechte Linie zwischen Partnern (von Rand zu Rand)
             const line = document.createElementNS(svgNS, "line");
-            line.setAttribute("x1", partner1.x + boxWidth/2);
-            line.setAttribute("y1", partner1.y + boxHeight/2);
+            line.setAttribute("x1", partner1.x - boxWidth/2);
+            line.setAttribute("y1", partner1.y);
             line.setAttribute("x2", partner2.x - boxWidth/2);
-            line.setAttribute("y2", partner2.y + boxHeight/2);
+            line.setAttribute("y2", partner2.y);
             line.setAttribute("stroke", "#dc2626");
             line.setAttribute("stroke-width", "3");
+            line.setAttribute("stroke-dasharray", "5,5");
             connectionsGroup.appendChild(line);
         }
     });
@@ -399,7 +427,7 @@ function renderTree() {
         // Gruppen-Element für jede Person
         const personGroup = document.createElementNS(svgNS, "g");
         personGroup.setAttribute("class", "node");
-        personGroup.setAttribute("transform", `translate(${pos.x - boxWidth/2}, ${pos.y})`);
+        personGroup.setAttribute("transform", `translate(${pos.x - boxWidth/2}, ${pos.y - boxHeight/2})`);
         personGroup.setAttribute("data-code", code);
 
         // Box-Hintergrund
