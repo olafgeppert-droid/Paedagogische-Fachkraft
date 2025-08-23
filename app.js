@@ -78,7 +78,14 @@ function computeGenFromCode(code){
 function postLoadFixups(){
   // Ensure Gen & RingCode are present after import
   for(const p of people){
-    if(!p.Gen) p.Gen = computeGenFromCode(p.Code);
+    // Normalize codes first
+    p.Code = normalizePersonCode(p.Code);
+    p.ParentCode = normalizePersonCode(p.ParentCode);
+    p.PartnerCode = normalizePersonCode(p.PartnerCode);
+    p.InheritedFrom = normalizePersonCode(p.InheritedFrom);
+    
+    // Recompute generation
+    p.Gen = computeGenFromCode(p.Code);
   }
   computeRingCodes();
 }
@@ -213,15 +220,30 @@ function renderTree() {
         }
     });
 
+    // Berechne optimale Box-Breite basierend auf Inhalten
+    let maxBoxWidth = 180; // Minimale Breite
+    people.forEach(person => {
+        const name = person.Name || person.Code;
+        const code = person.Code;
+        const text = `${code} / ${name}`;
+        // Geschätzte Textlänge (etwa 8px pro Zeichen)
+        const estimatedWidth = text.length * 8 + 40; // +40 für Padding
+        if (estimatedWidth > maxBoxWidth) {
+            maxBoxWidth = Math.min(estimatedWidth, 220); // Maximal 220px
+        }
+    });
+
+    const boxWidth = maxBoxWidth;
+    const boxHeight = 80;
+    const partnerGap = 30;
+    const verticalSpacing = 180;
+    const horizontalSpacing = boxWidth + 60; // Mehr Platz zwischen Boxen
+
     // Positionen berechnen - Nachkommentafel-Stil
     const positions = new Map();
     const generations = Object.keys(byGeneration).sort((a, b) => a - b);
-    const verticalSpacing = 180;
-    const horizontalSpacing = 280; // Mehr Platz zwischen Boxen
-    const boxWidth = 240; // Breitere Boxen
-    const boxHeight = 80;
-    const partnerGap = 30; // Mehr Abstand zwischen Partnern
 
+    // Berechne Layout für jede Generation
     generations.forEach((gen, genIndex) => {
         const persons = byGeneration[gen];
         const y = 120 + genIndex * verticalSpacing;
@@ -255,39 +277,50 @@ function renderTree() {
             }
         });
 
-        // Zentrierte horizontale Anordnung mit Überlaufbehandlung
-        const totalGroups = groupedPersons.length;
-        const totalWidth = totalGroups * horizontalSpacing;
-        const startX = (2400 - totalWidth) / 2 + horizontalSpacing / 2;
+        // Verteile Gruppen auf mehrere Zeilen falls nötig
+        const maxGroupsPerRow = Math.floor(2400 / horizontalSpacing);
+        const rows = [];
+        
+        for (let i = 0; i < groupedPersons.length; i += maxGroupsPerRow) {
+            rows.push(groupedPersons.slice(i, i + maxGroupsPerRow));
+        }
 
-        groupedPersons.forEach((group, groupIndex) => {
-            const groupX = startX + groupIndex * horizontalSpacing;
-            
-            if (group.length === 2) {
-                // Partner nebeneinander mit mehr Abstand
-                const partner1 = group[0];
-                const partner2 = group[1];
+        // Positioniere jede Zeile der Generation
+        rows.forEach((rowGroups, rowIndex) => {
+            const rowY = y + (rowIndex * 100); // Zusätzlicher vertikaler Abstand zwischen Zeilen
+            const totalGroups = rowGroups.length;
+            const totalWidth = totalGroups * horizontalSpacing;
+            const startX = (2400 - totalWidth) / 2 + horizontalSpacing / 2;
+
+            rowGroups.forEach((group, groupIndex) => {
+                const groupX = startX + groupIndex * horizontalSpacing;
                 
-                positions.set(partner1.Code, { 
-                    x: groupX - partnerGap/2 - boxWidth/2, 
-                    y: y, 
-                    person: partner1 
-                });
-                
-                positions.set(partner2.Code, { 
-                    x: groupX + partnerGap/2 + boxWidth/2, 
-                    y: y, 
-                    person: partner2 
-                });
-            } else {
-                // Einzelperson zentriert
-                const person = group[0];
-                positions.set(person.Code, { 
-                    x: groupX, 
-                    y: y, 
-                    person: person 
-                });
-            }
+                if (group.length === 2) {
+                    // Partner nebeneinander mit mehr Abstand
+                    const partner1 = group[0];
+                    const partner2 = group[1];
+                    
+                    positions.set(partner1.Code, { 
+                        x: groupX - partnerGap/2 - boxWidth/2, 
+                        y: rowY, 
+                        person: partner1 
+                    });
+                    
+                    positions.set(partner2.Code, { 
+                        x: groupX + partnerGap/2 + boxWidth/2, 
+                        y: rowY, 
+                        person: partner2 
+                    });
+                } else {
+                    // Einzelperson zentriert
+                    const person = group[0];
+                    positions.set(person.Code, { 
+                        x: groupX, 
+                        y: rowY, 
+                        person: person 
+                    });
+                }
+            });
         });
     });
 
@@ -392,7 +425,7 @@ function renderTree() {
         // Namen vollständig anzeigen
         const displayName = person.Name || person.Code;
         // Text kürzen falls zu lang
-        const maxLength = 20;
+        const maxLength = Math.floor((boxWidth - 40) / 7); // Geschätzte Zeichenbreite
         const displayText = displayName.length > maxLength ? 
             displayName.substring(0, maxLength - 3) + "..." : displayName;
         nameText.textContent = `${person.Code} / ${displayText}`;
@@ -434,7 +467,7 @@ function renderTree() {
             placeText.setAttribute("fill", "#6b7280");
             
             // Ort kürzen falls zu lang
-            const maxPlaceLength = 25;
+            const maxPlaceLength = Math.floor((boxWidth - 20) / 6);
             const placeTextShort = person.BirthPlace.length > maxPlaceLength ? 
                 person.BirthPlace.substring(0, maxPlaceLength - 3) + "..." : person.BirthPlace;
             placeText.textContent = placeTextShort;
@@ -786,7 +819,7 @@ function updateStats(){
     byGen[p.Gen] = (byGen[p.Gen]||0)+1;
   }
   let html = `<p>Gesamtanzahl Personen: <b>${total}</b></p>`;
-  html += `<p>davon männlich: <b>${m}</b> — weiblich: <b>${w}</b> — divers: <b>${d}</b></p>`;
+  html += `<p>davon männlich: <b>${m}</b> — weiblich: <b>${w</b> — divers: <b>${d}</b></p>`;
   html += `<ul>`; Object.keys(byGen).sort((a,b)=>a-b).forEach(k=> html += `<li>Generation ${k}: ${byGen[k]}</li>`); html += `</ul>`;
   $("#statsContent").innerHTML = html;
 }
