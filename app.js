@@ -277,83 +277,179 @@ function renderTree() {
             }
         });
 
- // Verteile Gruppen auf mehrere Zeilen falls nötig
-const rows = [];
-let currentRow = [];
-let currentRowWidth = 0;
+        // Verteile Gruppen auf mehrere Zeilen falls nötig
+        const rows = [];
+        let currentRow = [];
+        let currentRowWidth = 0;
 
-for (const group of groupedPersons) {
-    // Berechne benötigte Breite für diese Gruppe
-    const groupWidth = group.length === 2 ? 
-        (boxWidth * 2 + partnerGap + 60) : // Mehr Platz für Partner-Paare
-        (boxWidth + 60);
-    
-    // Wenn die Gruppe nicht in die aktuelle Zeile passt, neue Zeile beginnen
-    if (currentRow.length > 0 && currentRowWidth + groupWidth > 2200) {
-        rows.push(currentRow);
-        currentRow = [];
-        currentRowWidth = 0;
-    }
-    
-    currentRow.push(group);
-    currentRowWidth += groupWidth;
-}
-
-if (currentRow.length > 0) {
-    rows.push(currentRow);
-}
-
-// Positioniere jede Zeile der Generation
-rows.forEach((rowGroups, rowIndex) => {
-    const rowY = y + (rowIndex * 140); // Mehr vertikaler Abstand (140px statt 100px)
-    
-    // Berechne Gesamtbreite dieser Zeile
-    let totalRowWidth = 0;
-    rowGroups.forEach(group => {
-        totalRowWidth += group.length === 2 ? 
-            (boxWidth * 2 + partnerGap + 60) : 
-            (boxWidth + 60);
-    });
-    totalRowWidth -= 60; // Letztes Element braucht keinen Abstand
-    
-    const startX = 200 + (2200 - totalRowWidth) / 2; // Zentriert im verfügbaren Platz
-    let currentX = startX;
-    
-    rowGroups.forEach((group) => {
-        if (group.length === 2) {
-            // Partner nebeneinander
-            const partner1 = group[0];
-            const partner2 = group[1];
+        for (const group of groupedPersons) {
+            // Berechne benötigte Breite für diese Gruppe
+            const groupWidth = group.length === 2 ? 
+                (boxWidth * 2 + partnerGap + 80) : // Mehr Platz für Partner-Paare
+                (boxWidth + 80);
             
-            positions.set(partner1.Code, { 
-                x: currentX + boxWidth/2, 
-                y: rowY, 
-                person: partner1 
-            });
+            // Wenn die Gruppe nicht in die aktuelle Zeile passt, neue Zeile beginnen
+            if (currentRow.length > 0 && currentRowWidth + groupWidth > 2200) {
+                rows.push(currentRow);
+                currentRow = [];
+                currentRowWidth = 0;
+            }
             
-            positions.set(partner2.Code, { 
-                x: currentX + boxWidth + partnerGap + boxWidth/2, 
-                y: rowY, 
-                person: partner2 
-            });
-            
-            currentX += boxWidth * 2 + partnerGap + 60;
-        } else {
-            // Einzelperson
-            const person = group[0];
-            positions.set(person.Code, { 
-                x: currentX + boxWidth/2, 
-                y: rowY, 
-                person: person 
-            });
-            
-            currentX += boxWidth + 60;
+            currentRow.push(group);
+            currentRowWidth += groupWidth;
         }
-    });
-});
+
+        if (currentRow.length > 0) {
+            rows.push(currentRow);
+        }
+
+        // Positioniere jede Zeile der Generation
+        rows.forEach((rowGroups, rowIndex) => {
+            const rowY = y + (rowIndex * 140); // Mehr vertikaler Abstand
+            
+            // Berechne Gesamtbreite dieser Zeile
+            let totalRowWidth = 0;
+            rowGroups.forEach(group => {
+                totalRowWidth += group.length === 2 ? 
+                    (boxWidth * 2 + partnerGap + 80) : 
+                    (boxWidth + 80);
+            });
+            totalRowWidth -= 80; // Letztes Element braucht keinen Abstand
+            
+            const startX = 200 + (2200 - totalRowWidth) / 2; // Zentriert im verfügbaren Platz
+            let currentX = startX;
+            
+            rowGroups.forEach((group) => {
+                if (group.length === 2) {
+                    // Partner nebeneinander
+                    const partner1 = group[0];
+                    const partner2 = group[1];
+                    
+                    positions.set(partner1.Code, { 
+                        x: currentX + boxWidth/2, 
+                        y: rowY, 
+                        person: partner1 
+                    });
+                    
+                    positions.set(partner2.Code, { 
+                        x: currentX + boxWidth + partnerGap + boxWidth/2, 
+                        y: rowY, 
+                        person: partner2 
+                    });
+                    
+                    currentX += boxWidth * 2 + partnerGap + 80;
+                } else {
+                    // Einzelperson
+                    const person = group[0];
+                    positions.set(person.Code, { 
+                        x: currentX + boxWidth/2, 
+                        y: rowY, 
+                        person: person 
+                    });
+                    
+                    currentX += boxWidth + 80;
+                }
+            });
+        });
     });
 
-    // Verbindungslinien zeichnen (zuerst, damit sie hinter den Knoten liegen)
+    // Personen-Boxen zeichnen (Zuerst, damit Verbindungslinien darüber liegen)
+    const nodesGroup = document.createElementNS(svgNS, "g");
+    nodesGroup.setAttribute("class", "nodes");
+    svg.appendChild(nodesGroup);
+
+    // Sortiere Personen nach Generation und Code für korrekte Zeichenreihenfolge
+    const sortedPeople = [...people].sort((a, b) => {
+        if (a.Gen !== b.Gen) return a.Gen - b.Gen;
+        return a.Code.localeCompare(b.Code);
+    });
+
+    sortedPeople.forEach(person => {
+        const pos = positions.get(person.Code);
+        if (!pos) return;
+
+        const gen = person.Gen || 1;
+        const color = genColors[gen] || "#f9fafb";
+
+        // Gruppen-Element für jede Person
+        const personGroup = document.createElementNS(svgNS, "g");
+        personGroup.setAttribute("class", "node");
+        personGroup.setAttribute("transform", `translate(${pos.x - boxWidth/2}, ${pos.y})`);
+        personGroup.setAttribute("data-code", person.Code);
+
+        // Box-Hintergrund
+        const rect = document.createElementNS(svgNS, "rect");
+        rect.setAttribute("width", boxWidth);
+        rect.setAttribute("height", boxHeight);
+        rect.setAttribute("rx", "8");
+        rect.setAttribute("ry", "8");
+        rect.setAttribute("fill", color);
+        rect.setAttribute("stroke", "#374151");
+        rect.setAttribute("stroke-width", "2");
+        personGroup.appendChild(rect);
+
+        // 1. Zeile: Personen-Code: Vor- und Nachname
+        const nameText = document.createElementNS(svgNS, "text");
+        nameText.setAttribute("x", boxWidth/2);
+        nameText.setAttribute("y", 25);
+        nameText.setAttribute("text-anchor", "middle");
+        nameText.setAttribute("font-size", "14");
+        nameText.setAttribute("font-weight", "600");
+        nameText.setAttribute("fill", "#111827");
+        
+        // Namen vollständig anzeigen
+        const displayName = person.Name || person.Code;
+        // Text kürzen falls zu lang
+        const maxLength = Math.floor((boxWidth - 40) / 8);
+        const displayText = displayName.length > maxLength ? 
+            displayName.substring(0, maxLength - 3) + "..." : displayName;
+        nameText.textContent = `${person.Code}: ${displayText}`;
+        personGroup.appendChild(nameText);
+
+        // 2. Zeile: Geschlechtszeichen / Generation / Geburtsdatum
+        const detailsText = document.createElementNS(svgNS, "text");
+        detailsText.setAttribute("x", boxWidth/2);
+        detailsText.setAttribute("y", 50);
+        detailsText.setAttribute("text-anchor", "middle");
+        detailsText.setAttribute("font-size", "13");
+        detailsText.setAttribute("fill", "#4b5563");
+        
+        // Geschlechtssymbol
+        let genderSymbol = "";
+        if (person.Gender === "m") {
+            genderSymbol = "♂";
+        } else if (person.Gender === "w") {
+            genderSymbol = "♀";
+        } else if (person.Gender === "d") {
+            genderSymbol = "⚧";
+        }
+        
+        let details = genderSymbol ? `${genderSymbol} / ` : "";
+        details += `Gen ${gen}`;
+        if (person.Birth) {
+            details += ` / ${person.Birth}`;
+        }
+        detailsText.textContent = details;
+        personGroup.appendChild(detailsText);
+
+        // Klick-Event für Bearbeiten
+        personGroup.addEventListener("dblclick", () => openEdit(person.Code));
+        
+        // Hover-Effekte
+        personGroup.addEventListener("mouseenter", function() {
+            rect.setAttribute("stroke-width", "3");
+            rect.setAttribute("filter", "url(#dropShadow)");
+        });
+        
+        personGroup.addEventListener("mouseleave", function() {
+            rect.setAttribute("stroke-width", "2");
+            rect.setAttribute("filter", "none");
+        });
+
+        nodesGroup.appendChild(personGroup);
+    });
+
+    // Verbindungslinien zeichnen (Nach den Boxen, damit sie darüber liegen)
     const connectionsGroup = document.createElementNS(svgNS, "g");
     connectionsGroup.setAttribute("class", "connections");
     svg.appendChild(connectionsGroup);
@@ -369,7 +465,7 @@ rows.forEach((rowGroups, rowIndex) => {
                 verticalLine.setAttribute("x1", parent.x);
                 verticalLine.setAttribute("y1", parent.y + boxHeight);
                 verticalLine.setAttribute("x2", parent.x);
-                verticalLine.setAttribute("y2", child.y - 15); // 15px Abstand
+                verticalLine.setAttribute("y2", child.y - 15);
                 verticalLine.setAttribute("stroke", "#6b7280");
                 verticalLine.setAttribute("stroke-width", "2");
                 connectionsGroup.appendChild(verticalLine);
@@ -413,94 +509,6 @@ rows.forEach((rowGroups, rowIndex) => {
             line.setAttribute("stroke-width", "3");
             connectionsGroup.appendChild(line);
         }
-    });
-
-    // Personen-Boxen zeichnen
-    const nodesGroup = document.createElementNS(svgNS, "g");
-    nodesGroup.setAttribute("class", "nodes");
-    svg.appendChild(nodesGroup);
-
-    positions.forEach((pos, code) => {
-        const person = pos.person;
-        const gen = person.Gen || 1;
-        const color = genColors[gen] || "#f9fafb";
-
-        // Gruppen-Element für jede Person
-        const personGroup = document.createElementNS(svgNS, "g");
-        personGroup.setAttribute("class", "node");
-        personGroup.setAttribute("transform", `translate(${pos.x - boxWidth/2}, ${pos.y})`);
-        personGroup.setAttribute("data-code", code);
-
-        // Box-Hintergrund
-        const rect = document.createElementNS(svgNS, "rect");
-        rect.setAttribute("width", boxWidth);
-        rect.setAttribute("height", boxHeight);
-        rect.setAttribute("rx", "8");
-        rect.setAttribute("ry", "8");
-        rect.setAttribute("fill", color);
-        rect.setAttribute("stroke", "#374151");
-        rect.setAttribute("stroke-width", "2");
-        personGroup.appendChild(rect);
-
-        // 1. Zeile: Personen-Code: Vor- und Nachname
-        const nameText = document.createElementNS(svgNS, "text");
-        nameText.setAttribute("x", boxWidth/2);
-        nameText.setAttribute("y", 25);
-        nameText.setAttribute("text-anchor", "middle");
-        nameText.setAttribute("font-size", "14");
-        nameText.setAttribute("font-weight", "600");
-        nameText.setAttribute("fill", "#111827");
-        
-        // Namen vollständig anzeigen
-        const displayName = person.Name || person.Code;
-        // Text kürzen falls zu lang
-        const maxLength = Math.floor((boxWidth - 40) / 8); // Geschätzte Zeichenbreite
-        const displayText = displayName.length > maxLength ? 
-            displayName.substring(0, maxLength - 3) + "..." : displayName;
-        nameText.textContent = `${person.Code}: ${displayText}`;
-        personGroup.appendChild(nameText);
-
-        // 2. Zeile: Geschlechtszeichen / Generation / Geburtsdatum
-        const detailsText = document.createElementNS(svgNS, "text");
-        detailsText.setAttribute("x", boxWidth/2);
-        detailsText.setAttribute("y", 50);
-        detailsText.setAttribute("text-anchor", "middle");
-        detailsText.setAttribute("font-size", "13");
-        detailsText.setAttribute("fill", "#4b5563");
-        
-        // Geschlechtssymbol
-        let genderSymbol = "";
-        if (person.Gender === "m") {
-            genderSymbol = "♂";
-        } else if (person.Gender === "w") {
-            genderSymbol = "♀";
-        } else if (person.Gender === "d") {
-            genderSymbol = "⚧";
-        }
-        
-        let details = genderSymbol ? `${genderSymbol} / ` : "";
-        details += `Gen ${gen}`;
-        if (person.Birth) {
-            details += ` / ${person.Birth}`;
-        }
-        detailsText.textContent = details;
-        personGroup.appendChild(detailsText);
-
-        // Klick-Event für Bearbeiten
-        personGroup.addEventListener("dblclick", () => openEdit(code));
-        
-        // Hover-Effekte
-        personGroup.addEventListener("mouseenter", function() {
-            rect.setAttribute("stroke-width", "3");
-            rect.setAttribute("filter", "url(#dropShadow)");
-        });
-        
-        personGroup.addEventListener("mouseleave", function() {
-            rect.setAttribute("stroke-width", "2");
-            rect.setAttribute("filter", "none");
-        });
-
-        nodesGroup.appendChild(personGroup);
     });
 
     // Generationen-Beschriftung hinzufügen (linksbündig)
