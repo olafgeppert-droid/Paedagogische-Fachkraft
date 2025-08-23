@@ -518,7 +518,7 @@ function renderTree() {
         const labelText = document.createElementNS(svgNS, "text");
         labelText.setAttribute("x", "40");
         labelText.setAttribute("y", y);
-        labelText.setAttribute("font-size", "16");
+        labelText.setAttribute("font-size", "36");
         labelText.setAttribute("font-weight", "bold");
         labelText.setAttribute("fill", "#374151");
         labelText.setAttribute("text-anchor", "start");
