@@ -235,7 +235,7 @@ function renderTree() {
     const svg = document.createElementNS(svgNS, "svg");
     svg.setAttribute("width", "100%");
     svg.setAttribute("height", "100%");
-    svg.setAttribute("viewBox", "0 0 2400 1600");
+    svg.setAttribute("viewBox", "0 0 2400 1800");
     svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
     el.appendChild(svg);
 
@@ -270,16 +270,16 @@ function renderTree() {
         const code = person.Code;
         const text = `${code} / ${name}`;
         // Geschätzte Textlänge (etwa 9px per Zeichen)
-        const estimatedWidth = text.length * 9 + 50; // +50 für Padding
+        const estimatedWidth = text.length * 9 + 60; // +60 für Padding
         if (estimatedWidth > maxBoxWidth) {
-            maxBoxWidth = Math.min(estimatedWidth, 260); // Vergrößerte maximale Breite
+            maxBoxWidth = Math.min(estimatedWidth, 280); // Vergrößerte maximale Breite
         }
     });
 
-    const boxWidth = maxBoxWidth;
-    const boxHeight = 100; // Vergrößerte Boxhöhe
-    const partnerGap = 40; // Vergrößerter Abstand zwischen Partnern
-    const verticalSpacing = 220; // Vergrößerter vertikaler Abstand
+    const boxWidth = maxBoxWidth + 80;
+    const boxHeight = 110;
+    const partnerGap = 40;
+    const verticalSpacing = 240;
 
     // Positionen berechnen - Nachkommentafel-Stil
     const positions = new Map();
@@ -288,7 +288,7 @@ function renderTree() {
     // Berechne Layout für jede Generation
     generations.forEach((gen, genIndex) => {
         const persons = byGeneration[gen];
-        const y = 140 + genIndex * verticalSpacing; // Mehr Platz für größere Beschriftung
+        const y = 160 + genIndex * verticalSpacing;
         
         // Partner zu Gruppen zusammenfassen
         const groupedPersons = [];
@@ -327,8 +327,8 @@ function renderTree() {
         for (const group of groupedPersons) {
             // Berechne benötigte Breite für diese Gruppe
             const groupWidth = group.length === 2 ? 
-                (boxWidth * 2 + partnerGap + 100) : // Mehr Platz für Partner-Paare
-                (boxWidth + 100);
+                (boxWidth * 2 + partnerGap + 120) : // Mehr Platz für Partner-Paare
+                (boxWidth + 120);
             
             // Wenn die Gruppe nicht in die aktuelle Zeile passt, neue Zeile beginnen
             if (currentRow.length > 0 && currentRowWidth + groupWidth > 2200) {
@@ -347,18 +347,18 @@ function renderTree() {
 
         // Positioniere jede Zeile der Generation
         rows.forEach((rowGroups, rowIndex) => {
-            const rowY = y + (rowIndex * 160); // Mehr vertikaler Abstand
+            const rowY = y + (rowIndex * 180);
             
             // Berechne Gesamtbreite dieser Zeile
             let totalRowWidth = 0;
             rowGroups.forEach(group => {
                 totalRowWidth += group.length === 2 ? 
-                    (boxWidth * 2 + partnerGap + 100) : 
-                    (boxWidth + 100);
+                    (boxWidth * 2 + partnerGap + 120) : 
+                    (boxWidth + 120);
             });
-            totalRowWidth -= 100; // Letztes Element braucht keinen Abstand
+            totalRowWidth -= 120;
             
-            const startX = 200 + (2200 - totalRowWidth) / 2; // Zentriert im verfügbaren Platz
+            const startX = 200 + (2200 - totalRowWidth) / 2;
             let currentX = startX;
             
             rowGroups.forEach((group) => {
@@ -379,7 +379,7 @@ function renderTree() {
                         person: partner2 
                     });
                     
-                    currentX += boxWidth * 2 + partnerGap + 100;
+                    currentX += boxWidth * 2 + partnerGap + 120;
                 } else {
                     // Einzelperson
                     const person = group[0];
@@ -389,7 +389,7 @@ function renderTree() {
                         person: person 
                     });
                     
-                    currentX += boxWidth + 100;
+                    currentX += boxWidth + 120;
                 }
             });
         });
@@ -433,16 +433,16 @@ function renderTree() {
         // 1. Zeile: Personen-Code: Vor- und Nachname
         const nameText = document.createElementNS(svgNS, "text");
         nameText.setAttribute("x", boxWidth/2);
-        nameText.setAttribute("y", 30);
+        nameText.setAttribute("y", 40);
         nameText.setAttribute("text-anchor", "middle");
-        nameText.setAttribute("font-size", "16");
+        nameText.setAttribute("font-size", "18");
         nameText.setAttribute("font-weight", "600");
         nameText.setAttribute("fill", "#111827");
         
         // Namen vollständig anzeigen
         const displayName = person.Name || person.Code;
         // Text kürzen falls zu lang
-        const maxLength = Math.floor((boxWidth - 40) / 8);
+        const maxLength = Math.floor((boxWidth - 40) / 7);
         const displayText = displayName.length > maxLength ? 
             displayName.substring(0, maxLength - 3) + "..." : displayName;
         nameText.textContent = `${person.Code}: ${displayText}`;
@@ -451,9 +451,9 @@ function renderTree() {
         // 2. Zeile: Geschlechtszeichen / Generation / Geburtsdatum
         const detailsText = document.createElementNS(svgNS, "text");
         detailsText.setAttribute("x", boxWidth/2);
-        detailsText.setAttribute("y", 60);
+        detailsText.setAttribute("y", 70);
         detailsText.setAttribute("text-anchor", "middle");
-        detailsText.setAttribute("font-size", "15");
+        detailsText.setAttribute("font-size", "16");
         detailsText.setAttribute("fill", "#4b5563");
         
         // Geschlechtssymbol
@@ -555,12 +555,12 @@ function renderTree() {
 
     // Generationen-Beschriftung hinzufügen (linksbündig) mit größerer Schrift
     generations.forEach((gen, genIndex) => {
-        const y = 140 + genIndex * verticalSpacing - 20;
+        const y = 160 + genIndex * verticalSpacing - 20;
         
         const labelText = document.createElementNS(svgNS, "text");
         labelText.setAttribute("x", "40");
         labelText.setAttribute("y", y);
-        labelText.setAttribute("font-size", "30"); // Vergrößerte Schrift
+        labelText.setAttribute("font-size", "30");
         labelText.setAttribute("font-weight", "bold");
         labelText.setAttribute("fill", "#374151");
         labelText.setAttribute("text-anchor", "start");
@@ -950,7 +950,7 @@ function updateStats(){
     byGen[p.Gen] = (byGen[p.Gen]||0)+1;
   }
   let html = `<p>Gesamtanzahl Personen: <b>${total}</b></p>`;
-  html += `<p>davon männlich: <b>${m}</b> — weiblich: <b>${w}</b> — divers: <b>${d}</b></p>`;
+  html += `<p>davon männlich: <b>${m}</b> — weiblich: <b>${w</b> — divers: <b>${d}</b></p>`;
   html += `<ul>`; Object.keys(byGen).sort((a,b)=>a-b).forEach(k=> html += `<li>Generation ${k}: ${byGen[k]}</li>`); html += `</ul>`;
   $("#statsContent").innerHTML = html;
 }
