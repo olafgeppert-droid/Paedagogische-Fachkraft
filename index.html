@@ -124,25 +124,25 @@
       </div>
       <div class="dlg-body">
         <div class="form-grid">
-          <label> Name
-            <input id="pName" autocomplete="off">
+          <label> Name *
+            <input id="pName" autocomplete="off" required>
           </label>
-          <label> Geburtsdatum (TT.MM.JJJJ)
-            <input id="pBirth" inputmode="numeric" placeholder="z. B. 04.12.2000">
+          <label> Geburtsdatum (TT.MM.JJJJ) *
+            <input id="pBirth" inputmode="numeric" placeholder="z. B. 04.12.2000" required>
           </label>
-          <label> Geburtsort
-            <input id="pPlace">
+          <label> Geburtsort *
+            <input id="pPlace" required>
           </label>
-          <label> Geschlecht
-            <select id="pGender">
+          <label> Geschlecht *
+            <select id="pGender" required>
               <option value=""></option>
               <option value="m">m</option>
               <option value="w">w</option>
               <option value="d">d</option>
             </select>
           </label>
-          <label> Eltern-Code
-            <input id="pParent" placeholder="z. B. 1A">
+          <label> Eltern-Code *
+            <input id="pParent" placeholder="z. B. 1A" required>
           </label>
           <label> Partner-Code
             <input id="pPartner" placeholder="z. B. 1Ax">
@@ -153,6 +153,9 @@
           <label> Kommentar
             <input id="pNote">
           </label>
+        </div>
+        <div style="margin-top: 12px; font-size: 12px; color: #666;">
+          * Pflichtfelder
         </div>
       </div>
       <div class="dlg-actions">
@@ -170,21 +173,24 @@
       </div>
       <div class="dlg-body">
         <div class="form-grid">
-          <label> Name <input id="eName"></label>
-          <label> Geburtsdatum (TT.MM.JJJJ) <input id="eBirth"></label>
-          <label> Geburtsort <input id="ePlace"></label>
-          <label> Geschlecht
-            <select id="eGender">
+          <label> Name * <input id="eName" required></label>
+          <label> Geburtsdatum (TT.MM.JJJJ) * <input id="eBirth" required></label>
+          <label> Geburtsort * <input id="ePlace" required></label>
+          <label> Geschlecht *
+            <select id="eGender" required>
               <option value=""></option>
               <option value="m">m</option>
               <option value="w">w</option>
               <option value="d">d</option>
             </select>
           </label>
-          <label> Eltern-Code <input id="eParent"></label>
+          <label> Eltern-Code * <input id="eParent" required></label>
           <label> Partner-Code <input id="ePartner"></label>
           <label> Geerbt von Code <input id="eInherited"></label>
           <label> Kommentar <input id="eNote"></label>
+        </div>
+        <div style="margin-top: 12px; font-size: 12px; color: #666;">
+          * Pflichtfelder
         </div>
       </div>
       <div class="dlg-actions">
@@ -234,6 +240,18 @@
     <div class="dlg-actions"><button onclick="this.closest('dialog').close()">Schließen</button></div>
   </dialog>
 
+  <!-- Neues Dialog für Import-Fehler -->
+  <dialog id="dlgImportError">
+    <div class="dlg-head"><strong>Import-Fehler</strong><button class="close-x" onclick="this.closest('dialog').close()">×</button></div>
+    <div class="dlg-body">
+      <p>Fehlerhafte Daten können nicht importiert werden. Prüfe den Dateiinhalt.</p>
+      <p>Pflichtfelder sind: Name, Elterncode, Geschlecht, Geburtsdatum, und Geburtsort</p>
+    </div>
+    <div class="dlg-actions">
+      <button onclick="this.closest('dialog').close()">Schließen</button>
+    </div>
+  </dialog>
+
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
@@ -241,7 +259,7 @@
 
   <script>
     // central version string - change once
-    const APP_VERSION = 'v86';
+    const APP_VERSION = 'v87';
     (function(){
       const r = document.getElementById('versionRibbon');
       const u = document.getElementById('versionUnderTable');
