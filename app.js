@@ -38,49 +38,6 @@ function seedData(){
   ];
 }
 
-/* === Plausibilitätsprüfungen === */
-function validateBirthDate(dateString) {
-  // Prüfe das Format TT.MM.JJJJ
-  const regex = /^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/;
-  if (!regex.test(dateString)) {
-    return false;
-  }
-  
-  // Zusätzliche Validierung für realistische Daten
-  const parts = dateString.split('.');
-  const day = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10);
-  const year = parseInt(parts[2], 10);
-  
-  // Prüfe ob das Datum valide ist (z.B. nicht 31.02.)
-  const date = new Date(year, month - 1, day);
-  return date.getFullYear() === year && 
-         date.getMonth() === month - 1 && 
-         date.getDate() === day;
-}
-
-function validateRequiredFields(person) {
-  return person.Name && 
-         person.Birth && 
-         person.Gender && 
-         person.ParentCode && 
-         person.BirthPlace;
-}
-
-function validatePerson(person) {
-  // Prüfe Pflichtfelder
-  if (!validateRequiredFields(person)) {
-    return false;
-  }
-  
-  // Prüfe Geburtsdatum-Format
-  if (person.Birth && !validateBirthDate(person.Birth)) {
-    return false;
-  }
-  
-  return true;
-}
-
 /* Compute Gen if missing (based on code pattern / parent chain) */
 function computeGenFromCode(code){
   if(!code) return 1;
@@ -121,14 +78,7 @@ function computeGenFromCode(code){
 function postLoadFixups(){
   // Ensure Gen & RingCode are present after import
   for(const p of people){
-    // Normalize codes first
-    p.Code = normalizePersonCode(p.Code);
-    p.ParentCode = normalizePersonCode(p.ParentCode);
-    p.PartnerCode = normalizePersonCode(p.PartnerCode);
-    p.InheritedFrom = normalizePersonCode(p.InheritedFrom);
-    
-    // Recompute generation
-    p.Gen = computeGenFromCode(p.Code);
+    if(!p.Gen) p.Gen = computeGenFromCode(p.Code);
   }
   computeRingCodes();
 }
@@ -235,7 +185,7 @@ function renderTree() {
     const svg = document.createElementNS(svgNS, "svg");
     svg.setAttribute("width", "100%");
     svg.setAttribute("height", "100%");
-    svg.setAttribute("viewBox", "0 0 2400 1600");
+    svg.setAttribute("viewBox", "0 0 2400 1400");
     svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
     el.appendChild(svg);
 
@@ -263,32 +213,18 @@ function renderTree() {
         }
     });
 
-    // Berechne optimale Box-Breite basierend auf Inhalten
-    let maxBoxWidth = 220; // Vergrößerte minimale Breite
-    people.forEach(person => {
-        const name = person.Name || person.Code;
-        const code = person.Code;
-        const text = `${code} / ${name}`;
-        // Geschätzte Textlänge (etwa 9px per Zeichen)
-        const estimatedWidth = text.length * 9 + 50; // +50 für Padding
-        if (estimatedWidth > maxBoxWidth) {
-            maxBoxWidth = Math.min(estimatedWidth, 260); // Vergrößerte maximale Breite
-        }
-    });
-
-    const boxWidth = maxBoxWidth;
-    const boxHeight = 100; // Vergrößerte Boxhöhe
-    const partnerGap = 40; // Vergrößerter Abstand zwischen Partnern
-    const verticalSpacing = 220; // Vergrößerter vertikaler Abstand
-
     // Positionen berechnen - Nachkommentafel-Stil
     const positions = new Map();
     const generations = Object.keys(byGeneration).sort((a, b) => a - b);
+    const verticalSpacing = 180;
+    const horizontalSpacing = 280; // Mehr Platz zwischen Boxen
+    const boxWidth = 240; // Breitere Boxen
+    const boxHeight = 80;
+    const partnerGap = 30; // Mehr Abstand zwischen Partnern
 
-    // Berechne Layout für jede Generation
     generations.forEach((gen, genIndex) => {
         const persons = byGeneration[gen];
-        const y = 140 + genIndex * verticalSpacing; // Mehr Platz für größere Beschriftung
+        const y = 120 + genIndex * verticalSpacing;
         
         // Partner zu Gruppen zusammenfassen
         const groupedPersons = [];
@@ -319,179 +255,43 @@ function renderTree() {
             }
         });
 
-        // Verteile Gruppen auf mehrere Zeilen falls nötig
-        const rows = [];
-        let currentRow = [];
-        let currentRowWidth = 0;
+        // Zentrierte horizontale Anordnung mit Überlaufbehandlung
+        const totalGroups = groupedPersons.length;
+        const totalWidth = totalGroups * horizontalSpacing;
+        const startX = (2400 - totalWidth) / 2 + horizontalSpacing / 2;
 
-        for (const group of groupedPersons) {
-            // Berechne benötigte Breite für diese Gruppe
-            const groupWidth = group.length === 2 ? 
-                (boxWidth * 2 + partnerGap + 100) : // Mehr Platz für Partner-Paare
-                (boxWidth + 100);
+        groupedPersons.forEach((group, groupIndex) => {
+            const groupX = startX + groupIndex * horizontalSpacing;
             
-            // Wenn die Gruppe nicht in die aktuelle Zeile passt, neue Zeile beginnen
-            if (currentRow.length > 0 && currentRowWidth + groupWidth > 2200) {
-                rows.push(currentRow);
-                currentRow = [];
-                currentRowWidth = 0;
+            if (group.length === 2) {
+                // Partner nebeneinander mit mehr Abstand
+                const partner1 = group[0];
+                const partner2 = group[1];
+                
+                positions.set(partner1.Code, { 
+                    x: groupX - partnerGap/2 - boxWidth/2, 
+                    y: y, 
+                    person: partner1 
+                });
+                
+                positions.set(partner2.Code, { 
+                    x: groupX + partnerGap/2 + boxWidth/2, 
+                    y: y, 
+                    person: partner2 
+                });
+            } else {
+                // Einzelperson zentriert
+                const person = group[0];
+                positions.set(person.Code, { 
+                    x: groupX, 
+                    y: y, 
+                    person: person 
+                });
             }
-            
-            currentRow.push(group);
-            currentRowWidth += groupWidth;
-        }
-
-        if (currentRow.length > 0) {
-            rows.push(currentRow);
-        }
-
-        // Positioniere jede Zeile der Generation
-        rows.forEach((rowGroups, rowIndex) => {
-            const rowY = y + (rowIndex * 160); // Mehr vertikaler Abstand
-            
-            // Berechne Gesamtbreite dieser Zeile
-            let totalRowWidth = 0;
-            rowGroups.forEach(group => {
-                totalRowWidth += group.length === 2 ? 
-                    (boxWidth * 2 + partnerGap + 100) : 
-                    (boxWidth + 100);
-            });
-            totalRowWidth -= 100; // Letztes Element braucht keinen Abstand
-            
-            const startX = 200 + (2200 - totalRowWidth) / 2; // Zentriert im verfügbaren Platz
-            let currentX = startX;
-            
-            rowGroups.forEach((group) => {
-                if (group.length === 2) {
-                    // Partner nebeneinander
-                    const partner1 = group[0];
-                    const partner2 = group[1];
-                    
-                    positions.set(partner1.Code, { 
-                        x: currentX + boxWidth/2, 
-                        y: rowY, 
-                        person: partner1 
-                    });
-                    
-                    positions.set(partner2.Code, { 
-                        x: currentX + boxWidth + partnerGap + boxWidth/2, 
-                        y: rowY, 
-                        person: partner2 
-                    });
-                    
-                    currentX += boxWidth * 2 + partnerGap + 100;
-                } else {
-                    // Einzelperson
-                    const person = group[0];
-                    positions.set(person.Code, { 
-                        x: currentX + boxWidth/2, 
-                        y: rowY, 
-                        person: person 
-                    });
-                    
-                    currentX += boxWidth + 100;
-                }
-            });
         });
     });
 
-    // Personen-Boxen zeichnen (Zuerst, damit Verbindungslinien darüber liegen)
-    const nodesGroup = document.createElementNS(svgNS, "g");
-    nodesGroup.setAttribute("class", "nodes");
-    svg.appendChild(nodesGroup);
-
-    // Sortiere Personen nach Generation und Code für korrekte Zeichenreihenfolge
-    const sortedPeople = [...people].sort((a, b) => {
-        if (a.Gen !== b.Gen) return a.Gen - b.Gen;
-        return a.Code.localeCompare(b.Code);
-    });
-
-    sortedPeople.forEach(person => {
-        const pos = positions.get(person.Code);
-        if (!pos) return;
-
-        const gen = person.Gen || 1;
-        const color = genColors[gen] || "#f9fafb";
-
-        // Gruppen-Element für jede Person
-        const personGroup = document.createElementNS(svgNS, "g");
-        personGroup.setAttribute("class", "node");
-        personGroup.setAttribute("transform", `translate(${pos.x - boxWidth/2}, ${pos.y})`);
-        personGroup.setAttribute("data-code", person.Code);
-
-        // Box-Hintergrund
-        const rect = document.createElementNS(svgNS, "rect");
-        rect.setAttribute("width", boxWidth);
-        rect.setAttribute("height", boxHeight);
-        rect.setAttribute("rx", "8");
-        rect.setAttribute("ry", "8");
-        rect.setAttribute("fill", color);
-        rect.setAttribute("stroke", "#374151");
-        rect.setAttribute("stroke-width", "2");
-        personGroup.appendChild(rect);
-
-        // 1. Zeile: Personen-Code: Vor- und Nachname
-        const nameText = document.createElementNS(svgNS, "text");
-        nameText.setAttribute("x", boxWidth/2);
-        nameText.setAttribute("y", 30);
-        nameText.setAttribute("text-anchor", "middle");
-        nameText.setAttribute("font-size", "16");
-        nameText.setAttribute("font-weight", "600");
-        nameText.setAttribute("fill", "#111827");
-        
-        // Namen vollständig anzeigen
-        const displayName = person.Name || person.Code;
-        // Text kürzen falls zu lang
-        const maxLength = Math.floor((boxWidth - 40) / 8);
-        const displayText = displayName.length > maxLength ? 
-            displayName.substring(0, maxLength - 3) + "..." : displayName;
-        nameText.textContent = `${person.Code}: ${displayText}`;
-        personGroup.appendChild(nameText);
-
-        // 2. Zeile: Geschlechtszeichen / Generation / Geburtsdatum
-        const detailsText = document.createElementNS(svgNS, "text");
-        detailsText.setAttribute("x", boxWidth/2);
-        detailsText.setAttribute("y", 60);
-        detailsText.setAttribute("text-anchor", "middle");
-        detailsText.setAttribute("font-size", "15");
-        detailsText.setAttribute("fill", "#4b5563");
-        
-        // Geschlechtssymbol
-        let genderSymbol = "";
-        if (person.Gender === "m") {
-            genderSymbol = "♂";
-        } else if (person.Gender === "w") {
-            genderSymbol = "♀";
-        } else if (person.Gender === "d") {
-            genderSymbol = "⚧";
-        }
-        
-        let details = genderSymbol ? `${genderSymbol} / ` : "";
-        details += `Gen ${gen}`;
-        if (person.Birth) {
-            details += ` / ${person.Birth}`;
-        }
-        detailsText.textContent = details;
-        personGroup.appendChild(detailsText);
-
-        // Klick-Event für Bearbeiten
-        personGroup.addEventListener("dblclick", () => openEdit(person.Code));
-        
-        // Hover-Effekte
-        personGroup.addEventListener("mouseenter", function() {
-            rect.setAttribute("stroke-width", "3");
-            rect.setAttribute("filter", "url(#dropShadow)");
-        });
-        
-        personGroup.addEventListener("mouseleave", function() {
-            rect.setAttribute("stroke-width", "2");
-            rect.setAttribute("filter", "none");
-        });
-
-        nodesGroup.appendChild(personGroup);
-    });
-
-    // Verbindungslinien zeichnen (Nach den Boxen, damit sie darüber liegen)
+    // Verbindungslinien zeichnen (zuerst, damit sie hinter den Knoten liegen)
     const connectionsGroup = document.createElementNS(svgNS, "g");
     connectionsGroup.setAttribute("class", "connections");
     svg.appendChild(connectionsGroup);
@@ -507,7 +307,7 @@ function renderTree() {
                 verticalLine.setAttribute("x1", parent.x);
                 verticalLine.setAttribute("y1", parent.y + boxHeight);
                 verticalLine.setAttribute("x2", parent.x);
-                verticalLine.setAttribute("y2", child.y - 15);
+                verticalLine.setAttribute("y2", child.y - 10);
                 verticalLine.setAttribute("stroke", "#6b7280");
                 verticalLine.setAttribute("stroke-width", "2");
                 connectionsGroup.appendChild(verticalLine);
@@ -515,17 +315,17 @@ function renderTree() {
                 // Waagerechte Linie zum Kind (bis zum oberen Rand der Kind-Box)
                 const horizontalLine = document.createElementNS(svgNS, "line");
                 horizontalLine.setAttribute("x1", parent.x);
-                horizontalLine.setAttribute("y1", child.y - 15);
+                horizontalLine.setAttribute("y1", child.y - 10);
                 horizontalLine.setAttribute("x2", child.x);
-                horizontalLine.setAttribute("y2", child.y - 15);
+                horizontalLine.setAttribute("y2", child.y - 10);
                 horizontalLine.setAttribute("stroke", "#6b7280");
                 horizontalLine.setAttribute("stroke-width", "2");
                 connectionsGroup.appendChild(horizontalLine);
                 
-                // Senkrechte Linie von waagerechter Linie bis zur Kind-Box (15px)
+                // Senkrechte Linie von waagerechter Linie bis zur Kind-Box
                 const verticalConnector = document.createElementNS(svgNS, "line");
                 verticalConnector.setAttribute("x1", child.x);
-                verticalConnector.setAttribute("y1", child.y - 15);
+                verticalConnector.setAttribute("y1", child.y - 10);
                 verticalConnector.setAttribute("x2", child.x);
                 verticalConnector.setAttribute("y2", child.y);
                 verticalConnector.setAttribute("stroke", "#6b7280");
@@ -553,17 +353,121 @@ function renderTree() {
         }
     });
 
-    // Generationen-Beschriftung hinzufügen (linksbündig) mit größerer Schrift
+    // Personen-Boxen zeichnen
+    const nodesGroup = document.createElementNS(svgNS, "g");
+    nodesGroup.setAttribute("class", "nodes");
+    svg.appendChild(nodesGroup);
+
+    positions.forEach((pos, code) => {
+        const person = pos.person;
+        const gen = person.Gen || 1;
+        const color = genColors[gen] || "#f9fafb";
+
+        // Gruppen-Element für jede Person
+        const personGroup = document.createElementNS(svgNS, "g");
+        personGroup.setAttribute("class", "node");
+        personGroup.setAttribute("transform", `translate(${pos.x - boxWidth/2}, ${pos.y})`);
+        personGroup.setAttribute("data-code", code);
+
+        // Box-Hintergrund
+        const rect = document.createElementNS(svgNS, "rect");
+        rect.setAttribute("width", boxWidth);
+        rect.setAttribute("height", boxHeight);
+        rect.setAttribute("rx", "8");
+        rect.setAttribute("ry", "8");
+        rect.setAttribute("fill", color);
+        rect.setAttribute("stroke", "#374151");
+        rect.setAttribute("stroke-width", "2");
+        personGroup.appendChild(rect);
+
+        // 1. Zeile: Personencode / Vor- und Nachname
+        const nameText = document.createElementNS(svgNS, "text");
+        nameText.setAttribute("x", boxWidth/2);
+        nameText.setAttribute("y", 20);
+        nameText.setAttribute("text-anchor", "middle");
+        nameText.setAttribute("font-size", "12");
+        nameText.setAttribute("font-weight", "600");
+        nameText.setAttribute("fill", "#111827");
+        
+        // Namen vollständig anzeigen
+        const displayName = person.Name || person.Code;
+        // Text kürzen falls zu lang
+        const maxLength = 20;
+        const displayText = displayName.length > maxLength ? 
+            displayName.substring(0, maxLength - 3) + "..." : displayName;
+        nameText.textContent = `${person.Code} / ${displayText}`;
+        personGroup.appendChild(nameText);
+
+        // 2. Zeile: Geschlechtszeichen / Generation / Geburtsdatum
+        const detailsText = document.createElementNS(svgNS, "text");
+        detailsText.setAttribute("x", boxWidth/2);
+        detailsText.setAttribute("y", 40);
+        detailsText.setAttribute("text-anchor", "middle");
+        detailsText.setAttribute("font-size", "11");
+        detailsText.setAttribute("fill", "#4b5563");
+        
+        // Geschlechtssymbol
+        let genderSymbol = "";
+        if (person.Gender === "m") {
+            genderSymbol = "♂";
+        } else if (person.Gender === "w") {
+            genderSymbol = "♀";
+        } else if (person.Gender === "d") {
+            genderSymbol = "⚧";
+        }
+        
+        let details = genderSymbol ? `${genderSymbol} / ` : "";
+        details += `Gen ${gen}`;
+        if (person.Birth) {
+            details += ` / ${person.Birth}`;
+        }
+        detailsText.textContent = details;
+        personGroup.appendChild(detailsText);
+
+        // 3. Zeile: Geburtsort (falls vorhanden)
+        if (person.BirthPlace) {
+            const placeText = document.createElementNS(svgNS, "text");
+            placeText.setAttribute("x", boxWidth/2);
+            placeText.setAttribute("y", 60);
+            placeText.setAttribute("text-anchor", "middle");
+            placeText.setAttribute("font-size", "10");
+            placeText.setAttribute("fill", "#6b7280");
+            
+            // Ort kürzen falls zu lang
+            const maxPlaceLength = 25;
+            const placeTextShort = person.BirthPlace.length > maxPlaceLength ? 
+                person.BirthPlace.substring(0, maxPlaceLength - 3) + "..." : person.BirthPlace;
+            placeText.textContent = placeTextShort;
+            personGroup.appendChild(placeText);
+        }
+
+        // Klick-Event für Bearbeiten
+        personGroup.addEventListener("dblclick", () => openEdit(code));
+        
+        // Hover-Effekte
+        personGroup.addEventListener("mouseenter", function() {
+            rect.setAttribute("stroke-width", "3");
+            rect.setAttribute("filter", "url(#dropShadow)");
+        });
+        
+        personGroup.addEventListener("mouseleave", function() {
+            rect.setAttribute("stroke-width", "2");
+            rect.setAttribute("filter", "none");
+        });
+
+        nodesGroup.appendChild(personGroup);
+    });
+
+    // Generationen-Beschriftung hinzufügen
     generations.forEach((gen, genIndex) => {
-        const y = 140 + genIndex * verticalSpacing - 20;
+        const y = 120 + genIndex * verticalSpacing - 30;
         
         const labelText = document.createElementNS(svgNS, "text");
-        labelText.setAttribute("x", "40");
+        labelText.setAttribute("x", "80");
         labelText.setAttribute("y", y);
-        labelText.setAttribute("font-size", "30"); // Vergrößerte Schrift
+        labelText.setAttribute("font-size", "16");
         labelText.setAttribute("font-weight", "bold");
         labelText.setAttribute("fill", "#374151");
-        labelText.setAttribute("text-anchor", "start");
         
         switch(gen) {
             case "1": labelText.textContent = "Stammeltern"; break;
@@ -729,19 +633,6 @@ function addNew(){
   const inherited=normalizePersonCode($("#pInherited").value.trim());
   const note=$("#pNote").value.trim();
 
-  // Plausibilitätsprüfung
-  if (!name || !birth || !place || !gender || !parent) {
-    alert("Bitte füllen Sie alle Pflichtfelder aus (Name, Geburtsdatum, Geburtsort, Geschlecht, Eltern-Code)");
-    return;
-  }
-
-  // Geburtsdatum-Validierung
-  if (!validateBirthDate(birth)) {
-    alert("Ungültiges Geburtsdatum-Format. Bitte verwenden Sie TT.MM.JJJJ (z.B. 04.12.2000)");
-    $("#pBirth").value = "";
-    return;
-  }
-
   let gen=1, code="";
   if(parent){
     const parentP = people.find(p=>p.Code===parent);
@@ -753,7 +644,6 @@ function addNew(){
   const p={Gen:gen, Code:code, Name:name, Birth:birth, BirthPlace:place, Gender:gender, ParentCode:parent, PartnerCode:partner, InheritedFrom:inherited, Note:note};
   people.push(p);
   saveState(); renderTable(); renderTree();
-  $("#dlgNew").close();
 }
 
 let editCode=null;
@@ -767,39 +657,17 @@ function openEdit(code){
 }
 function saveEditFn(){
   const p=people.find(x=>x.Code===editCode); if(!p) return;
-  
-  const name=$("#eName").value.trim();
-  const birth=$("#eBirth").value.trim();
-  const place=$("#ePlace").value.trim();
-  const gender=$("#eGender").value;
-  const parent=normalizePersonCode($("#eParent").value.trim());
-  
-  // Plausibilitätsprüfung
-  if (!name || !birth || !place || !gender || !parent) {
-    alert("Bitte füllen Sie alle Pflichtfelder aus (Name, Geburtsdatum, Geburtsort, Geschlecht, Eltern-Code)");
-    return;
-  }
-
-  // Geburtsdatum-Validierung
-  if (!validateBirthDate(birth)) {
-    alert("Ungültiges Geburtsdatum-Format. Bitte verwenden Sie TT.MM.JJJJ (z.B. 04.12.2000)");
-    $("#eBirth").value = "";
-    return;
-  }
-
-  p.Name=name;
-  p.Birth=birth;
-  p.BirthPlace=place;
-  p.Gender=gender;
-  p.ParentCode=parent;
+  p.Name=$("#eName").value.trim();
+  p.Birth=$("#eBirth").value.trim();
+  p.BirthPlace=$("#ePlace").value.trim();
+  p.Gender=$("#eGender").value;
+  p.ParentCode=normalizePersonCode($("#eParent").value.trim());
   p.PartnerCode=normalizePersonCode($("#ePartner").value.trim());
   p.InheritedFrom=normalizePersonCode($("#eInherited").value.trim());
   p.Note=$("#eNote").value.trim();
-  
   // Recompute gen if parent changed or code pattern changed
   p.Gen = computeGenFromCode(p.Code);
   saveState(); renderTable(); renderTree();
-  $("#dlgEdit").close();
 }
 
 function deletePerson(){
@@ -832,24 +700,9 @@ function doImport(file){
       if(!Array.isArray(data)) throw new Error("Format");
       
       // Validierung der importierten Daten
-      const validData = [];
-      let hasErrors = false;
-      
-      for (const item of data) {
-        if (item && typeof item === 'object' && item.Code && typeof item.Code === 'string') {
-          // Prüfe Pflichtfelder und Datumsformat
-          if (!validateRequiredFields(item) || (item.Birth && !validateBirthDate(item.Birth))) {
-            hasErrors = true;
-            break;
-          }
-          validData.push(item);
-        }
-      }
-      
-      if (hasErrors || validData.length === 0) {
-        $("#dlgImportError").showModal();
-        return;
-      }
+      const validData = data.filter(item => 
+        item && typeof item === 'object' && item.Code && typeof item.Code === 'string'
+      );
       
       people = validData;
       postLoadFixups();
@@ -857,7 +710,7 @@ function doImport(file){
       renderTable(); renderTree();
     }catch(e){ 
       console.error("Import error:", e);
-      $("#dlgImportError").showModal();
+      alert("Ungültige Datei: " + e.message); 
     }
   };
   r.readAsText(file);
@@ -890,8 +743,8 @@ function parseCSV(csvText) {
 /* Events */
 function setupEventListeners() {
   $("#btnNew").addEventListener("click", openNew);
-  $("#saveNew").addEventListener("click", (e)=>{ e.preventDefault(); addNew(); });
-  $("#saveEdit").addEventListener("click", (e)=>{ e.preventDefault(); saveEditFn(); });
+  $("#saveNew").addEventListener("click", (e)=>{ e.preventDefault(); addNew(); $("#dlgNew").close(); });
+  $("#saveEdit").addEventListener("click", (e)=>{ e.preventDefault(); saveEditFn(); $("#dlgEdit").close(); });
   $("#btnDelete").addEventListener("click", deletePerson);
   $("#btnImport").addEventListener("click", ()=>{ 
     const inp=document.createElement("input"); 
@@ -921,23 +774,6 @@ function setupEventListeners() {
   $("#btnRedo").addEventListener("click", ()=>{ if(!redoStack.length) return; undoStack.push(JSON.stringify(people)); people=JSON.parse(redoStack.pop()); localStorage.setItem(STORAGE_KEY, JSON.stringify(people)); renderTable(); renderTree(); });
 
   $("#search").addEventListener("input", renderTable);
-
-  // Event-Listener für Geburtsdatum-Validierung
-  $("#pBirth").addEventListener("blur", function() {
-    if (this.value && !validateBirthDate(this.value)) {
-      alert("Ungültiges Geburtsdatum-Format. Bitte verwenden Sie TT.MM.JJJJ (z.B. 04.12.2000)");
-      this.value = "";
-      this.focus();
-    }
-  });
-
-  $("#eBirth").addEventListener("blur", function() {
-    if (this.value && !validateBirthDate(this.value)) {
-      alert("Ungültiges Geburtsdatum-Format. Bitte verwenden Sie TT.MM.JJJJ (z.B. 04.12.2000)");
-      this.value = "";
-      this.focus();
-    }
-  });
 }
 
 /* Stats */
