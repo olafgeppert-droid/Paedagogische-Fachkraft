@@ -22,7 +22,7 @@ const Toolbar = ({
                     onClick={onEditStudent}
                     disabled={!selectedStudent}
                 >
-                    Kind bearbeiten
+                    Kind bearbeiten/löschen
                 </button>
                 <button 
                     className="button" 
