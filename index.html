@@ -1,248 +1,1801 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Wappenringe der Familie GEPPERT</title>
-  <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="styles.css"/>
-  <style>
-    /* Sicherstellen, dass die Version auf iPad immer sichtbar ist */
-    #versionRibbon {
-      position: absolute !important;
-      right: 12px !important;
-      bottom: 8px !important;
-      font-size: 12px !important;
-      color: #fff !important;
-      opacity: .9 !important;
-      pointer-events: none !important;
-      text-align: right !important;
-      z-index: 10 !important;
-      display: block !important;
-    }
-    
-    /* Für sehr kleine Bildschirme überschreiben */
-    @media (max-width: 480px) {
-      #versionRibbon {
-        position: static !important;
-        text-align: center !important;
-        padding: 4px 12px !important;
-        color: #fff !important;
-        background: rgba(0,0,0,0.2) !important;
-        margin-top: 4px !important;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pädagogische Dokumentation</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/idb@7/build/umd.js"></script>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --background-color: #f8f9fa;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --font-size: 16px;
+            --input-font-size: 16px;
+            --header-height: 60px;
+            --toolbar-height: 90px;
+            --sidebar-width: 300px;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #6c94c9;
+            --secondary-color: #3a7ca5;
+            --background-color: #1a1a1a;
+            --text-color: #f8f9fa;
+            --border-color: #495057;
+        }
+
+        [data-theme="high-contrast"] {
+            --primary-color: #000000;
+            --secondary-color: #ffffff;
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --border-color: #000000;
+            --success-color: #000000;
+            --danger-color: #ffffff;
+            --warning-color: #000000;
+            --info-color: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: var(--font-size);
+        }
+
+        .app {
+            display: grid;
+            grid-template-areas:
+                "header header"
+                "toolbar toolbar"
+                "nav main";
+            grid-template-rows: var(--header-height) var(--toolbar-height) 1fr;
+            grid-template-columns: var(--sidebar-width) 1fr;
+            height: 100vh;
+        }
+
+        .header {
+            grid-area: header;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hamburger-menu {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .toolbar {
+            grid-area: toolbar;
+            display: flex;
+            flex-direction: column;
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--background-color);
+        }
+
+        .toolbar-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav {
+            grid-area: nav;
+            border-right: 1px solid var(--border-color);
+            padding: 1rem;
+            overflow-y: auto;
+            background-color: var(--background-color);
+        }
+
+        .main {
+            grid-area: main;
+            padding: 1rem;
+            overflow-y: auto;
+            background-color: var(--background-color);
+        }
+
+        .search-filter {
+            margin-bottom: 1rem;
+        }
+
+        .search-input, .filter-select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: var(--input-font-size);
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .students-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .student-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .student-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .student-item.selected {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .nav-footer {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+        }
+
+        .entry-card {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: var(--background-color);
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--font-size);
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button-success {
+            background-color: var(--success-color);
+        }
+
+        .button-danger {
+            background-color: var(--danger-color);
+        }
+
+        .button-warning {
+            background-color: var(--warning-color);
+            color: var(--text-color);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background-color: var(--background-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: var(--input-font-size);
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .theme-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .theme-option.selected {
+            border-color: var(--text-color);
+        }
+
+        .theme-light {
+            background-color: #f8f9fa;
+        }
+
+        .theme-dark {
+            background-color: #343a40;
+        }
+
+        .theme-high-contrast {
+            background: linear-gradient(135deg, #000000 50%, #ffffff 50%);
+        }
+
+        @media (max-width: 768px) {
+            .app {
+                grid-template-areas:
+                    "header"
+                    "toolbar"
+                    "main";
+                grid-template-columns: 1fr;
+                grid-template-rows: var(--header-height) var(--toolbar-height) 1fr;
+            }
+
+            .nav {
+                position: fixed;
+                top: var(--header-height);
+                left: -100%;
+                width: 80%;
+                height: calc(100% - var(--header-height));
+                z-index: 100;
+                transition: left 0.3s;
+            }
+
+            .nav.open {
+                left: 0;
+            }
+
+            .hamburger-menu {
+                display: block;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="app">
-    <!-- RIBBON / HEADER -->
-    <header class="ribbon">
-      <div class="title-wrap">
-        <img class="coa" src="wappen.jpeg" alt="Wappen" onerror="this.style.display='none'">
-        <h1 class="title">Wappenringe der Familie GEPPERT</h1>
-        <img class="coa" src="wappen.jpeg" alt="Wappen" onerror="this.style.display='none'">
-      </div>
-      <div class="toolbar">
-        <!-- Erste Zeile: Wichtigste Funktionen -->
-        <div class="button-row main-functions">
-          <button class="btn" id="btnNew" title="Neue Person anlegen">➕ Neue Person</button>
-          <button class="btn" id="btnDelete" title="Person löschen">🗑️ Löschen</button>
-          <button class="btn" id="btnImport" title="Import">📥 Import</button>
-          <button class="btn" id="btnExport" title="Export">📤 Export</button>
-          <button class="btn" id="btnPrint" title="Drucken">🖨️ Drucken</button>
-          <button class="btn" id="btnStats" title="Statistiken">📊 Statistiken</button>
-        </div>
-        
-        <!-- Zweite Zeile: Zusätzliche Funktionen & Suche -->
-        <div class="button-row additional-functions">
-          <button class="btn" id="btnUndo" title="Rückgängig">↶ Rückgängig</button>
-          <button class="btn" id="btnRedo" title="Wiederholen">↷ Wiederholen</button>
-          <button class="btn danger" id="btnReset" title="Alle Daten löschen">⛔ Reset</button>
-          
-          <div class="search-container">
-            <input id="search" type="text" placeholder="Personen suchen (Name/Code)"/>
-          </div>
-          
-          <button class="btn help" id="btnHelp" title="Hilfe / Anleitung">❓ Hilfe</button>
-        </div>
-      </div>
-      <div class="hint-row">
-        <div id="autoHint" title="Sicherungshinweis">
-          Personen- und Ring-Code werden vom Programm vergeben. Denke daran, die Datenbank durch Export als JSON-Datei in deinem Backup-Verzeichnis zu sichern.
-        </div>
-      </div>
-    
-      <!-- Version im Ribbon - rechtsbündig -->
-      <span id="versionRibbon" class="version-ribbon" aria-label="Softwareversion"></span>
-    </header>
+    <div id="root"></div>
 
-    <!-- TABLE -->
-    <section class="table-wrap">
-      <table id="peopleTable">
-        <thead>
-          <tr>
-            <th>Gen</th>
-            <th>Code</th>
-            <th>Ring-Code</th>
-            <th>Name</th>
-            <th>Geburtsdatum</th>
-            <th>Geburtsort</th>
-            <th>Geschlecht</th>
-            <th>Eltern-Code</th>
-            <th>Partner-Code</th>
-            <th>Geerbt von</th>
-            <th>Kommentar</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
-    
-    <!-- Version unter der Tabelle - rechtsbündig -->
-    <div id="versionUnderTable" class="version-under" role="note"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+        const { openDB } = idb;
 
-    <!-- TREE -->
-    <section class="tree-panel">
-      <div id="treeContainer">
-        <div id="tree"></div>
-      </div>
-    </section>
-  </div>
+        // Datenbank-Service
+        const setupDB = async () => {
+            return openDB('PedagogicalDocumentationDB', 1, {
+                upgrade(db) {
+                    // Studenten-Tabelle
+                    if (!db.objectStoreNames.contains('students')) {
+                        const studentStore = db.createObjectStore('students', { keyPath: 'id', autoIncrement: true });
+                        studentStore.createIndex('name', 'name', { unique: false });
+                        studentStore.createIndex('schoolYear', 'schoolYear', { unique: false });
+                        studentStore.createIndex('school', 'school', { unique: false });
+                        studentStore.createIndex('className', 'className', { unique: false });
+                    }
 
-  <!-- DIALOGS -->
-  <dialog id="dlgNew">
-    <form method="dialog" id="formNew">
-      <div class="dlg-head">
-        <strong>Neue Person</strong>
-        <button class="close-x" value="cancel" type="submit" formnovalidate aria-label="Schließen">×</button>
-      </div>
-      <div class="dlg-body">
-        <div class="form-grid">
-          <label> Name
-            <input id="pName" autocomplete="off">
-          </label>
-          <label> Geburtsdatum (TT.MM.JJJJ)
-            <input id="pBirth" inputmode="numeric" placeholder="z. B. 04.12.2000">
-          </label>
-          <label> Geburtsort
-            <input id="pPlace">
-          </label>
-          <label> Geschlecht
-            <select id="pGender">
-              <option value=""></option>
-              <option value="m">m</option>
-              <option value="w">w</option>
-              <option value="d">d</option>
-            </select>
-          </label>
-          <label> Eltern-Code
-            <input id="pParent" placeholder="z. B. 1A">
-          </label>
-          <label> Partner-Code
-            <input id="pPartner" placeholder="z. B. 1Ax">
-          </label>
-          <label> Geerbt von Code
-            <input id="pInherited" placeholder="z. B. 1">
-          </label>
-          <label> Kommentar
-            <input id="pNote">
-          </label>
-        </div>
-      </div>
-      <div class="dlg-actions">
-        <button value="cancel" type="submit" formnovalidate>Abbrechen</button>
-        <button id="saveNew" value="default" type="submit">Speichern</button>
-      </div>
-    </form>
-  </dialog>
+                    // Einträge-Tabelle
+                    if (!db.objectStoreNames.contains('entries')) {
+                        const entryStore = db.createObjectStore('entries', { keyPath: 'id', autoIncrement: true });
+                        entryStore.createIndex('studentId', 'studentId', { unique: false });
+                        entryStore.createIndex('date', 'date', { unique: false });
+                    }
 
-  <dialog id="dlgEdit">
-    <form method="dialog" id="formEdit">
-      <div class="dlg-head">
-        <strong>Person ändern</strong>
-        <button class="close-x" value="cancel" type="submit" formnovalidate aria-label="Schließen">×</button>
-      </div>
-      <div class="dlg-body">
-        <div class="form-grid">
-          <label> Name <input id="eName"></label>
-          <label> Geburtsdatum (TT.MM.JJJJ) <input id="eBirth"></label>
-          <label> Geburtsort <input id="ePlace"></label>
-          <label> Geschlecht
-            <select id="eGender">
-              <option value=""></option>
-              <option value="m">m</option>
-              <option value="w">w</option>
-              <option value="d">d</option>
-            </select>
-          </label>
-          <label> Eltern-Code <input id="eParent"></label>
-          <label> Partner-Code <input id="ePartner"></label>
-          <label> Geerbt von Code <input id="eInherited"></label>
-          <label> Kommentar <input id="eNote"></label>
-        </div>
-      </div>
-      <div class="dlg-actions">
-        <button value="cancel" type="submit" formnovalidate>Abbrechen</button>
-        <button id="saveEdit" value="default" type="submit">Speichern</button>
-      </div>
-    </form>
-  </dialog>
+                    // Einstellungen-Tabelle
+                    if (!db.objectStoreNames.contains('settings')) {
+                        db.createObjectStore('settings', { keyPath: 'id' });
+                    }
 
-  <dialog id="dlgPrint">
-    <div class="dlg-head"><strong>Drucken</strong><button class="close-x" onclick="this.closest('dialog').close()">×</button></div>
-    <div class="dlg-body">
-      <p>Bitte auswählen, что gedruckt werden soll:</p>
-      <div class="btn-row">
-        <button class="btn" id="btnPrintTable">🖨️ Tabelle drucken</button>
-        <button class="btn" id="btnPrintTree">🖨️ Baum drucken</button>
-      </div>
-    </div>
-    <div class="dlg-actions">
-      <button onclick="this.closest('dialog').close()">Schließen</button>
-    </div>
-  </dialog>
+                    // Master-Daten-Tabelle
+                    if (!db.objectStoreNames.contains('masterData')) {
+                        db.createObjectStore('masterData', { keyPath: 'id' });
+                    }
 
-  <dialog id="dlgExport">
-    <div class="dlg-head"><strong>Export</strong><button class="close-x" onclick="this.closest('dialog').close()">×</button></div>
-    <div class="dlg-body">
-      <p>Format wählen. Tipp: Diese Exporte dienen auch als <b>Backup</b>.</p>
-      <div class="btn-row">
-        <button class="btn" id="btnExportJSON">📄 JSON exportieren</button>
-        <button class="btn" id="btnExportCSV">📄 CSV exportieren</button>
-      </div>
-    </div>
-    <div class="dlg-actions">
-      <button onclick="this.closest('dialog').close()">Schließen</button>
-    </div>
-  </dialog>
+                    // History-Tabelle für Undo/Redo
+                    if (!db.objectStoreNames.contains('history')) {
+                        db.createObjectStore('history', { keyPath: 'id', autoIncrement: true });
+                    }
+                },
+            });
+        };
 
-  <dialog id="dlgStats">
-    <div class="dlg-head"><strong>Statistiken</strong><button class="close-x" onclick="this.closest('dialog').close()">×</button></div>
-    <div class="dlg-body" id="statsContent"></div>
-    <div class="dlg-actions"><button onclick="this.closest('dialog').close()">Schließen</button></div>
-  </dialog>
+        // Hauptkomponente
+        const App = () => {
+            const [db, setDb] = useState(null);
+            const [students, setStudents] = useState([]);
+            const [entries, setEntries] = useState([]);
+            const [selectedStudent, setSelectedStudent] = useState(null);
+            const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+            const [viewMode, setViewMode] = useState('student'); // 'student' oder 'day'
+            const [filters, setFilters] = useState({
+                search: '',
+                schoolYear: '',
+                school: '',
+                className: ''
+            });
+            const [settings, setSettings] = useState({
+                theme: 'light',
+                fontSize: 16,
+                inputFontSize: 16,
+                customColors: {}
+            });
+            const [masterData, setMasterData] = useState({
+                schoolYears: [],
+                schools: {}
+            });
+            const [modal, setModal] = useState(null);
+            const [navOpen, setNavOpen] = useState(false);
+            const [history, setHistory] = useState([]);
+            const [historyIndex, setHistoryIndex] = useState(-1);
 
-  <dialog id="dlgHelp">
-    <div class="dlg-head"><strong>❓ Hilfe &amp; Anleitung</strong><button class="close-x" onclick="this.closest('dialog').close()">×</button></div>
-    <div class="dlg-body help-body" id="helpContent">Lade Hilfe…</div>
-    <div class="dlg-actions"><button onclick="this.closest('dialog').close()">Schließen</button></div>
-  </dialog>
+            // Datenbank initialisieren
+            useEffect(() => {
+                const initDB = async () => {
+                    try {
+                        const database = await setupDB();
+                        setDb(database);
+                        
+                        // Einstellungen laden
+                        const settingsData = await database.get('settings', 1);
+                        if (settingsData) {
+                            setSettings(settingsData);
+                            document.documentElement.setAttribute('data-theme', settingsData.theme);
+                            document.documentElement.style.setProperty('--font-size', `${settingsData.fontSize}px`);
+                            document.documentElement.style.setProperty('--input-font-size', `${settingsData.inputFontSize}px`);
+                        }
+                        
+                        // Master-Daten laden
+                        const masterData = await database.get('masterData', 1);
+                        if (masterData) {
+                            setMasterData(masterData);
+                        }
+                        
+                        // Studenten laden
+                        const allStudents = await database.getAll('students');
+                        setStudents(allStudents);
+                    } catch (error) {
+                        console.error('Datenbank-Initialisierungsfehler:', error);
+                    }
+                };
+                
+                initDB();
+            }, []);
 
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+            // Einträge laden basierend auf Auswahl
+            useEffect(() => {
+                const loadEntries = async () => {
+                    if (!db) return;
+                    
+                    try {
+                        let entriesData = [];
+                        if (viewMode === 'student' && selectedStudent) {
+                            // Einträge für ausgewählten Schüler laden
+                            const index = db.transaction('entries').store.index('studentId');
+                            entriesData = await index.getAll(selectedStudent.id);
+                        } else if (viewMode === 'day' && selectedDate) {
+                            // Einträge für ausgewähltes Datum laden
+                            const index = db.transaction('entries').store.index('date');
+                            entriesData = await index.getAll(selectedDate);
+                        }
+                        
+                        setEntries(entriesData);
+                    } catch (error) {
+                        console.error('Fehler beim Laden der Einträge:', error);
+                    }
+                };
+                
+                loadEntries();
+            }, [db, selectedStudent, selectedDate, viewMode]);
 
-  <script src="app.js"></script>
+            // Gefilterte Schülerliste
+            const filteredStudents = useCallback(() => {
+                return students.filter(student => {
+                    const matchesSearch = filters.search === '' || 
+                        student.name.toLowerCase().includes(filters.search.toLowerCase());
+                    const matchesSchoolYear = filters.schoolYear === '' || 
+                        student.schoolYear === filters.schoolYear;
+                    const matchesSchool = filters.school === '' || 
+                        student.school === filters.school;
+                    const matchesClass = filters.className === '' || 
+                        student.className === filters.className;
+                    
+                    return matchesSearch && matchesSchoolYear && matchesSchool && matchesClass;
+                });
+            }, [students, filters]);
 
-  <script>
-    // central version string - change once
-    const APP_VERSION = 'v84';
-    (function(){
-      const r = document.getElementById('versionRibbon');
-      const u = document.getElementById('versionUnderTable');
-      if(r) r.textContent = 'Softwareversion ' + APP_VERSION;
-      if(u) u.textContent = 'Softwareversion ' + APP_VERSION;
-    })();
-  </script>
+            // Schüler hinzufügen/bearbeiten
+            const saveStudent = async (studentData) => {
+                if (!db) return;
+                
+                try {
+                    // Aktuellen Zustand für Undo speichern
+                    await saveStateForUndo();
+                    
+                    if (studentData.id) {
+                        // Vorhandenen Schüler aktualisieren
+                        await db.put('students', studentData);
+                        setStudents(students.map(s => s.id === studentData.id ? studentData : s));
+                    } else {
+                        // Neuen Schüler hinzufügen
+                        const id = await db.add('students', studentData);
+                        const newStudent = { ...studentData, id };
+                        setStudents([...students, newStudent]);
+                    }
+                    
+                    setModal(null);
+                } catch (error) {
+                    console.error('Fehler beim Speichern des Schülers:', error);
+                }
+            };
+
+            // Eintrag hinzufügen/bearbeiten
+            const saveEntry = async (entryData) => {
+                if (!db) return;
+                
+                try {
+                    // Aktuellen Zustand für Undo speichern
+                    await saveStateForUndo();
+                    
+                    if (entryData.id) {
+                        // Vorhandenen Eintrag aktualisieren
+                        await db.put('entries', entryData);
+                        setEntries(entries.map(e => e.id === entryData.id ? entryData : e));
+                    } else {
+                        // Neuen Eintrag hinzufügen
+                        const id = await db.add('entries', { ...entryData, date: selectedDate });
+                        const newEntry = { ...entryData, id, date: selectedDate };
+                        setEntries([...entries, newEntry]);
+                    }
+                    
+                    setModal(null);
+                } catch (error) {
+                    console.error('Fehler beim Speichern des Eintrags:', error);
+                }
+            };
+
+            // Einstellungen speichern
+            const saveSettings = async (newSettings) => {
+                if (!db) return;
+                
+                try {
+                    await db.put('settings', { ...newSettings, id: 1 });
+                    setSettings(newSettings);
+                    
+                    // UI anpassen
+                    document.documentElement.setAttribute('data-theme', newSettings.theme);
+                    document.documentElement.style.setProperty('--font-size', `${newSettings.fontSize}px`);
+                    document.documentElement.style.setProperty('--input-font-size', `${newSettings.inputFontSize}px`);
+                    
+                    setModal(null);
+                } catch (error) {
+                    console.error('Fehler beim Speichern der Einstellungen:', error);
+                }
+            };
+
+            // Master-Daten speichern
+            const saveMasterData = async (newMasterData) => {
+                if (!db) return;
+                
+                try {
+                    await db.put('masterData', { ...newMasterData, id: 1 });
+                    setMasterData(newMasterData);
+                } catch (error) {
+                    console.error('Fehler beim Speichern der Master-Daten:', error);
+                }
+            };
+
+            // Daten exportieren
+            const exportData = async () => {
+                if (!db) return;
+                
+                try {
+                    const allStudents = await db.getAll('students');
+                    const allEntries = await db.getAll('entries');
+                    const settingsData = await db.get('settings', 1);
+                    const masterData = await db.get('masterData', 1);
+                    
+                    const exportData = {
+                        students: allStudents,
+                        entries: allEntries,
+                        settings: settingsData,
+                        masterData: masterData,
+                        exportDate: new Date().toISOString()
+                    };
+                    
+                    const dataStr = JSON.stringify(exportData, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                    
+                    const exportFileDefaultName = 'paedagogische-dokumentation-export.json';
+                    
+                    const linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', exportFileDefaultName);
+                    linkElement.click();
+                } catch (error) {
+                    console.error('Fehler beim Exportieren der Daten:', error);
+                }
+            };
+
+            // Daten importieren
+            const importData = async (event) => {
+                if (!db) return;
+                
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        // Aktuellen Zustand für Undo speichern
+                        await saveStateForUndo();
+                        
+                        const importData = JSON.parse(e.target.result);
+                        
+                        // Alte Daten löschen
+                        await db.clear('students');
+                        await db.clear('entries');
+                        
+                        // Neue Daten importieren
+                        for (const student of importData.students) {
+                            await db.add('students', student);
+                        }
+                        
+                        for (const entry of importData.entries) {
+                            await db.add('entries', entry);
+                        }
+                        
+                        if (importData.settings) {
+                            await db.put('settings', importData.settings);
+                            setSettings(importData.settings);
+                            
+                            // UI anpassen
+                            document.documentElement.setAttribute('data-theme', importData.settings.theme);
+                            document.documentElement.style.setProperty('--font-size', `${importData.settings.fontSize}px`);
+                            document.documentElement.style.setProperty('--input-font-size', `${importData.settings.inputFontSize}px`);
+                        }
+                        
+                        if (importData.masterData) {
+                            await db.put('masterData', importData.masterData);
+                            setMasterData(importData.masterData);
+                        }
+                        
+                        // Daten neu laden
+                        const allStudents = await db.getAll('students');
+                        setStudents(allStudents);
+                        
+                        setModal(null);
+                        alert('Daten erfolgreich importiert!');
+                    } catch (error) {
+                        console.error('Fehler beim Importieren der Daten:', error);
+                        alert('Fehler beim Importieren der Daten: ' + error.message);
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+
+            // Zustand für Undo speichern
+            const saveStateForUndo = async () => {
+                if (!db) return;
+                
+                try {
+                    const allStudents = await db.getAll('students');
+                    const allEntries = await db.getAll('entries');
+                    
+                    const currentState = {
+                        students: allStudents,
+                        entries: allEntries,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    // Nur die letzten 50 Zustände behalten
+                    const newHistory = history.slice(0, historyIndex + 1);
+                    newHistory.push(currentState);
+                    if (newHistory.length > 50) {
+                        newHistory.shift();
+                    }
+                    
+                    setHistory(newHistory);
+                    setHistoryIndex(newHistory.length - 1);
+                } catch (error) {
+                    console.error('Fehler beim Speichern des Zustands für Undo:', error);
+                }
+            };
+
+            // Undo-Funktion
+            const undo = async () => {
+                if (historyIndex <= 0 || !db) return;
+                
+                try {
+                    const previousState = history[historyIndex - 1];
+                    
+                    // Alte Daten löschen
+                    await db.clear('students');
+                    await db.clear('entries');
+                    
+                    // Vorherigen Zustand wiederherstellen
+                    for (const student of previousState.students) {
+                        await db.add('students', student);
+                    }
+                    
+                    for (const entry of previousState.entries) {
+                        await db.add('entries', entry);
+                    }
+                    
+                    // Daten neu laden
+                    const allStudents = await db.getAll('students');
+                    setStudents(allStudents);
+                    
+                    setHistoryIndex(historyIndex - 1);
+                } catch (error) {
+                    console.error('Fehler beim Undo:', error);
+                }
+            };
+
+            // Redo-Funktion
+            const redo = async () => {
+                if (historyIndex >= history.length - 1 || !db) return;
+                
+                try {
+                    const nextState = history[historyIndex + 1];
+                    
+                    // Alte Daten löschen
+                    await db.clear('students');
+                    await db.clear('entries');
+                    
+                    // Nächsten Zustand wiederherstellen
+                    for (const student of nextState.students) {
+                        await db.add('students', student);
+                    }
+                    
+                    for (const entry of nextState.entries) {
+                        await db.add('entries', entry);
+                    }
+                    
+                    // Daten neu laden
+                    const allStudents = await db.getAll('students');
+                    setStudents(allStudents);
+                    
+                    setHistoryIndex(historyIndex + 1);
+                } catch (error) {
+                    console.error('Fehler beim Redo:', error);
+                }
+            };
+
+            // Beispieldaten laden
+            const loadSampleData = async () => {
+                if (!db) return;
+                
+                try {
+                    // Aktuellen Zustand für Undo speichern
+                    await saveStateForUndo();
+                    
+                    // Alte Daten löschen
+                    await db.clear('students');
+                    await db.clear('entries');
+                    
+                    // Beispieldaten
+                    const sampleStudents = [
+                        {
+                            name: 'Max Mustermann',
+                            schoolYear: '2023/2024',
+                            school: 'Grundschule Musterstadt',
+                            className: '3a',
+                            gender: 'männlich',
+                            nationality: 'deutsch',
+                            germanLevel: 2,
+                            notes: 'Sehr aufmerksamer Schüler'
+                        },
+                        {
+                            name: 'Anna Beispiel',
+                            schoolYear: '2023/2024',
+                            school: 'Grundschule Musterstadt',
+                            className: '3b',
+                            gender: 'weiblich',
+                            nationality: 'deutsch',
+                            germanLevel: 1,
+                            notes: 'Braucht Unterstützung in Mathematik'
+                        }
+                    ];
+                    
+                    const sampleEntries = [
+                        {
+                            studentId: 1,
+                            date: new Date().toISOString().split('T')[0],
+                            subject: 'Mathematik',
+                            observations: 'Max hat heute sehr gut mitgearbeitet und alle Aufgaben gelöst.',
+                            measures: 'Positive Verstärkung durch Lob',
+                            erfolg: 'Max war stolz auf seine Leistung und motiviert für weitere Aufgaben.',
+                            erfolgRating: 'positiv'
+                        },
+                        {
+                            studentId: 2,
+                            date: new Date().toISOString().split('T')[0],
+                            subject: 'Deutsch',
+                            observations: 'Anna hatte Schwierigkeiten mit der Rechtschreibung.',
+                            measures: 'Individuelle Förderung angeboten',
+                            erfolg: 'Anna hat die Hilfe angenommen und Fortschritte gezeigt.',
+                            erfolgRating: 'positiv'
+                        }
+                    ];
+                    
+                    // Beispieldaten hinzufügen
+                    for (const student of sampleStudents) {
+                        await db.add('students', student);
+                    }
+                    
+                    for (const entry of sampleEntries) {
+                        await db.add('entries', entry);
+                    }
+                    
+                    // Beispieldaten für Master-Daten
+                    const sampleMasterData = {
+                        schoolYears: ['2022/2023', '2023/2024', '2024/2025'],
+                        schools: {
+                            'Grundschule Musterstadt': ['1a', '1b', '2a', '2b', '3a', '3b', '4a', '4b'],
+                            'Mittelschule Beispieldorf': ['5a', '5b', '6a', '6b', '7a', '7b', '8a', '8b', '9a', '9b']
+                        }
+                    };
+                    
+                    await db.put('masterData', { ...sampleMasterData, id: 1 });
+                    setMasterData(sampleMasterData);
+                    
+                    // Daten neu laden
+                    const allStudents = await db.getAll('students');
+                    setStudents(allStudents);
+                    
+                    alert('Beispieldaten erfolgreich geladen!');
+                } catch (error) {
+                    console.error('Fehler beim Laden der Beispieldaten:', error);
+                }
+            };
+
+            // Alle Daten löschen
+            const clearAllData = async () => {
+                if (!db) return;
+                
+                if (!confirm('Sind Sie sicher, dass Sie alle Daten löschen möchten? Dieser Vorgang kann nicht rückgängig gemacht werden.')) {
+                    return;
+                }
+                
+                try {
+                    await db.clear('students');
+                    await db.clear('entries');
+                    
+                    setStudents([]);
+                    setEntries([]);
+                    setSelectedStudent(null);
+                    
+                    alert('Alle Daten wurden gelöscht!');
+                } catch (error) {
+                    console.error('Fehler beim Löschen der Daten:', error);
+                }
+            };
+
+            if (!db) {
+                return <div>Datenbank wird initialisiert...</div>;
+            }
+
+            return (
+                <div className="app">
+                    <Header 
+                        onMenuClick={() => setNavOpen(!navOpen)}
+                    />
+                    <Toolbar
+                        selectedStudent={selectedStudent}
+                        selectedDate={selectedDate}
+                        onAddStudent={() => setModal('student')}
+                        onEditStudent={() => setModal('student')}
+                        onAddEntry={() => setModal('entry')}
+                        onEditEntry={() => setModal('entry')}
+                        onPrint={() => window.print()}
+                        onExport={exportData}
+                        onImport={(e) => importData(e)}
+                        onUndo={undo}
+                        onRedo={redo}
+                        canUndo={historyIndex > 0}
+                        canRedo={historyIndex < history.length - 1}
+                    />
+                    <Navigation
+                        isOpen={navOpen}
+                        students={filteredStudents()}
+                        selectedStudent={selectedStudent}
+                        selectedDate={selectedDate}
+                        filters={filters}
+                        masterData={masterData}
+                        onStudentSelect={setSelectedStudent}
+                        onDateSelect={(date) => {
+                            setSelectedDate(date);
+                            setViewMode('day');
+                        }}
+                        onFilterChange={setFilters}
+                        onShowStats={() => setModal('statistics')}
+                        onShowSettings={() => setModal('settings')}
+                        onShowHelp={() => setModal('help')}
+                    />
+                    <MainContent
+                        viewMode={viewMode}
+                        selectedStudent={selectedStudent}
+                        selectedDate={selectedDate}
+                        entries={entries}
+                        onEditEntry={() => setModal('entry')}
+                    />
+                    
+                    {/* Modale Dialoge */}
+                    {modal === 'student' && (
+                        <StudentModal
+                            student={selectedStudent}
+                            masterData={masterData}
+                            onSave={saveStudent}
+                            onClose={() => setModal(null)}
+                        />
+                    )}
+                    
+                    {modal === 'entry' && (
+                        <EntryModal
+                            entry={viewMode === 'student' && entries.length > 0 ? entries[0] : null}
+                            student={selectedStudent}
+                            students={students}
+                            masterData={masterData}
+                            onSave={saveEntry}
+                            onClose={() => setModal(null)}
+                        />
+                    )}
+                    
+                    {modal === 'settings' && (
+                        <SettingsModal
+                            settings={settings}
+                            masterData={masterData}
+                            onSave={saveSettings}
+                            onSaveMasterData={saveMasterData}
+                            onClose={() => setModal(null)}
+                        />
+                    )}
+                    
+                    {modal === 'statistics' && (
+                        <StatisticsModal
+                            students={students}
+                            entries={entries}
+                            onClose={() => setModal(null)}
+                        />
+                    )}
+                    
+                    {modal === 'help' && (
+                        <HelpModal
+                            onLoadSampleData={loadSampleData}
+                            onClearData={clearAllData}
+                            onClose={() => setModal(null)}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        // Header-Komponente
+        const Header = ({ onMenuClick }) => {
+            const currentDate = new Date().toLocaleDateString('de-DE', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            return (
+                <header className="header">
+                    <button className="hamburger-menu" onClick={onMenuClick}>☰</button>
+                    <h1>Pädagogische Dokumentation</h1>
+                    <span>{currentDate}</span>
+                </header>
+            );
+        };
+
+        // Toolbar-Komponente
+        const Toolbar = ({
+            selectedStudent, 
+            selectedDate, 
+            onAddStudent, 
+            onEditStudent, 
+            onAddEntry, 
+            onEditEntry,
+            onPrint,
+            onExport,
+            onImport,
+            onUndo,
+            onRedo,
+            canUndo,
+            canRedo
+        }) => {
+            return (
+                <div className="toolbar">
+                    <div className="toolbar-row">
+                        <button className="button" onClick={onAddStudent}>Kind hinzufügen</button>
+                        <button 
+                            className="button" 
+                            onClick={onEditStudent}
+                            disabled={!selectedStudent}
+                        >
+                            Kind bearbeiten
+                        </button>
+                        <button 
+                            className="button" 
+                            onClick={onAddEntry}
+                            disabled={!selectedStudent && !selectedDate}
+                        >
+                            Eintrag hinzufügen
+                        </button>
+                        <button 
+                            className="button" 
+                            onClick={onEditEntry}
+                            disabled={!selectedStudent && !selectedDate}
+                        >
+                            Eintrag bearbeiten
+                        </button>
+                    </div>
+                    <div className="toolbar-row">
+                        <button className="button" onClick={onPrint}>Drucken</button>
+                        <button className="button" onClick={onExport}>Daten exportieren</button>
+                        <label htmlFor="import-file" className="button">
+                            Daten importieren
+                            <input
+                                id="import-file"
+                                type="file"
+                                accept=".json"
+                                style={{ display: 'none' }}
+                                onChange={onImport}
+                            />
+                        </label>
+                        <button 
+                            className="button" 
+                            onClick={onUndo}
+                            disabled={!canUndo}
+                        >
+                            Rückgängig
+                        </button>
+                        <button 
+                            className="button" 
+                            onClick={onRedo}
+                            disabled={!canRedo}
+                        >
+                            Wiederholen
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // Navigation-Komponente
+        const Navigation = ({
+            isOpen,
+            students,
+            selectedStudent,
+            selectedDate,
+            filters,
+            masterData,
+            onStudentSelect,
+            onDateSelect,
+            onFilterChange,
+            onShowStats,
+            onShowSettings,
+            onShowHelp
+        }) => {
+            return (
+                <nav className={`nav ${isOpen ? 'open' : ''}`}>
+                    <div className="search-filter">
+                        <input
+                            type="text"
+                            className="search-input"
+                            placeholder="Kind suchen..."
+                            value={filters.search}
+                            onChange={(e) => onFilterChange({ ...filters, search: e.target.value })}
+                        />
+                        
+                        <select
+                            className="filter-select"
+                            value={filters.schoolYear}
+                            onChange={(e) => onFilterChange({ ...filters, schoolYear: e.target.value })}
+                        >
+                            <option value="">Alle Schuljahre</option>
+                            {masterData.schoolYears.map(year => (
+                                <option key={year} value={year}>{year}</option>
+                            ))}
+                        </select>
+                        
+                        <select
+                            className="filter-select"
+                            value={filters.school}
+                            onChange={(e) => onFilterChange({ ...filters, school: e.target.value })}
+                        >
+                            <option value="">Alle Schulen</option>
+                            {Object.keys(masterData.schools || {}).map(school => (
+                                <option key={school} value={school}>{school}</option>
+                            ))}
+                        </select>
+                        
+                        <select
+                            className="filter-select"
+                            value={filters.className}
+                            onChange={(e) => onFilterChange({ ...filters, className: e.target.value })}
+                        >
+                            <option value="">Alle Klassen</option>
+                            {filters.school && masterData.schools[filters.school]?.map(className => (
+                                <option key={className} value={className}>{className}</option>
+                            ))}
+                        </select>
+                        
+                        <input
+                            type="date"
+                            className="filter-select"
+                            value={selectedDate}
+                            onChange={(e) => onDateSelect(e.target.value)}
+                        />
+                    </div>
+                    
+                    <ul className="students-list">
+                        {students.map(student => (
+                            <li
+                                key={student.id}
+                                className={`student-item ${selectedStudent?.id === student.id ? 'selected' : ''}`}
+                                onClick={() => onStudentSelect(student)}
+                            >
+                                {student.name} ({student.className})
+                            </li>
+                        ))}
+                    </ul>
+                    
+                    <div className="nav-footer">
+                        <button className="button" onClick={onShowStats}>Statistiken</button>
+                        <button className="button" onClick={onShowSettings}>Einstellungen</button>
+                        <button className="button" onClick={onShowHelp}>Hilfe</button>
+                    </div>
+                </nav>
+            );
+        };
+
+        // Hauptinhalt-Komponente
+        const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditEntry }) => {
+            if (viewMode === 'student' && selectedStudent) {
+                return (
+                    <div className="main">
+                        <h2>Einträge für {selectedStudent.name}</h2>
+                        {entries.length === 0 ? (
+                            <p>Keine Einträge für dieses Kind.</p>
+                        ) : (
+                            entries.map(entry => (
+                                <EntryCard 
+                                    key={entry.id} 
+                                    entry={entry} 
+                                    student={selectedStudent}
+                                    onEdit={onEditEntry}
+                                />
+                            ))
+                        )}
+                    </div>
+                );
+            } else if (viewMode === 'day' && selectedDate) {
+                const entriesByStudent = {};
+                entries.forEach(entry => {
+                    if (!entriesByStudent[entry.studentId]) {
+                        entriesByStudent[entry.studentId] = [];
+                    }
+                    entriesByStudent[entry.studentId].push(entry);
+                });
+                
+                return (
+                    <div className="main">
+                        <h2>Einträge für {new Date(selectedDate).toLocaleDateString('de-DE')}</h2>
+                        {Object.keys(entriesByStudent).length === 0 ? (
+                            <p>Keine Einträge für dieses Datum.</p>
+                        ) : (
+                            Object.entries(entriesByStudent).map(([studentId, studentEntries]) => (
+                                <div key={studentId}>
+                                    <h3>{studentEntries[0].studentName || `Schüler ${studentId}`}</h3>
+                                    {studentEntries.map(entry => (
+                                        <EntryCard 
+                                            key={entry.id} 
+                                            entry={entry} 
+                                            onEdit={onEditEntry}
+                                        />
+                                    ))}
+                                </div>
+                            ))
+                        )}
+                    </div>
+                );
+            } else {
+                return (
+                    <div className="main">
+                        <div className="welcome-screen">
+                            <h2>Willkommen zur Pädagogischen Dokumentation</h2>
+                            <p>Wählen Sie ein Kind aus der Liste oder ein Datum, um Einträge anzuzeigen.</p>
+                        </div>
+                    </div>
+                );
+            }
+        };
+
+        // Eintrag-Karten-Komponente
+        const EntryCard = ({ entry, student, onEdit }) => {
+            return (
+                <div className="entry-card">
+                    <div className="entry-header">
+                        <span>{entry.subject}</span>
+                        <span>{new Date(entry.date).toLocaleDateString('de-DE')}</span>
+                    </div>
+                    {student && <p><strong>Schüler:</strong> {student.name}</p>}
+                    <p><strong>Beobachtungen:</strong> {entry.observations}</p>
+                    <p><strong>Maßnahmen:</strong> {entry.measures}</p>
+                    <p><strong>Erfolg:</strong> {entry.erfolg}</p>
+                    <p><strong>Bewertung:</strong> {entry.erfolgRating}</p>
+                    <button className="button" onClick={onEdit}>Bearbeiten</button>
+                </div>
+            );
+        };
+
+        // Schüler-Modal-Komponente
+        const StudentModal = ({ student, masterData, onSave, onClose }) => {
+            const [formData, setFormData] = useState(student || {
+                name: '',
+                schoolYear: '',
+                school: '',
+                className: '',
+                gender: '',
+                nationality: '',
+                germanLevel: '',
+                notes: ''
+            });
+            
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onSave(formData);
+            };
+            
+            return (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <div className="modal-header">
+                            <h2>{student ? 'Kind bearbeiten' : 'Neues Kind hinzufügen'}</h2>
+                            <button className="modal-close" onClick={onClose}>×</button>
+                        </div>
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label className="form-label">Name</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Schuljahr</label>
+                                <select
+                                    className="form-select"
+                                    value={formData.schoolYear}
+                                    onChange={(e) => setFormData({ ...formData, schoolYear: e.target.value })}
+                                    required
+                                >
+                                    <option value="">Bitte wählen</option>
+                                    {masterData.schoolYears.map(year => (
+                                        <option key={year} value={year}>{year}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Schule</label>
+                                <select
+                                    className="form-select"
+                                    value={formData.school}
+                                    onChange={(e) => setFormData({ ...formData, school: e.target.value })}
+                                    required
+                                >
+                                    <option value="">Bitte wählen</option>
+                                    {Object.keys(masterData.schools || {}).map(school => (
+                                        <option key={school} value={school}>{school}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Klasse</label>
+                                <select
+                                    className="form-select"
+                                    value={formData.className}
+                                    onChange={(e) => setFormData({ ...formData, className: e.target.value })}
+                                    required
+                                >
+                                    <option value="">Bitte wählen</option>
+                                    {formData.school && masterData.schools[formData.school]?.map(className => (
+                                        <option key={className} value={className}>{className}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Geschlecht</label>
+                                <select
+                                    className="form-select"
+                                    value={formData.gender}
+                                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                                >
+                                    <option value="">Bitte wählen</option>
+                                    <option value="männlich">Männlich</option>
+                                    <option value="weiblich">Weiblich</option>
+                                    <option value="divers">Divers</option>
+                                </select>
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Nationalität</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={formData.nationality}
+                                    onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
+                                />
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Deutschkenntnisse</label>
+                                <select
+                                    className="form-select"
+                                    value={formData.germanLevel}
+                                    onChange={(e) => setFormData({ ...formData, germanLevel: e.target.value })}
+                                >
+                                    <option value="">Bitte wählen</option>
+                                    <option value="1">1 - Sehr gut</option>
+                                    <option value="2">2 - Gut</option>
+                                    <option value="3">3 - Befriedigend</option>
+                                    <option value="4">4 - Ausreichend</option>
+                                    <option value="5">5 - Mangelhaft</option>
+                                    <option value="6">6 - Ungenügend</option>
+                                </select>
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Notizen</label>
+                                <textarea
+                                    className="form-textarea"
+                                    value={formData.notes}
+                                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                />
+                            </div>
+                            
+                            <div className="form-actions">
+                                <button type="button" className="button button-danger" onClick={onClose}>Abbrechen</button>
+                                <button type="submit" className="button button-success">Speichern</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // Eintrag-Modal-Komponente
+        const EntryModal = ({ entry, student, students, masterData, onSave, onClose }) => {
+            const [formData, setFormData] = useState(entry || {
+                studentId: student?.id || '',
+                subject: '',
+                observations: '',
+                measures: '',
+                erfolg: '',
+                erfolgRating: ''
+            });
+            
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onSave(formData);
+            };
+            
+            return (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <div className="modal-header">
+                            <h2>{entry ? 'Eintrag bearbeiten' : 'Neuer Eintrag'}</h2>
+                            <button className="modal-close" onClick={onClose}>×</button>
+                        </div>
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label className="form-label">Kind</label>
+                                <select
+                                    className="form-select"
+                                    value={formData.studentId}
+                                    onChange={(e) => setFormData({ ...formData, studentId: parseInt(e.target.value) })}
+                                    required
+                                >
+                                    <option value="">Bitte wählen</option>
+                                    {students.map(student => (
+                                        <option key={student.id} value={student.id}>{student.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Thema</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={formData.subject}
+                                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Beobachtungen</label>
+                                <textarea
+                                    className="form-textarea"
+                                    value={formData.observations}
+                                    onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Maßnahmen</label>
+                                <textarea
+                                    className="form-textarea"
+                                    value={formData.measures}
+                                    onChange={(e) => setFormData({ ...formData, measures: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Erfolg</label>
+                                <textarea
+                                    className="form-textarea"
+                                    value={formData.erfolg}
+                                    onChange={(e) => setFormData({ ...formData, erfolg: e.target.value })}
+                                />
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Bewertung</label>
+                                <select
+                                    className="form-select"
+                                    value={formData.erfolgRating}
+                                    onChange={(e) => setFormData({ ...formData, erfolgRating: e.target.value })}
+                                >
+                                    <option value="">Keine Bewertung</option>
+                                    <option value="positiv">Positiv</option>
+                                    <option value="negativ">Negativ</option>
+                                </select>
+                            </div>
+                            
+                            <div className="form-actions">
+                                <button type="button" className="button button-danger" onClick={onClose}>Abbrechen</button>
+                                <button type="submit" className="button button-success">Speichern</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // Einstellungen-Modal-Komponente
+        const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose }) => {
+            const [formData, setFormData] = useState(settings);
+            const [masterFormData, setMasterFormData] = useState(masterData);
+            
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onSave(formData);
+            };
+            
+            const handleMasterDataSubmit = (e) => {
+                e.preventDefault();
+                onSaveMasterData(masterFormData);
+            };
+            
+            const addSchoolYear = () => {
+                const newYear = prompt('Neues Schuljahr hinzufügen (Format: YYYY/YYYY):');
+                if (newYear && !masterFormData.schoolYears.includes(newYear)) {
+                    setMasterFormData({
+                        ...masterFormData,
+                        schoolYears: [...masterFormData.schoolYears, newYear].sort()
+                    });
+                }
+            };
+            
+            const removeSchoolYear = (year) => {
+                setMasterFormData({
+                    ...masterFormData,
+                    schoolYears: masterFormData.schoolYears.filter(y => y !== year)
+                });
+            };
+            
+            const addSchool = () => {
+                const newSchool = prompt('Neue Schule hinzufügen:');
+                if (newSchool && !masterFormData.schools[newSchool]) {
+                    setMasterFormData({
+                        ...masterFormData,
+                        schools: { ...masterFormData.schools, [newSchool]: [] }
+                    });
+                }
+            };
+            
+            const removeSchool = (school) => {
+                const newSchools = { ...masterFormData.schools };
+                delete newSchools[school];
+                setMasterFormData({
+                    ...masterFormData,
+                    schools: newSchools
+                });
+            };
+            
+            const addClass = (school) => {
+                const newClass = prompt('Neue Klasse hinzufügen:');
+                if (newClass && !masterFormData.schools[school].includes(newClass)) {
+                    setMasterFormData({
+                        ...masterFormData,
+                        schools: {
+                            ...masterFormData.schools,
+                            [school]: [...masterFormData.schools[school], newClass].sort()
+                        }
+                    });
+                }
+            };
+            
+            const removeClass = (school, className) => {
+                setMasterFormData({
+                    ...masterFormData,
+                    schools: {
+                        ...masterFormData.schools,
+                        [school]: masterFormData.schools[school].filter(c => c !== className)
+                    }
+                });
+            };
+            
+            return (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <div className="modal-header">
+                            <h2>Einstellungen</h2>
+                            <button className="modal-close" onClick={onClose}>×</button>
+                        </div>
+                        
+                        <form onSubmit={handleSubmit}>
+                            <h3>Darstellung</h3>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Farbschema</label>
+                                <div className="theme-selector">
+                                    <div
+                                        className={`theme-option theme-light ${formData.theme === 'light' ? 'selected' : ''}`}
+                                        onClick={() => setFormData({ ...formData, theme: 'light' })}
+                                        title="Hell"
+                                    ></div>
+                                    <div
+                                        className={`theme-option theme-dark ${formData.theme === 'dark' ? 'selected' : ''}`}
+                                        onClick={() => setFormData({ ...formData, theme: 'dark' })}
+                                        title="Dunkel"
+                                    ></div>
+                                    <div
+                                        className={`theme-option theme-high-contrast ${formData.theme === 'high-contrast' ? 'selected' : ''}`}
+                                        onClick={() => setFormData({ ...formData, theme: 'high-contrast' })}
+                                        title="Kontrastreich"
+                                    ></div>
+                                </div>
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Schriftgröße (Labels)</label>
+                                <input
+                                    type="range"
+                                    min="12"
+                                    max="24"
+                                    value={formData.fontSize}
+                                    onChange={(e) => setFormData({ ...formData, fontSize: parseInt(e.target.value) })}
+                                />
+                                <span>{formData.fontSize}px</span>
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Schriftgröße (Eingabefelder)</label>
+                                <input
+                                    type="range"
+                                    min="12"
+                                    max="24"
+                                    value={formData.inputFontSize}
+                                    onChange={(e) => setFormData({ ...formData, inputFontSize: parseInt(e.target.value) })}
+                                />
+                                <span>{formData.inputFontSize}px</span>
+                            </div>
+                            
+                            <div className="form-actions">
+                                <button type="button" className="button button-danger" onClick={onClose}>Abbrechen</button>
+                                <button type="submit" className="button button-success">Speichern</button>
+                            </div>
+                        </form>
+                        
+                        <hr style={{ margin: '2rem 0' }} />
+                        
+                        <form onSubmit={handleMasterDataSubmit}>
+                            <h3>Stammdaten verwalten</h3>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Schuljahre</label>
+                                <div>
+                                    {masterFormData.schoolYears.map(year => (
+                                        <div key={year} style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                            <span style={{ flex: 1 }}>{year}</span>
+                                            <button 
+                                                type="button" 
+                                                className="button button-danger"
+                                                style={{ padding: '0.25rem 0.5rem' }}
+                                                onClick={() => removeSchoolYear(year)}
+                                            >
+                                                Löschen
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button type="button" className="button" onClick={addSchoolYear}>
+                                        Schuljahr hinzufügen
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Schulen und Klassen</label>
+                                <div>
+                                    {Object.entries(masterFormData.schools || {}).map(([school, classes]) => (
+                                        <div key={school} style={{ marginBottom: '1rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                                <strong style={{ flex: 1 }}>{school}</strong>
+                                                <button 
+                                                    type="button" 
+                                                    className="button button-danger"
+                                                    style={{ padding: '0.25rem 0.5rem' }}
+                                                    onClick={() => removeSchool(school)}
+                                                >
+                                                    Schule löschen
+                                                </button>
+                                            </div>
+                                            <div style={{ paddingLeft: '1rem' }}>
+                                                {classes.map(className => (
+                                                    <div key={className} style={{ display: 'flex', alignItems: 'center', marginBottom: '0.25rem' }}>
+                                                        <span style={{ flex: 1 }}>{className}</span>
+                                                        <button 
+                                                            type="button" 
+                                                            className="button button-danger"
+                                                            style={{ padding: '0.25rem 0.5rem' }}
+                                                            onClick={() => removeClass(school, className)}
+                                                        >
+                                                            Löschen
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                <button 
+                                                    type="button" 
+                                                    className="button"
+                                                    style={{ padding: '0.25rem 0.5rem', marginTop: '0.5rem' }}
+                                                    onClick={() => addClass(school)}
+                                                >
+                                                    Klasse hinzufügen
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <button type="button" className="button" onClick={addSchool}>
+                                        Schule hinzufügen
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div className="form-actions">
+                                <button type="button" className="button button-danger" onClick={onClose}>Abbrechen</button>
+                                <button type="submit" className="button button-success">Stammdaten speichern</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // Statistiken-Modal-Komponente
+        const StatisticsModal = ({ students, entries, onClose }) => {
+            const totalStudents = students.length;
+            const totalEntries = entries.length;
+            
+            const entriesByStudent = {};
+            entries.forEach(entry => {
+                if (!entriesByStudent[entry.studentId]) {
+                    entriesByStudent[entry.studentId] = 0;
+                }
+                entriesByStudent[entry.studentId]++;
+            });
+            
+            const studentsWithEntries = Object.keys(entriesByStudent).length;
+            const studentsWithoutEntries = totalStudents - studentsWithEntries;
+            
+            const ratings = {
+                positiv: 0,
+                negativ: 0,
+                keine: 0
+            };
+            
+            entries.forEach(entry => {
+                if (entry.erfolgRating === 'positiv') {
+                    ratings.positiv++;
+                } else if (entry.erfolgRating === 'negativ') {
+                    ratings.negativ++;
+                } else {
+                    ratings.keine++;
+                }
+            });
+            
+            return (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <div className="modal-header">
+                            <h2>Statistiken</h2>
+                            <button className="modal-close" onClick={onClose}>×</button>
+                        </div>
+                        
+                        <div>
+                            <h3>Übersicht</h3>
+                            <p><strong>Gesamtzahl Kinder:</strong> {totalStudents}</p>
+                            <p><strong>Gesamtzahl Einträge:</strong> {totalEntries}</p>
+                            <p><strong>Durchschnittliche Einträge pro Kind:</strong> {totalStudents > 0 ? (totalEntries / totalStudents).toFixed(1) : 0}</p>
+                            
+                            <h3>Einträge nach Kindern</h3>
+                            <p><strong>Kinder mit Einträgen:</strong> {studentsWithEntries}</p>
+                            <p><strong>Kinder ohne Einträge:</strong> {studentsWithoutEntries}</p>
+                            
+                            <h3>Bewertungen</h3>
+                            <p><strong>Positive Bewertungen:</strong> {ratings.positiv}</p>
+                            <p><strong>Negative Bewertungen:</strong> {ratings.negativ}</p>
+                            <p><strong>Keine Bewertung:</strong> {ratings.keine}</p>
+                        </div>
+                        
+                        <div className="form-actions">
+                            <button type="button" className="button" onClick={onClose}>Schließen</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Hilfe-Modal-Komponente
+        const HelpModal = ({ onLoadSampleData, onClearData, onClose }) => {
+            return (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <div className="modal-header">
+                            <h2>Hilfe</h2>
+                            <button className="modal-close" onClick={onClose}>×</button>
+                        </div>
+                        
+                        <div>
+                            <h3>Anleitung</h3>
+                            <p>Willkommen zur Pädagogischen Dokumentation. Diese Anwendung hilft Ihnen bei der Dokumentation von Beobachtungen und Maßnahmen für Kinder und Jugendliche.</p>
+                            
+                            <h4>Erste Schritte</h4>
+                            <ol>
+                                <li>Fügen Sie Kinder über den Button "Kind hinzufügen" hinzu</li>
+                                <li>Wählen Sie ein Kind aus der Liste, um Einträge zu erstellen</li>
+                                <li>Erstellen Sie Einträge mit Beobachtungen, Maßnahmen und Bewertungen</li>
+                                <li>Wechseln Sie zwischen Kinder- und Tagesansicht</li>
+                            </ol>
+                            
+                            <h4>Datenverwaltung</h4>
+                            <p>Exportieren Sie regelmäßig Ihre Daten, um sie zu sichern. Sie können die Daten auch auf ein anderes Gerät importieren.</p>
+                            
+                            <h4>Einstellungen</h4>
+                            <p>Passen Sie das Aussehen der Anwendung in den Einstellungen an und verwalten Sie dort auch die Stammdaten wie Schuljahre, Schulen und Klassen.</p>
+                            
+                            <h3>Aktionen</h3>
+                            <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                                <button className="button" onClick={onLoadSampleData}>Beispieldaten laden</button>
+                                <button className="button button-danger" onClick={onClearData}>Alle Daten löschen</button>
+                            </div>
+                        </div>
+                        
+                        <div className="form-actions">
+                            <button type="button" className="button" onClick={onClose}>Schließen</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // React App rendern
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
 </body>
 </html>
