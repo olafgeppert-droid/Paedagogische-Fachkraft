@@ -60,13 +60,6 @@ const App = () => {
         initDB();
     }, []);
 
-    // Einstellungen anwenden
-    const applySettings = (settings) => {
-        document.documentElement.setAttribute('data-theme', settings.theme);
-        document.documentElement.style.setProperty('--font-size', `${settings.fontSize}px`);
-        document.documentElement.style.setProperty('--input-font-size', `${settings.inputFontSize}px`);
-    };
-
     // Einträge laden basierend auf Auswahl
     useEffect(() => {
         const loadEntries = async () => {
@@ -115,7 +108,85 @@ const App = () => {
         }
     };
 
-    // Weitere Funktionen hier...
+    // Eintrag hinzufügen/bearbeiten
+    const saveEntry = async (entryData) => {
+        if (!db) return;
+        
+        try {
+            await saveStateForUndo(db, history, setHistory, setHistoryIndex);
+            
+            if (entryData.id) {
+                await updateEntry(db, entryData);
+                setEntries(entries.map(e => e.id === entryData.id ? entryData : e));
+            } else {
+                const newEntry = await addEntry(db, { ...entryData, date: selectedDate });
+                setEntries([...entries, newEntry]);
+            }
+            
+            setModal(null);
+        } catch (error) {
+            console.error('Fehler beim Speichern des Eintrags:', error);
+        }
+    };
+
+    // Einstellungen speichern
+    const saveSettings = async (newSettings) => {
+        if (!db) return;
+        
+        try {
+            await db.put('settings', { ...newSettings, id: 1 });
+            setSettings(newSettings);
+            
+            // UI anpassen
+            applySettings(newSettings);
+            
+            setModal(null);
+        } catch (error) {
+            console.error('Fehler beim Speichern der Einstellungen:', error);
+        }
+    };
+
+    // Master-Daten speichern
+    const saveMasterData = async (newMasterData) => {
+        if (!db) return;
+        
+        try {
+            await db.put('masterData', { ...newMasterData, id: 1 });
+            setMasterData(newMasterData);
+        } catch (error) {
+            console.error('Fehler beim Speichern der Master-Daten:', error);
+        }
+    };
+
+    // Daten exportieren
+    const handleExport = async () => {
+        await exportData(db);
+    };
+
+    // Daten importieren
+    const handleImport = async (event) => {
+        await importData(db, event, setSettings, setMasterData, setStudents, setModal);
+    };
+
+    // Undo-Funktion
+    const handleUndo = async () => {
+        await undo(db, history, historyIndex, setHistoryIndex, setStudents);
+    };
+
+    // Redo-Funktion
+    const handleRedo = async () => {
+        await redo(db, history, historyIndex, setHistoryIndex, setStudents);
+    };
+
+    // Beispieldaten laden
+    const handleLoadSampleData = async () => {
+        await loadSampleData(db, setMasterData, setStudents);
+    };
+
+    // Alle Daten löschen
+    const handleClearData = async () => {
+        await clearAllData(db, setStudents, setEntries, setSelectedStudent);
+    };
 
     if (!db) {
         return <div>Datenbank wird initialisiert...</div>;
@@ -134,10 +205,10 @@ const App = () => {
                 onAddEntry={() => setModal('entry')}
                 onEditEntry={() => setModal('entry')}
                 onPrint={() => window.print()}
-                onExport={() => exportData(db)}
-                onImport={(e) => importData(db, e, setSettings, setMasterData, setStudents, setModal)}
-                onUndo={() => undo(db, history, historyIndex, setHistoryIndex, setStudents)}
-                onRedo={() => redo(db, history, historyIndex, setHistoryIndex, setStudents)}
+                onExport={handleExport}
+                onImport={handleImport}
+                onUndo={handleUndo}
+                onRedo={handleRedo}
                 canUndo={historyIndex > 0}
                 canRedo={historyIndex < history.length - 1}
             />
@@ -148,7 +219,10 @@ const App = () => {
                 selectedDate={selectedDate}
                 filters={filters}
                 masterData={masterData}
-                onStudentSelect={setSelectedStudent}
+                onStudentSelect={(student) => {
+                    setSelectedStudent(student);
+                    setViewMode('student');
+                }}
                 onDateSelect={(date) => {
                     setSelectedDate(date);
                     setViewMode('day');
@@ -207,8 +281,8 @@ const App = () => {
             
             {modal === 'help' && (
                 <HelpModal
-                    onLoadSampleData={loadSampleData}
-                    onClearData={clearAllData}
+                    onLoadSampleData={handleLoadSampleData}
+                    onClearData={handleClearData}
                     onClose={() => setModal(null)}
                 />
             )}
