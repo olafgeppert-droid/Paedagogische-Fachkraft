@@ -168,4 +168,193 @@ const importData = async (db, event, setSettings, setMasterData, setStudents, se
             }
             
             if (importData.settings) {
-                await db.put('
+                await db.put('settings', importData.settings);
+                setSettings(importData.settings);
+            }
+            
+            if (importData.masterData) {
+                await db.put('masterData', importData.masterData);
+                setMasterData(importData.masterData);
+            }
+            
+            // Daten neu laden
+            const allStudents = await db.getAll('students');
+            setStudents(allStudents);
+            
+            setModal(null);
+            alert('Daten erfolgreich importiert!');
+        } catch (error) {
+            console.error('Fehler beim Importieren der Daten:', error);
+            alert('Fehler beim Importieren der Daten: ' + error.message);
+        }
+    };
+    
+    reader.readAsText(file);
+};
+
+// Undo-Funktion
+const undo = async (db, history, historyIndex, setHistoryIndex, setStudents) => {
+    if (historyIndex <= 0 || !db) return;
+    
+    try {
+        const previousState = history[historyIndex - 1];
+        
+        // Alte Daten löschen
+        await db.clear('students');
+        await db.clear('entries');
+        
+        // Vorherigen Zustand wiederherstellen
+        for (const student of previousState.students) {
+            await db.add('students', student);
+        }
+        
+        for (const entry of previousState.entries) {
+            await db.add('entries', entry);
+        }
+        
+        // Daten neu laden
+        const allStudents = await db.getAll('students');
+        setStudents(allStudents);
+        
+        setHistoryIndex(historyIndex - 1);
+    } catch (error) {
+        console.error('Fehler beim Undo:', error);
+    }
+};
+
+// Redo-Funktion
+const redo = async (db, history, historyIndex, setHistoryIndex, setStudents) => {
+    if (historyIndex >= history.length - 1 || !db) return;
+    
+    try {
+        const nextState = history[historyIndex + 1];
+        
+        // Alte Daten löschen
+        await db.clear('students');
+        await db.clear('entries');
+        
+        // Nächsten Zustand wiederherstellen
+        for (const student of nextState.students) {
+            await db.add('students', student);
+        }
+        
+        for (const entry of nextState.entries) {
+            await db.add('entries', entry);
+        }
+        
+        // Daten neu laden
+        const allStudents = await db.getAll('students');
+        setStudents(allStudents);
+        
+        setHistoryIndex(historyIndex + 1);
+    } catch (error) {
+        console.error('Fehler beim Redo:', error);
+    }
+};
+
+// Beispieldaten laden
+const loadSampleData = async (db, setMasterData, setStudents) => {
+    if (!db) return;
+    
+    try {
+        // Alte Daten löschen
+        await db.clear('students');
+        await db.clear('entries');
+        
+        // Beispieldaten
+        const sampleStudents = [
+            {
+                name: 'Max Mustermann',
+                schoolYear: '2023/2024',
+                school: 'Grundschule Musterstadt',
+                className: '3a',
+                gender: 'männlich',
+                nationality: 'deutsch',
+                germanLevel: 2,
+                notes: 'Sehr aufmerksamer Schüler'
+            },
+            {
+                name: 'Anna Beispiel',
+                schoolYear: '2023/2024',
+                school: 'Grundschule Musterstadt',
+                className: '3b',
+                gender: 'weiblich',
+                nationality: 'deutsch',
+                germanLevel: 1,
+                notes: 'Braucht Unterstützung in Mathematik'
+            }
+        ];
+        
+        const sampleEntries = [
+            {
+                studentId: 1,
+                date: new Date().toISOString().split('T')[0],
+                subject: 'Mathematik',
+                observations: 'Max hat heute sehr gut mitgearbeitet und alle Aufgaben gelöst.',
+                measures: 'Positive Verstärkung durch Lob',
+                erfolg: 'Max war stolz auf seine Leistung und motiviert für weitere Aufgaben.',
+                erfolgRating: 'positiv'
+            },
+            {
+                studentId: 2,
+                date: new Date().toISOString().split('T')[0],
+                subject: 'Deutsch',
+                observations: 'Anna hatte Schwierigkeiten mit der Rechtschreibung.',
+                measures: 'Individuelle Förderung angeboten',
+                erfolg: 'Anna hat die Hilfe angenommen und Fortschritte gezeigt.',
+                erfolgRating: 'positiv'
+            }
+        ];
+        
+        // Beispieldaten hinzufügen
+        for (const student of sampleStudents) {
+            await db.add('students', student);
+        }
+        
+        for (const entry of sampleEntries) {
+            await db.add('entries', entry);
+        }
+        
+        // Beispieldaten für Master-Daten
+        const sampleMasterData = {
+            schoolYears: ['2022/2023', '2023/2024', '2024/2025'],
+            schools: {
+                'Grundschule Musterstadt': ['1a', '1b', '2a', '2b', '3a', '3b', '4a', '4b'],
+                'Mittelschule Beispieldorf': ['5a', '5b', '6a', '6b', '7a', '7b', '8a', '8b', '9a', '9b']
+            }
+        };
+        
+        await db.put('masterData', { ...sampleMasterData, id: 1 });
+        setMasterData(sampleMasterData);
+        
+        // Daten neu laden
+        const allStudents = await db.getAll('students');
+        setStudents(allStudents);
+        
+        alert('Beispieldaten erfolgreich geladen!');
+    } catch (error) {
+        console.error('Fehler beim Laden der Beispieldaten:', error);
+    }
+};
+
+// Alle Daten löschen
+const clearAllData = async (db, setStudents, setEntries, setSelectedStudent) => {
+    if (!db) return;
+    
+    if (!confirm('Sind Sie sicher, dass Sie alle Daten löschen möchten? Dieser Vorgang kann nicht rückgängig gemacht werden.')) {
+        return;
+    }
+    
+    try {
+        await db.clear('students');
+        await db.clear('entries');
+        
+        setStudents([]);
+        setEntries([]);
+        setSelectedStudent(null);
+        
+        alert('Alle Daten wurden gelöscht!');
+    } catch (error) {
+        console.error('Fehler beim Löschen der Daten:', error);
+    }
+};
