@@ -272,3 +272,17 @@
         display: block;
     }
 }
+
+.delete-confirmation {
+    text-align: center;
+}
+
+.delete-confirmation h3 {
+    color: var(--danger-color);
+    margin-bottom: 1rem;
+}
+
+.delete-confirmation p {
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
