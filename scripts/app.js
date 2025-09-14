@@ -60,6 +60,13 @@ const App = () => {
         initDB();
     }, []);
 
+    // Einstellungen anwenden
+    const applySettings = (settings) => {
+        document.documentElement.setAttribute('data-theme', settings.theme);
+        document.documentElement.style.setProperty('--font-size', `${settings.fontSize}px`);
+        document.documentElement.style.setProperty('--input-font-size', `${settings.inputFontSize}px`);
+    };
+
     // Einträge laden basierend auf Auswahl
     useEffect(() => {
         const loadEntries = async () => {
@@ -108,6 +115,29 @@ const App = () => {
         }
     };
 
+    // Schüler löschen
+    const deleteStudent = async (studentId) => {
+        if (!db) return;
+        
+        try {
+            await saveStateForUndo(db, history, setHistory, setHistoryIndex);
+            
+            const success = await deleteStudent(db, studentId);
+            if (success) {
+                setStudents(students.filter(s => s.id !== studentId));
+                if (selectedStudent && selectedStudent.id === studentId) {
+                    setSelectedStudent(null);
+                }
+                alert('Kind wurde erfolgreich gelöscht.');
+            } else {
+                alert('Fehler beim Löschen des Kindes.');
+            }
+        } catch (error) {
+            console.error('Fehler beim Löschen des Schülers:', error);
+            alert('Fehler beim Löschen des Kindes: ' + error.message);
+        }
+    };
+
     // Eintrag hinzufügen/bearbeiten
     const saveEntry = async (entryData) => {
         if (!db) return;
@@ -117,7 +147,7 @@ const App = () => {
             
             if (entryData.id) {
                 await updateEntry(db, entryData);
-                setEntries(entries.map(e => e.id === entryData.id ? entryData : e));
+                setEntries(entries.map(e => e.id === entryData.id ? entryData : e);
             } else {
                 const newEntry = await addEntry(db, { ...entryData, date: selectedDate });
                 setEntries([...entries, newEntry]);
@@ -246,6 +276,7 @@ const App = () => {
                     student={selectedStudent}
                     masterData={masterData}
                     onSave={saveStudent}
+                    onDelete={deleteStudent}
                     onClose={() => setModal(null)}
                 />
             )}
@@ -289,40 +320,6 @@ const App = () => {
         </div>
     );
 };
-
-// In der Hauptkomponente die Löschfunktion hinzufügen
-const deleteStudent = async (studentId) => {
-    if (!db) return;
-    
-    try {
-        await saveStateForUndo(db, history, setHistory, setHistoryIndex);
-        
-        const success = await deleteStudent(db, studentId);
-        if (success) {
-            setStudents(students.filter(s => s.id !== studentId));
-            if (selectedStudent && selectedStudent.id === studentId) {
-                setSelectedStudent(null);
-            }
-            alert('Kind wurde erfolgreich gelöscht.');
-        } else {
-            alert('Fehler beim Löschen des Kindes.');
-        }
-    } catch (error) {
-        console.error('Fehler beim Löschen des Schülers:', error);
-        alert('Fehler beim Löschen des Kindes: ' + error.message);
-    }
-};
-
-// Und im Modal-Aufruf den onDelete-Handler übergeben:
-{modal === 'student' && (
-    <StudentModal
-        student={selectedStudent}
-        masterData={masterData}
-        onSave={saveStudent}
-        onDelete={deleteStudent}
-        onClose={() => setModal(null)}
-    />
-)}
 
 // React App rendern
 ReactDOM.render(<App />, document.getElementById('root'));
