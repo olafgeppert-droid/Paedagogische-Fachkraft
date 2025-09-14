@@ -358,3 +358,26 @@ const clearAllData = async (db, setStudents, setEntries, setSelectedStudent) => 
         console.error('Fehler beim Löschen der Daten:', error);
     }
 };
+
+// Schüler löschen
+const deleteStudent = async (db, studentId) => {
+    try {
+        // Zuerst alle Einträge des Schülers löschen
+        const tx = db.transaction('entries', 'readwrite');
+        const entryStore = tx.objectStore('entries');
+        const index = entryStore.index('studentId');
+        
+        let cursor = await index.openCursor(IDBKeyRange.only(studentId));
+        while (cursor) {
+            await entryStore.delete(cursor.primaryKey);
+            cursor = await cursor.continue();
+        }
+        
+        // Dann den Schüler löschen
+        await db.delete('students', studentId);
+        return true;
+    } catch (error) {
+        console.error('Fehler beim Löschen des Schülers:', error);
+        return false;
+    }
+};
