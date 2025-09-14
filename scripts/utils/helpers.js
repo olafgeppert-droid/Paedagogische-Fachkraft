@@ -14,34 +14,101 @@ const filterStudents = (students, filters) => {
     });
 };
 
-// Daten exportieren
-const exportData = async (db) => {
+// Einstellungen anwenden
+const applySettings = (settings) => {
+    document.documentElement.setAttribute('data-theme', settings.theme);
+    document.documentElement.style.setProperty('--font-size', `${settings.fontSize}px`);
+    document.documentElement.style.setProperty('--input-font-size', `${settings.inputFontSize}px`);
+};
+
+// Eintrag speichern
+const saveEntry = async (db, entryData, entries, setEntries, setModal) => {
+    if (!db) return;
+    
     try {
-        const allStudents = await db.getAll('students');
-        const allEntries = await db.getAll('entries');
-        const settingsData = await db.get('settings', 1);
-        const masterData = await db.get('masterData', 1);
+        if (entryData.id) {
+            // Vorhandenen Eintrag aktualisieren
+            await db.put('entries', entryData);
+            setEntries(entries.map(e => e.id === entryData.id ? entryData : e));
+        } else {
+            // Neuen Eintrag hinzufügen
+            const id = await db.add('entries', entryData);
+            const newEntry = { ...entryData, id };
+            setEntries([...entries, newEntry]);
+        }
         
-        const exportData = {
-            students: allStudents,
-            entries: allEntries,
-            settings: settingsData,
-            masterData: masterData,
-            exportDate: new Date().toISOString()
-        };
-        
-        const dataStr = JSON.stringify(exportData, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-        
-        const exportFileDefaultName = 'paedagogische-dokumentation-export.json';
-        
-        const linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', exportFileDefaultName);
-        linkElement.click();
+        setModal(null);
     } catch (error) {
-        console.error('Fehler beim Exportieren der Daten:', error);
+        console.error('Fehler beim Speichern des Eintrags:', error);
     }
 };
 
-// Weitere Hilfsfunktionen...
+// Einstellungen speichern
+const saveSettings = async (db, newSettings, setSettings, setModal) => {
+    if (!db) return;
+    
+    try {
+        await db.put('settings', { ...newSettings, id: 1 });
+        setSettings(newSettings);
+        
+        // UI anpassen
+        applySettings(newSettings);
+        
+        setModal(null);
+    } catch (error) {
+        console.error('Fehler beim Speichern der Einstellungen:', error);
+    }
+};
+
+// Master-Daten speichern
+const saveMasterData = async (db, newMasterData, setMasterData) => {
+    if (!db) return;
+    
+    try {
+        await db.put('masterData', { ...newMasterData, id: 1 });
+        setMasterData(newMasterData);
+    } catch (error) {
+        console.error('Fehler beim Speichern der Master-Daten:', error);
+    }
+};
+
+// Statistiken berechnen
+const calculateStatistics = (students, entries) => {
+    const totalStudents = students.length;
+    const totalEntries = entries.length;
+    
+    const entriesByStudent = {};
+    entries.forEach(entry => {
+        if (!entriesByStudent[entry.studentId]) {
+            entriesByStudent[entry.studentId] = 0;
+        }
+        entriesByStudent[entry.studentId]++;
+    });
+    
+    const studentsWithEntries = Object.keys(entriesByStudent).length;
+    const studentsWithoutEntries = totalStudents - studentsWithEntries;
+    
+    const ratings = {
+        positiv: 0,
+        negativ: 0,
+        keine: 0
+    };
+    
+    entries.forEach(entry => {
+        if (entry.erfolgRating === 'positiv') {
+            ratings.positiv++;
+        } else if (entry.erfolgRating === 'negativ') {
+            ratings.negativ++;
+        } else {
+            ratings.keine++;
+        }
+    });
+    
+    return {
+        totalStudents,
+        totalEntries,
+        studentsWithEntries,
+        studentsWithoutEntries,
+        ratings
+    };
+};
