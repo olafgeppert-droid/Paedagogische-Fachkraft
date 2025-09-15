@@ -54,8 +54,9 @@ body {
     display: grid;
     grid-template-areas:
         "header header"
+        "toolbar toolbar"
         "nav main";
-    grid-template-rows: var(--header-height) 1fr;
+    grid-template-rows: var(--header-height) var(--toolbar-height) 1fr;
     grid-template-columns: var(--sidebar-width) 1fr;
     height: 100vh;
 }
@@ -84,6 +85,25 @@ body {
     color: white;
     font-size: 1.5rem;
     cursor: pointer;
+}
+
+/* Toolbar Styles */
+.toolbar {
+    grid-area: toolbar;
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem 2rem;
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.toolbar-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 /* Navigation Styles */
@@ -335,14 +355,61 @@ body {
     background-color: var(--info-color);
 }
 
+/* Entry Cards */
+.entry-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.entry-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.entry-header span:first-child {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+
+.entry-header span:last-child {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.entry-card p {
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+.entry-card strong {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .app {
         grid-template-areas:
             "header"
+            "toolbar"
             "main";
         grid-template-columns: 1fr;
-        grid-template-rows: var(--header-height) 1fr;
+        grid-template-rows: var(--header-height) var(--toolbar-height) 1fr;
     }
 
     .nav {
@@ -362,6 +429,20 @@ body {
 
     .hamburger-menu {
         display: block;
+    }
+
+    .toolbar {
+        padding: 0.5rem 1rem;
+        gap: 0.25rem;
+    }
+
+    .toolbar-row {
+        gap: 0.25rem;
+    }
+
+    .button {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
     }
 
     .main {
