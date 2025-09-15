@@ -4,29 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dokumentation pädagogische Arbeit</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #0055a4; /* Mittelfranken Blau */
-            --secondary: #f0f0f0;
-            --text: #000000;
-            --background: #ffffff;
-            --border: #cccccc;
-            --button-bg: #e9e9e9;
-            --button-hover: #d9d9d9;
+            --primary-color: #005ca9; /* Mittelfranken Blau */
+            --text-color: #000000;
+            --background-color: #ffffff;
+            --border-color: #cccccc;
+            --button-bg: #f0f0f0;
+            --button-hover: #e0e0e0;
             --footer-bg: #f5f5f5;
             --label-size: 16px;
             --input-size: 16px;
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         /* Dunkles Farbschema */
         [data-theme="dark"] {
-            --primary: #333;
-            --secondary: #444;
-            --text: #ffffff;
-            --background: #222222;
-            --border: #555555;
+            --primary-color: #333;
+            --text-color: #ffffff;
+            --background-color: #222222;
+            --border-color: #444444;
             --button-bg: #444;
             --button-hover: #555;
             --footer-bg: #333;
@@ -34,24 +30,21 @@
 
         /* Hoher Kontrast */
         [data-theme="high-contrast"] {
-            --primary: #000000;
-            --secondary: #000000;
-            --text: #ffffff;
-            --background: #000000;
-            --border: #ffffff;
+            --primary-color: #000000;
+            --text-color: #ffffff;
+            --background-color: #000000;
+            --border-color: #ffffff;
             --button-bg: #000000;
             --button-hover: #333333;
             --footer-bg: #000000;
-            --shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
         }
 
         /* Farbig (Benutzerdefiniert) */
         [data-theme="colored"] {
-            --primary: #4caf50;
-            --secondary: #e8f5e9;
-            --text: #1b5e20;
-            --background: #f1f8e9;
-            --border: #c5e1a5;
+            --primary-color: #4caf50;
+            --text-color: #333333;
+            --background-color: #f1f8e9;
+            --border-color: #c5e1a5;
             --button-bg: #e8f5e9;
             --button-hover: #c8e6c9;
             --footer-bg: #e8f5e9;
@@ -62,62 +55,49 @@
             padding: 0;
             box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
         }
 
         body {
-            background-color: var(--background);
-            color: var(--text);
+            background-color: var(--background-color);
+            color: var(--text-color);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
         header {
-            background-color: var(--primary);
+            background-color: var(--primary-color);
             color: white;
             text-align: center;
-            padding: 1.2rem;
+            padding: 1rem;
             width: 100%;
-            box-shadow: var(--shadow);
         }
 
         .toolbar {
             display: flex;
             justify-content: space-between;
             background-color: var(--button-bg);
-            padding: 0.6rem;
-            border-bottom: 1px solid var(--border);
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
             flex-wrap: wrap;
-            gap: 0.5rem;
         }
 
         .toolbar button {
             flex: 1;
             min-width: 120px;
-            padding: 0.8rem;
+            margin: 0.25rem;
+            padding: 0.75rem;
             background-color: var(--button-bg);
-            color: var(--text);
-            border: 1px solid var(--border);
-            border-radius: 6px;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
             cursor: pointer;
-            height: 44px;
+            height: 44px; /* Gleiche Höhe für alle Buttons */
             font-size: var(--label-size);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .toolbar button:hover {
             background-color: var(--button-hover);
-        }
-
-        .toolbar button i {
-            font-size: 14px;
         }
 
         .container {
@@ -127,153 +107,69 @@
         }
 
         .navigation {
-            width: 280px;
-            background-color: var(--primary);
+            width: 250px;
+            background-color: var(--primary-color);
             color: white;
-            padding: 1.2rem;
-            display: flex;
-            flex-direction: column;
-            box-shadow: var(--shadow);
+            padding: 1rem;
+            min-height: calc(100vh - 180px);
         }
 
         .navigation h2 {
-            margin-bottom: 1.5rem;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
         }
 
-        .nav-section {
-            margin-bottom: 1.5rem;
-        }
-
-        .nav-section h3 {
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .nav-section select, .nav-section input {
+        .navigation select, .navigation input {
             width: 100%;
-            padding: 0.6rem;
-            border: 1px solid var(--border);
-            border-radius: 6px;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
             font-size: var(--input-size);
-            background-color: white;
-            color: black;
         }
 
         .content {
             flex: 1;
-            padding: 1.5rem;
-            background-color: var(--background);
+            padding: 1rem;
         }
 
         .settings-section {
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
         }
 
         .settings-section h2 {
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
         }
 
         .settings-option {
-            margin-bottom: 1.5rem;
-            padding: 1rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background-color: var(--secondary);
+            margin-bottom: 1rem;
         }
 
         .settings-option label {
             display: block;
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.5rem;
             font-size: var(--label-size);
-            font-weight: 500;
         }
 
         .settings-option select, .settings-option input {
             width: 100%;
             max-width: 300px;
-            padding: 0.7rem;
-            border: 1px solid var(--border);
-            border-radius: 6px;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
             font-size: var(--input-size);
-            background-color: var(--background);
-            color: var(--text);
-        }
-
-        .settings-option button {
-            padding: 0.8rem 1.5rem;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: var(--label-size);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .settings-option button:hover {
-            opacity: 0.9;
-        }
-
-        .size-control {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .size-control input {
-            flex: 1;
-        }
-
-        .size-value {
-            min-width: 40px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .info-text {
-            margin-top: 2rem;
-            padding: 1rem;
-            background-color: var(--secondary);
-            border-radius: 8px;
-            border-left: 4px solid var(--primary);
-            font-size: var(--label-size);
         }
 
         footer {
             background-color: var(--footer-bg);
             text-align: center;
-            padding: 1.2rem;
-            border-top: 1px solid var(--border);
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
             margin-top: auto;
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.5rem;
         }
 
         /* Responsive Design */
-        @media (max-width: 1024px) {
-            .navigation {
-                width: 220px;
-            }
-        }
-
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -286,7 +182,6 @@
             
             .toolbar button {
                 min-width: 100px;
-                font-size: 14px;
             }
         }
 
@@ -299,82 +194,60 @@
                 width: 100%;
                 margin: 0.25rem 0;
             }
-            
-            .settings-option select, .settings-option input {
-                max-width: 100%;
-            }
-            
-            header h1 {
-                font-size: 1.5rem;
-            }
         }
     </style>
 </head>
-<body data-theme="standard">
+<body>
     <header>
-        <h1><i class="fas fa-book-open"></i> Dokumentation pädagogische Arbeit</h1>
+        <h1>Dokumentation pädagogische Arbeit</h1>
     </header>
     
     <div class="toolbar">
-        <button><i class="fas fa-search"></i> Kind suchen...</button>
-        <button><i class="fas fa-calendar-alt"></i> Schuljahr: Alle Schuljahre</button>
-        <button><i class="fas fa-school"></i> Schule: Alle Schulen</button>
-        <button><i class="fas fa-users"></i> Klasse: Alle Klassen</button>
-        <button><i class="fas fa-child"></i> Kind: Alle Kinder</button>
-        <button><i class="fas fa-trash-alt"></i> Tag: Löschen</button>
+        <button>Kind suchen...</button>
+        <button>Schuljahr: Alle Schuljahre</button>
+        <button>Schule: Alle Schulen</button>
+        <button>Klasse: Alle Klassen</button>
+        <button>Kind: Alle Kinder</button>
+        <button>Tag: Löschen</button>
     </div>
     
     <div class="container">
         <nav class="navigation">
-            <h2><i class="fas fa-compass"></i> Navigation</h2>
+            <h2>Navigation</h2>
+            <select>
+                <option>Kind suchen...</option>
+            </select>
             
-            <div class="nav-section">
-                <h3><i class="fas fa-search"></i> Kind suchen</h3>
-                <select>
-                    <option>Kind suchen...</option>
-                </select>
-            </div>
+            <h3>Schuljahr</h3>
+            <select>
+                <option>Alle Schuljahre</option>
+            </select>
             
-            <div class="nav-section">
-                <h3><i class="fas fa-calendar-alt"></i> Schuljahr</h3>
-                <select>
-                    <option>Alle Schuljahre</option>
-                </select>
-            </div>
+            <h3>Schule</h3>
+            <select>
+                <option>Alle Schulen</option>
+            </select>
             
-            <div class="nav-section">
-                <h3><i class="fas fa-school"></i> Schule</h3>
-                <select>
-                    <option>Alle Schulen</option>
-                </select>
-            </div>
+            <h3>Klasse</h3>
+            <select>
+                <option>Alle Klassen</option>
+            </select>
             
-            <div class="nav-section">
-                <h3><i class="fas fa-users"></i> Klasse</h3>
-                <select>
-                    <option>Alle Klassen</option>
-                </select>
-            </div>
+            <h3>Kind</h3>
+            <select>
+                <option>Alle Kinder</option>
+            </select>
             
-            <div class="nav-section">
-                <h3><i class="fas fa-child"></i> Kind</h3>
-                <select>
-                    <option>Alle Kinder</option>
-                </select>
-            </div>
-            
-            <div class="nav-section">
-                <h3><i class="fas fa-calendar-day"></i> Tag</h3>
-                <input type="text" value="Löschen">
-            </div>
+            <h3>Tag</h3>
+            <input type="text" value="Löschen">
         </nav>
         
         <main class="content">
             <section class="settings-section">
-                <h2><i class="fas fa-cog"></i> Einstellungen</h2>
+                <h2>Einstellungen</h2>
                 
                 <div class="settings-option">
-                    <label for="color-scheme"><i class="fas fa-palette"></i> Farbschema</label>
+                    <label for="color-scheme">Farbschema</label>
                     <select id="color-scheme">
                         <option value="standard">Standard (Hell)</option>
                         <option value="dark">Dunkel</option>
@@ -384,47 +257,36 @@
                 </div>
                 
                 <div class="settings-option">
-                    <label for="label-size"><i class="fas fa-text-height"></i> Schriftgröße Labels</label>
-                    <div class="size-control">
-                        <input type="range" id="label-size" min="12" max="24" value="16" step="1">
-                        <span id="label-size-value" class="size-value">16px</span>
-                    </div>
+                    <label for="label-size">Schriftgröße Labels</label>
+                    <input type="range" id="label-size" min="12" max="24" value="16" step="1">
+                    <span id="label-size-value">16px</span>
                 </div>
                 
                 <div class="settings-option">
-                    <label for="input-size"><i class="fas fa-font"></i> Schriftgröße Eingabefelder</label>
-                    <div class="size-control">
-                        <input type="range" id="input-size" min="12" max="24" value="16" step="1">
-                        <span id="input-size-value" class="size-value">16px</span>
-                    </div>
+                    <label for="input-size">Schriftgröße Eingabefelder</label>
+                    <input type="range" id="input-size" min="12" max="24" value="16" step="1">
+                    <span id="input-size-value">16px</span>
                 </div>
                 
                 <div class="settings-option">
-                    <button id="manage-data">
-                        <i class="fas fa-database"></i> Stammdaten verwalten...
-                    </button>
+                    <button id="manage-data">Stammdaten verwalten...</button>
                 </div>
             </section>
             
-            <section class="info-text">
-                <p><i class="fas fa-info-circle"></i> Wählen Sie einen Tag, um alle Einträge für diesen Tag anzuzeigen.</p>
+            <section>
+                <p>Sie einen Tag, um alle Einträge für diesen Tag</p>
             </section>
         </main>
     </div>
     
     <footer>
-        <i class="fas fa-code-branch"></i> Version 1.2.0
+        Version 1.2.0
     </footer>
 
     <script>
         // Farbschema wechseln
         document.getElementById('color-scheme').addEventListener('change', function() {
             document.body.setAttribute('data-theme', this.value);
-            
-            // Mittelfranken Blau für Standardmodus setzen
-            if (this.value === 'standard') {
-                document.querySelector('.navigation').style.backgroundColor = '#0055a4';
-            }
         });
         
         // Schriftgröße Labels anpassen
@@ -450,11 +312,6 @@
         // Stammdaten Button
         document.getElementById('manage-data').addEventListener('click', function() {
             alert('Stammdatenverwaltung wird geöffnet');
-        });
-        
-        // Navigation Hintergrund für Standardmodus setzen
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelector('.navigation').style.backgroundColor = '#0055a4';
         });
     </script>
 </body>
