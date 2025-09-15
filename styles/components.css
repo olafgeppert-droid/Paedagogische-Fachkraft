@@ -1,0 +1,129 @@
+/* Navigation Erweiterungen */
+.nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.filter-group {
+    margin-bottom: 1rem;
+}
+
+.filter-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1.5rem 0 1rem 0;
+}
+
+.student-count {
+    font-size: 0.8rem;
+    color: #666;
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.student-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: var(--transition);
+    gap: 0.75rem;
+}
+
+.student-item:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.student-item.selected {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+.student-avatar {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.student-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.student-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.student-details {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.student-year {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    flex-shrink: 0;
+}
+
+.footer-section {
+    margin-bottom: 1rem;
+}
+
+.footer-section h4 {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.app-info {
+    text-align: center;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Responsive Design für Navigation */
+@media (max-width: 768px) {
+    .nav {
+        width: 100%;
+        left: -100%;
+    }
+    
+    .nav.open {
+        left: 0;
+    }
+    
+    .student-item {
+        padding: 1rem;
+    }
+    
+    .student-details {
+        display: none;
+    }
+}
