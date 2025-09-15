@@ -20,4 +20,4 @@ const HelpModal = ({ onLoadSampleData, onClearData, onClose }) => {
                     </ol>
                     
                     <h4>Datenverwaltung</h4>
-                    <p>Exportieren Sie regelmäßig Ihre Daten, um sie zu sichern. Sie können die Daten auch auf ein andere
+                    <p>Exportieren Sie regelmäßig Ihre Daten, um sie zu sichern. Sie können die Daten auch auf ein andere</p>
