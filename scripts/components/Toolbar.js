@@ -22,28 +22,28 @@ const Toolbar = ({
                     onClick={onEditStudent}
                     disabled={!selectedStudent}
                 >
-                    ✏️ Kind bearbeiten
+                    ✏️ Kind bearbeiten/löschen
                 </button>
                 <button 
                     className="button" 
                     onClick={onAddEntry}
                     disabled={!selectedStudent && !selectedDate}
                 >
-                    📝 Eintrag hinzufügen
+                    📝 Protokoll anlegen
                 </button>
                 <button 
                     className="button" 
                     onClick={onEditEntry}
                     disabled={!selectedStudent && !selectedDate}
                 >
-                    🔧 Eintrag bearbeiten
+                    🔧 Protokoll bearbeiten/löschen
                 </button>
             </div>
             <div className="toolbar-row">
                 <button className="button" onClick={onPrint}>🖨️ Drucken</button>
-                <button className="button" onClick={onExport}>💾 Exportieren</button>
+                <button className="button" onClick={onExport}>💾 Datenexport</button>
                 <label htmlFor="import-file" className="button">
-                    📥 Importieren
+                    📥 Datenimport
                     <input
                         id="import-file"
                         type="file"
