@@ -1,10 +1,3 @@
-/** @jsxImportSource react */
-import React from 'react';
-
-/**
- * HelpModal component
- * @param {{ onClose: () => void, version?: string }} props
- */
 const HelpModal = ({ onClose, version }) => {
     return (
         <div className="modal-backdrop">
@@ -60,5 +53,3 @@ const HelpModal = ({ onClose, version }) => {
         </div>
     );
 };
-
-export default HelpModal;
