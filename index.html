@@ -6,28 +6,27 @@
     <title>Pädagogische Dokumentation</title>
     
     <!-- Externe Abhängigkeiten -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/idb@7/build/umd.js"></script>
     
     <!-- Eigene Styles -->
-    <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/main.css">
     
-    <!-- Eigene Scripte -->
-    <script type="text/babel" src="scripts/database.js"></script>
-    <script type="text/babel" src="scripts/utils/helpers.js"></script>
-    <script type="text/babel" src="scripts/components/Header.js"></script>
-    <script type="text/babel" src="scripts/components/Toolbar.js"></script>
-    <script type="text/babel" src="scripts/components/Navigation.js"></script>
-    <script type="text/babel" src="scripts/components/MainContent.js"></script>
-    <script type="text/babel" src="scripts/components/StudentModal.js"></script>
-    <script type="text/babel" src="scripts/components/EntryModal.js"></script>
-    <script type="text/babel" src="scripts/components/SettingsModal.js"></script>
-    <script type="text/babel" src="scripts/components/StatisticsModal.js"></script>
-    <script type="text/babel" src="scripts/components/HelpModal.js"></script>
-    <script type="text/babel" src="scripts/app.js"></script>
+    <!-- Eigene Scripte (Reihenfolge WICHTIG!) -->
+    <script src="scripts/database.js"></script>
+    <script src="scripts/utils/helpers.js"></script>
+    <script src="scripts/components/Header.js"></script>
+    <script src="scripts/components/Toolbar.js"></script>
+    <script src="scripts/components/Navigation.js"></script>
+    <script src="scripts/components/MainContent.js"></script>
+    <script src="scripts/components/StudentModal.js"></script>
+    <script src="scripts/components/EntryModal.js"></script>
+    <script src="scripts/components/SettingsModal.js"></script>
+    <script src="scripts/components/StatisticsModal.js"></script>
+    <script src="scripts/components/HelpModal.js"></script>
+    <script src="scripts/app.js"></script>
 </head>
 <body>
     <div id="root"></div>
