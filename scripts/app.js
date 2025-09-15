@@ -147,7 +147,7 @@ const App = () => {
             
             if (entryData.id) {
                 await updateEntry(db, entryData);
-                setEntries(entries.map(e => e.id === entryData.id ? entryData : e);
+                setEntries(entries.map(e => e.id === entryData.id ? entryData : e));
             } else {
                 const newEntry = await addEntry(db, { ...entryData, date: selectedDate });
                 setEntries([...entries, newEntry]);
