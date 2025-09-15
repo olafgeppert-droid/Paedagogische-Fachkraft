@@ -10,7 +10,7 @@ const Header = ({ onMenuClick }) => {
         <header className="header">
             <button className="hamburger-menu" onClick={onMenuClick}>☰</button>
             <h1>Pädagogische Dokumentation</h1>
-            <span>{currentDate}</span>
+            <span className="header-date">{currentDate}</span>
         </header>
     );
 };
