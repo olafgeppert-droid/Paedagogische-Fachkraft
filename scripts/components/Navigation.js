@@ -43,15 +43,14 @@ const Navigation = ({
 
     return (
         <nav className={`nav ${isOpen ? 'open' : ''}`}>
-            <h3>Dokumentation pädagogische Arbeit</h3>
+            <h3>Navigation</h3>
             
             <div className="search-filter">
                 <div className="filter-group">
-                    <label className="filter-label">Navigation</label>
                     <input
                         type="text"
                         className="search-input"
-                        placeholder="Kind suchen..."
+                        placeholder="🔍 Kind suchen..."
                         value={searchTerm}
                         onChange={handleSearchChange}
                     />
