@@ -5,57 +5,42 @@ on:
     branches: [main]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: npm
-    - run: npm ci
-    - run: |
-        rm -rf dist
-        npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
-        cp index.html dist/
-        cp -r styles/ dist/styles/
-        cp -r assets/ dist/ 2>/dev/null || true
-        cp -r images/ dist/ 2>/dev/null || true
-        
-        echo "📁 Build abgeschlossen - Dist Inhalt:"
-        ls -la dist/
-        ls -la dist/styles/ || echo "styles nicht gefunden"
-    - uses: actions/upload-artifact@v4
-      with:
-        name: dist-files
-        path: dist/
-
-  deploy:
-    needs: build
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
     
-    - name: Download artefacts
-      uses: actions/download-artifact@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        name: dist-files
-        path: .
-        
-    - name: Überprüfe Dateien
+        node-version: 20
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build with Babel
       run: |
-        echo "📁 Aktuelles Verzeichnis:"
-        ls -la
-        echo ""
-        echo "📁 Dist Ordner Inhalt:"
-        ls -la dist/ || echo "dist/ existiert nicht"
-        echo ""
-        echo "📁 Styles Ordner:"
-        ls -la dist/styles/ || echo "styles/ existiert nicht"
+        rm -rf dist
+        npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
+        cp index.html dist/
+        cp -r styles/ dist/styles/
         
-    - uses: peaceiris/actions-gh-pages@v4
+        echo "📁 Build erfolgreich - Inhalt:"
+        ls -la dist/
+        echo ""
+        echo "📁 Components:"
+        ls -la dist/components/ | head -5
+        echo ""
+        echo "📁 Styles:"
+        ls -la dist/styles/
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./dist
+        force_orphan: true
