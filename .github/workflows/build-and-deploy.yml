@@ -10,8 +10,7 @@ jobs:
     permissions:
       contents: write
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -24,23 +23,23 @@ jobs:
     
     - name: Build with Babel
       run: |
+        # Lösche dist
         rm -rf dist
-        npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
+        # ERST die ORIGINAL index.html kopieren
         cp index.html dist/
-        cp -r styles/ dist/styles/
+        # DANN babel build
+        npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
+        # DANACH styles kopieren
+        cp -r styles/ dist/styles/ || echo "Styles nicht gefunden"
         
-        echo "📁 Build erfolgreich - Inhalt:"
-        ls -la dist/
-        echo ""
-        echo "📁 Components:"
-        ls -la dist/components/ | head -5
-        echo ""
-        echo "📁 Styles:"
-        ls -la dist/styles/
+        echo "🔍 ÜBERPRÜFUNG:"
+        echo "index.html Größe:"
+        ls -la dist/index.html
+        echo "index.html Inhalt (Auszug):"
+        head -10 dist/index.html
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./dist
-        force_orphan: true
