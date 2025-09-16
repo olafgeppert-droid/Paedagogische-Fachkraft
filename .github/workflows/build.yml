@@ -1,0 +1,33 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v3
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Abhängigkeiten installieren
+        run: npm install
+
+      - name: Babel Build
+        run: npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
+
+      - name: Änderungen committen
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add dist
+          git commit -m "Automatischer Build via GitHub Actions" || echo "Keine Änderungen"
+          git push
