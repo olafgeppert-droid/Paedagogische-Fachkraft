@@ -5,28 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pädagogische Dokumentation</title>
     
-    <!-- Externe Abhängigkeiten -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/idb@7/build/umd.js"></script>
-    
     <!-- Eigene Styles -->
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
-    
-    <!-- Kompilierte Scripte aus dist/ -->
-    <script src="dist/database.js"></script>
-    <script src="dist/utils/helpers.js"></script>
-    <script src="dist/components/Header.js"></script>
-    <script src="dist/components/Toolbar.js"></script>
-    <script src="dist/components/Navigation.js"></script>
-    <script src="dist/components/MainContent.js"></script>
-    <script src="dist/components/StudentModal.js"></script>
-    <script src="dist/components/EntryModal.js"></script>
-    <script src="dist/components/SettingsModal.js"></script>
-    <script src="dist/components/StatisticsModal.js"></script>
-    <script src="dist/components/HelpModal.js"></script>
-    <script src="dist/app.js"></script>
 
     <style>
         /* Responsive Grundlagen */
@@ -52,18 +33,28 @@
             flex-direction: column;
             min-height: 100vh;
         }
-        
-        /* Responsive Design für verschiedene Bildschirmgrößen */
-        @media (max-width: 768px) {
-            /* Anpassungen für Tablets */
-        }
-        
-        @media (max-width: 480px) {
-            /* Anpassungen für Smartphones */
-        }
     </style>
 </head>
 <body>
     <div id="root"></div>
+
+    <!-- Externe Abhängigkeiten -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/idb@7/build/umd.js"></script>
+    
+    <!-- Kompilierte Scripte aus dist/ -->
+    <script src="dist/database.js"></script>
+    <script src="dist/utils/helpers.js"></script>
+    <script src="dist/components/Header.js"></script>
+    <script src="dist/components/Toolbar.js"></script>
+    <script src="dist/components/Navigation.js"></script>
+    <script src="dist/components/MainContent.js"></script>
+    <script src="dist/components/StudentModal.js"></script>
+    <script src="dist/components/EntryModal.js"></script>
+    <script src="dist/components/SettingsModal.js"></script>
+    <script src="dist/components/StatisticsModal.js"></script>
+    <script src="dist/components/HelpModal.js"></script>
+    <script src="dist/app.js"></script>
 </body>
 </html>
