@@ -6,20 +6,18 @@ const Header = ({ onMenuClick }) => {
         day: 'numeric'
     });
 
-    // Softwareversion
-    const version = "v1.2.5";
+    const appVersion = "v1.2.5"; // Aktuelle Softwareversion
 
     return (
         <header className="header">
             <button className="hamburger-menu" onClick={onMenuClick}>☰</button>
             <h1>Dokumentation pädagogische Arbeit - Irina Geppert</h1>
-            <div className="header-right">
+            <div className="header-info">
                 <span className="header-date">{currentDate}</span>
-                <span className="header-version">{version}</span>
+                <span className="header-version">{appVersion}</span>
             </div>
         </header>
     );
 };
 
 export default Header;
-
