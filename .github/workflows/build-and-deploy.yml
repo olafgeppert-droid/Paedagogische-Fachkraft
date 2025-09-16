@@ -26,6 +26,9 @@ jobs:
       - name: Babel Build
         run: npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
 
+      - name: Prüfen, dass dist existiert
+        run: ls -R dist
+
   deploy:
     name: Deploy to GitHub Pages
     needs: build
@@ -38,7 +41,7 @@ jobs:
       - name: Deploy via GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GH_PAT }}   # <-- Secret muss erstellt werden
-          publish_branch: gh-pages              # Branch, auf den deployed wird
-          publish_dir: ./                       # Root-Ordner mit index.html + dist
-          force_orphan: true                    # erzwingt frischen Commit im gh-pages Branch
+          github_token: ${{ secrets.GH_PAT }}
+          publish_branch: gh-pages
+          publish_dir: ./dist          # <-- Nur den dist-Ordner deployen
+          force_orphan: true
