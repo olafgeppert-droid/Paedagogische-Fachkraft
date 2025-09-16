@@ -267,6 +267,8 @@ const App = () => {
     );
 };
 
-// React App rendern
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App />);
+// React App rendern, erst nach DOMContentLoaded
+document.addEventListener("DOMContentLoaded", () => {
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+});
