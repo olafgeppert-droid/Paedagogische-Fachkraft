@@ -1,4 +1,4 @@
-name: Build & Deploy
+name: Build & Deploy All
 
 on:
   push:
@@ -7,7 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
@@ -25,7 +26,16 @@ jobs:
       - name: Babel Build
         run: npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
 
-      - name: Deploy to GitHub Pages
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v3
+
+      - name: Deploy via GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GH_PAT }}
