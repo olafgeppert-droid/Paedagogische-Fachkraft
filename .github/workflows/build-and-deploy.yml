@@ -1,26 +1,45 @@
-- name: Build with Babel
+name: Build & Deploy All
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build with Babel
       run: |
+        # Lösche dist
         rm -rf dist
+        # ERST die ORIGINAL index.html kopieren
+        cp index.html dist/
+        # DANN babel build
         npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
+        # DANACH styles kopieren
+        cp -r styles/ dist/styles/ || echo "Styles nicht gefunden"
         
-        # ERSTELLE index.html falls nicht vorhanden
-        if [ ! -f "index.html" ]; then
-          echo "⚠️  index.html nicht gefunden - erstelle eine..."
-          cat > dist/index.html << 'EOL'
-<!DOCTYPE html>
-<html>
-<head>
-    <title>App</title>
-</head>
-<body>
-    <div id="root"></div>
-    <script src="scripts/App.js"></script>
-</body>
-</html>
-EOL
-        else
-          echo "✅ Kopiere index.html"
-          cp index.html dist/
-        fi
-        
-        cp -r styles/ dist/styles/ 2>/dev/null || true
+        echo "🔍 ÜBERPRÜFUNG:"
+        echo "index.html Größe:"
+        ls -la dist/index.html
+        echo "index.html Inhalt (Auszug):"
+        head -10 dist/index.html
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
