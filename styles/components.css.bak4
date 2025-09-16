@@ -347,8 +347,3 @@
     align-items: center;
     width: 100%;
 }
-
-.header-version {
-    font-size: 0.9em;
-    color: #666;
-}
