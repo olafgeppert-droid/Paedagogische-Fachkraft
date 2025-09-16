@@ -56,12 +56,3 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./dist
         
-- name: Build with Babel
-  run: |
-    rm -rf dist
-    # UMD Transformation für Browser-Kompatibilität
-    npx babel scripts --out-dir dist --copy-files \
-      --presets=@babel/preset-env,@babel/preset-react \
-      --plugins=@babel/plugin-transform-modules-umd
-    
-    echo "✅ Build mit UMD Transformation abgeschlossen"
