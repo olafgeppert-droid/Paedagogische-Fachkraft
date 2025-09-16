@@ -1,4 +1,4 @@
-name: Build & Deploy All
+name: Build & Deploy
 
 on:
   push:
@@ -7,8 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,22 +25,10 @@ jobs:
       - name: Babel Build
         run: npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
 
-      - name: Prüfen, dass dist existiert
-        run: ls -R dist
-
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Repository auschecken
-        uses: actions/checkout@v3
-
-      - name: Deploy via GitHub Pages
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GH_PAT }}
           publish_branch: gh-pages
-          publish_dir: ./dist          # <-- Nur den dist-Ordner deployen
+          publish_dir: ./dist
           force_orphan: true
