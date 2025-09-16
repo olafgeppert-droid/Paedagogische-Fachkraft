@@ -16,10 +16,21 @@ jobs:
     - run: npm ci
     - run: |
         rm -rf dist
+        # Babel Build
         npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
+        
+        # ALLE notwendigen Dateien kopieren
         cp index.html dist/
-        # STYLES ORDNER KOPIEREN
-        cp -r styles/ dist/ 2>/dev/null || echo "Styles ordner nicht gefunden"
+        cp -r styles/ dist/styles/
+        cp -r assets/ dist/ 2>/dev/null || true
+        cp -r images/ dist/ 2>/dev/null || true
+        cp -r lib/ dist/ 2>/dev/null || true
+        
+        # Überprüfen ob styles kopiert wurden
+        echo "📁 Dist Struktur nach Kopiervorgang:"
+        ls -la dist/
+        echo "styles Ordner vorhanden?"
+        ls -la dist/styles/ || echo "❌ styles nicht kopiert"
     - uses: actions/upload-artifact@v4
       with:
         name: dist
@@ -35,6 +46,12 @@ jobs:
       with:
         name: dist
         path: .
+    - name: Überprüfe finale Dist Struktur
+      run: |
+        echo "🚀 Finale Dist Struktur vor Deployment:"
+        ls -la dist/
+        echo "styles Ordner:"
+        ls -la dist/styles/ || echo "styles nicht gefunden"
     - uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
