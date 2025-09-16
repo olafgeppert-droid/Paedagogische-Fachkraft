@@ -23,30 +23,20 @@ jobs:
     
     - name: Build with Babel
       run: |
-        # Lösche dist
         rm -rf dist
-        # ERST babel build - erstellt dist/ Ordner
         npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
-        
-        echo "📁 Nach Babel Build:"
-        ls -la dist/
-        echo ""
-        
-        # DANACH index.html kopieren (dist/ existiert jetzt)
         cp index.html dist/
-        echo "✅ index.html kopiert"
-        
-        # Styles kopieren
         cp -r styles/ dist/styles/ || echo "Styles nicht gefunden"
         
-        echo "🔍 FINALE ÜBERPRÜFUNG:"
-        echo "index.html Größe:"
-        ls -la dist/index.html
-        echo "index.html Inhalt (Auszug):"
-        head -5 dist/index.html
+        echo "🔍 DETAILIERTE DIST-ANALYSE:"
+        echo "📁 Dist Struktur:"
+        find dist -type f -name "*.js" | head -10
         echo ""
-        echo "📁 Dist gesamter Inhalt:"
-        ls -la dist/
+        echo "📄 index.html Inhalt:"
+        cat dist/index.html | grep -o '<script src="[^"]*"' | head -5
+        echo ""
+        echo "🧩 Component Dateien:"
+        ls -la dist/components/ | grep -E "(Header|App|Toolbar)" || echo "Components nicht gefunden"
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
