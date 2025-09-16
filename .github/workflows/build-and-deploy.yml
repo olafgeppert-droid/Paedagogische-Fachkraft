@@ -23,20 +23,32 @@ jobs:
     
     - name: Build with Babel
       run: |
-        rm -rf dist
-        npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
-        cp index.html dist/
-        cp -r styles/ dist/styles/ || echo "Styles nicht gefunden"
+        echo "📁 VOR dem Build:"
+        ls -la
+        echo ""
+        echo "📁 scripts Ordner:"
+        ls -la scripts/ || echo "❌ scripts/ existiert nicht!"
+        echo ""
         
-        echo "🔍 DETAILIERTE DIST-ANALYSE:"
-        echo "📁 Dist Struktur:"
-        find dist -type f -name "*.js" | head -10
+        rm -rf dist
+        mkdir -p dist
+        
+        # BABEL BUILD MIT DETAILIERTEM OUTPUT
+        echo "🚀 Starte Babel Build..."
+        npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react --verbose
+        
+        echo "📁 NACH Babel Build:"
+        ls -la dist/ || echo "❌ dist/ ist leer!"
         echo ""
-        echo "📄 index.html Inhalt:"
-        cat dist/index.html | grep -o '<script src="[^"]*"' | head -5
+        echo "🔍 Components Ordner:"
+        ls -la dist/components/ 2>/dev/null || echo "❌ components/ nicht gefunden!"
         echo ""
-        echo "🧩 Component Dateien:"
-        ls -la dist/components/ | grep -E "(Header|App|Toolbar)" || echo "Components nicht gefunden"
+        echo "🔍 Utils Ordner:"
+        ls -la dist/utils/ 2>/dev/null || echo "❌ utils/ nicht gefunden!"
+        
+        # Kopiere index.html und styles
+        cp index.html dist/
+        cp -r styles/ dist/styles/ 2>/dev/null || echo "⚠️  styles nicht gefunden"
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
