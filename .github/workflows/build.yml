@@ -1,5 +1,6 @@
-name: Build and Deploy
+name: Build and Deploy Dist
 
+# Workflow startet bei jedem Push auf main
 on:
   push:
     branches:
@@ -10,24 +11,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Repository auschecken
+      # Schritt 1: Repository auschecken
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Node.js einrichten
+      # Schritt 2: Node.js einrichten
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      - name: Abhängigkeiten installieren
+      # Schritt 3: Abhängigkeiten installieren
+      - name: Install Dependencies
         run: npm install
 
+      # Schritt 4: Babel Build ausführen
       - name: Babel Build
         run: npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
 
-      - name: Änderungen committen
+      # Schritt 5: Automatisch Änderungen in dist/ committen (falls nötig)
+      - name: Commit Dist Changes
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add dist
-          git commit -m "Automatischer Build via GitHub Actions" || echo "Keine Änderungen"
+          git commit -m "Automatischer Build via GitHub Actions" || echo "Keine Änderungen zum Commit"
           git push
