@@ -26,29 +26,19 @@ jobs:
 
       - name: Babel Build
         run: |
-          # Lösche dist Ordner für clean build
           rm -rf dist
-          # Kompiliere scripts/ mit allen Unterordnern (inkl. components/)
           npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
-          
-          # Kopiere zusätzlich wichtige statische Dateien
           cp *.html dist/ 2>/dev/null || true
           cp *.css dist/ 2>/dev/null || true
           cp -r css/ dist/ 2>/dev/null || true
           cp -r assets/ dist/ 2>/dev/null || true
           cp -r images/ dist/ 2>/dev/null || true
-          cp -r public/ dist/ 2>/dev/null || true
 
       - name: Überprüfe dist Ordner
         run: |
-          echo "📁 Dist Ordner Struktur:"
-          find dist -type f -name "*.js" | head -20
-          echo ""
-          echo "🔍 Header.js vorhanden?"
-          find dist -name "Header.js" || echo "❌ Header.js nicht gefunden!"
-          echo ""
-          echo "📊 Gesamtstruktur:"
-          ls -la dist/
+          echo "Dist Ordner Struktur:"
+          find dist -type f -name "*.js" | head -10
+          find dist -name "Header.js" || echo "Header.js nicht gefunden!"
 
       - name: Artefakte speichern
         uses: actions/upload-artifact@v4
@@ -70,14 +60,6 @@ jobs:
           name: build-artifacts
           path: ./dist
 
-      - name: Überprüfe deploy Ordner
-        run: |
-          echo "🚀 Deploy Ordner Struktur:"
-          ls -la dist/
-          echo ""
-          echo "🔍 Header.js im deploy:"
-          find dist -name "Header.js" 2>/dev/null || echo "❌ Header.js nicht im deploy gefunden!"
-
       - name: Deploy via GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -85,8 +67,3 @@ jobs:
           publish_branch: gh-pages
           publish_dir: ./dist
           force_orphan: true
-
-      - name: Deploy Bestätigung
-        run: |
-          echo "✅ Deployment abgeschlossen!"
-          echo "🌐 Die App ist jetzt live auf: https://[dein-username].github.io/[repository-name]/"
