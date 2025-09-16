@@ -16,24 +16,18 @@ jobs:
     - run: npm ci
     - run: |
         rm -rf dist
-        # Babel Build
         npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
-        
-        # ALLE notwendigen Dateien kopieren
         cp index.html dist/
         cp -r styles/ dist/styles/
         cp -r assets/ dist/ 2>/dev/null || true
         cp -r images/ dist/ 2>/dev/null || true
-        cp -r lib/ dist/ 2>/dev/null || true
         
-        # Überprüfen ob styles kopiert wurden
-        echo "📁 Dist Struktur nach Kopiervorgang:"
+        echo "📁 Build abgeschlossen - Dist Inhalt:"
         ls -la dist/
-        echo "styles Ordner vorhanden?"
-        ls -la dist/styles/ || echo "❌ styles nicht kopiert"
+        ls -la dist/styles/ || echo "styles nicht gefunden"
     - uses: actions/upload-artifact@v4
       with:
-        name: dist
+        name: dist-files
         path: dist/
 
   deploy:
@@ -42,16 +36,25 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: actions/download-artifact@v4
+    - uses: actions/checkout@v4
+    
+    - name: Download artefacts
+      uses: actions/download-artifact@v4
       with:
-        name: dist
+        name: dist-files
         path: .
-    - name: Überprüfe finale Dist Struktur
+        
+    - name: Überprüfe Dateien
       run: |
-        echo "🚀 Finale Dist Struktur vor Deployment:"
-        ls -la dist/
-        echo "styles Ordner:"
-        ls -la dist/styles/ || echo "styles nicht gefunden"
+        echo "📁 Aktuelles Verzeichnis:"
+        ls -la
+        echo ""
+        echo "📁 Dist Ordner Inhalt:"
+        ls -la dist/ || echo "dist/ existiert nicht"
+        echo ""
+        echo "📁 Styles Ordner:"
+        ls -la dist/styles/ || echo "styles/ existiert nicht"
+        
     - uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
