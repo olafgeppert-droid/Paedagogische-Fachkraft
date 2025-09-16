@@ -38,7 +38,7 @@ jobs:
       - name: Deploy via GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GH_PAT }}
-          publish_branch: gh-pages
-          publish_dir: ./dist
-          force_orphan: true
+          github_token: ${{ secrets.GH_PAT }}   # <-- Dein Personal Access Token als Secret anlegen
+          publish_branch: gh-pages              # Branch, auf den deployed wird
+          publish_dir: ./dist                   # Direkt der dist-Ordner
+          force_orphan: true                    # Frischer Commit im gh-pages Branch
