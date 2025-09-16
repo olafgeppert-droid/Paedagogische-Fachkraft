@@ -1,0 +1,43 @@
+name: Build & Deploy All
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v3
+
+      - name: Node.js installieren
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Abhängigkeiten installieren
+        run: npm install
+
+      - name: Babel Build
+        run: npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v3
+
+      - name: Deploy via GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GH_PAT }}
+          publish_branch: gh-pages
+          publish_dir: ./  # Root-Ordner inkl. index.html + dist
