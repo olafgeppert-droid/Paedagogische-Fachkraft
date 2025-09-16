@@ -1,40 +1,43 @@
-# .github/workflows/build.yml
-name: Build and Deploy
+name: Build & Deploy
 
 on:
   push:
     branches:
-      - main
+      - main  # Löst den Workflow nur auf main aus
+  workflow_dispatch:  # Manuelles Auslösen möglich
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Repository auschecken
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: Node.js installieren
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: 20
 
-      - name: Install Dependencies
+      - name: Abhängigkeiten installieren
         run: npm install
 
-      - name: Build JS with Babel
+      - name: Babel Build
         run: npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
 
-  # Deployment zu GitHub Pages
   deploy:
-    runs-on: ubuntu-latest
+    name: Deploy to GitHub Pages
     needs: build
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repository
+      - name: Repository auschecken
         uses: actions/checkout@v3
 
-      - name: Deploy to GitHub Pages
+      - name: GitHub Pages Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./  # Da deine index.html im Root liegt und dist/ direkt im Root
+          github_token: ${{ secrets.GH_PAT }}  # Dein persönliches Token
+          publish_dir: ./  # Root, weil index.html im Root liegt
+          # Wenn du dist/ veröffentlichen willst, ändere zu: publish_dir: ./dist
