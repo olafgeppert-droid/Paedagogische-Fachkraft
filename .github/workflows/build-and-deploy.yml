@@ -4,71 +4,36 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   build:
-    name: Build
     runs-on: ubuntu-latest
-
     steps:
-      - name: Repository auschecken
-        uses: actions/checkout@v4
-
-      - name: Node.js installieren
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Abhängigkeiten installieren
-        run: npm ci
-
-      - name: Babel Build
-        run: |
-          rm -rf dist
-          npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
-          
-          # WICHTIG: index.html muss im root von dist liegen
-          cp index.html dist/ 2>/dev/null || echo "❌ index.html nicht gefunden - erstelle eine!"
-          cp *.css dist/ 2>/dev/null || true
-          cp -r css/ dist/ 2>/dev/null || true
-          cp -r assets/ dist/ 2>/dev/null || true
-          cp -r images/ dist/ 2>/dev/null || true
-
-      - name: Überprüfe dist Ordner
-        run: |
-          echo "📁 Dist Ordner Inhalt:"
-          ls -la dist/
-          echo ""
-          echo "🔍 Wichtige Dateien:"
-          [ -f "dist/index.html" ] && echo "✅ index.html vorhanden" || echo "❌ index.html FEHLT"
-          [ -f "dist/components/Header.js" ] && echo "✅ Header.js vorhanden" || echo "❌ Header.js FEHLT"
-
-      - name: Artefakte speichern
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: dist/
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - run: npm ci
+    - run: |
+        rm -rf dist
+        npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
+        cp index.html dist/ || echo "Index nicht gefunden"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: dist-files
+        path: dist/
 
   deploy:
-    name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
-      - name: Artefakte downloaden
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-          path: ./dist
-
-      - name: Deploy via GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: ./dist
-          force_orphan: true
+    - uses: actions/download-artifact@v4
+      with:
+        name: dist-files
+        path: dist/
+    - uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
