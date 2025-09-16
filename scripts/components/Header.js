@@ -20,3 +20,6 @@ const Header = ({ onMenuClick }) => {
         </header>
     );
 };
+
+export default Header;
+
