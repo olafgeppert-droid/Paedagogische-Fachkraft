@@ -28,7 +28,9 @@ jobs:
         run: |
           rm -rf dist
           npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
-          cp *.html dist/ 2>/dev/null || true
+          
+          # WICHTIG: index.html muss im root von dist liegen
+          cp index.html dist/ 2>/dev/null || echo "❌ index.html nicht gefunden - erstelle eine!"
           cp *.css dist/ 2>/dev/null || true
           cp -r css/ dist/ 2>/dev/null || true
           cp -r assets/ dist/ 2>/dev/null || true
@@ -36,9 +38,12 @@ jobs:
 
       - name: Überprüfe dist Ordner
         run: |
-          echo "Dist Ordner Struktur:"
-          find dist -type f -name "*.js" | head -10
-          find dist -name "Header.js" || echo "Header.js nicht gefunden!"
+          echo "📁 Dist Ordner Inhalt:"
+          ls -la dist/
+          echo ""
+          echo "🔍 Wichtige Dateien:"
+          [ -f "dist/index.html" ] && echo "✅ index.html vorhanden" || echo "❌ index.html FEHLT"
+          [ -f "dist/components/Header.js" ] && echo "✅ Header.js vorhanden" || echo "❌ Header.js FEHLT"
 
       - name: Artefakte speichern
         uses: actions/upload-artifact@v4
