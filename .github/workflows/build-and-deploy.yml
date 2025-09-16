@@ -13,32 +13,46 @@ jobs:
 
     steps:
       - name: Repository auschecken
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Node.js installieren
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Abhängigkeiten installieren
-        run: npm install
+        run: npm ci
 
       - name: Babel Build
         run: npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
+
+      - name: Artefakte speichern
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/
 
   deploy:
     name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
 
     steps:
-      - name: Repository auschecken
-        uses: actions/checkout@v3
+      - name: Artefakte downloaden
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: ./dist
 
       - name: Deploy via GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GH_PAT }}   # <-- Dein Personal Access Token als Secret anlegen
-          publish_branch: gh-pages              # Branch, auf den deployed wird
-          publish_dir: ./dist                   # Direkt der dist-Ordner
-          force_orphan: true                    # Frischer Commit im gh-pages Branch
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./dist
+          force_orphan: true
