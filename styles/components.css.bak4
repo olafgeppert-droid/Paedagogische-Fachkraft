@@ -340,3 +340,15 @@
 ::-webkit-scrollbar-thumb:hover {
     background: var(--secondary-color);
 }
+
+.header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.header-version {
+    font-size: 0.9em;
+    color: #666;
+}
