@@ -1,58 +1,26 @@
-name: Build & Deploy All
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Build with Babel
+- name: Build with Babel
       run: |
-        echo "📁 Vor dem Build:"
-        ls -la
-        echo ""
-        
-        # Lösche dist
         rm -rf dist
-        # Babel Build
         npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react
         
-        echo "📁 Nach Babel Build:"
-        ls -la dist/
-        echo ""
+        # ERSTELLE index.html falls nicht vorhanden
+        if [ ! -f "index.html" ]; then
+          echo "⚠️  index.html nicht gefunden - erstelle eine..."
+          cat > dist/index.html << 'EOL'
+<!DOCTYPE html>
+<html>
+<head>
+    <title>App</title>
+</head>
+<body>
+    <div id="root"></div>
+    <script src="components/App.js"></script>
+</body>
+</html>
+EOL
+        else
+          echo "✅ Kopiere index.html"
+          cp index.html dist/
+        fi
         
-        # KOPIERE index.html
-        echo "🔄 Kopiere index.html..."
-        cp index.html dist/
-        echo "✅ index.html kopiert"
-        
-        # KOPIERE styles
-        echo "🔄 Kopiere styles..."
-        cp -r styles/ dist/styles/ 2>/dev/null || echo "⚠️  Styles nicht gefunden"
-        
-        echo "📁 Finaler dist Inhalt:"
-        ls -la dist/
-        echo ""
-        echo "📄 index.html vorhanden?"
-        ls -la dist/index.html || echo "❌ index.html FEHLT im dist!"
-    
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist
+        cp -r styles/ dist/styles/ 2>/dev/null || true
