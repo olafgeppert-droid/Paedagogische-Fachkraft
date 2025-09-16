@@ -6,7 +6,7 @@ const Header = ({ onMenuClick }) => {
         day: 'numeric'
     });
 
-    const appVersion = "1.2.8"; // <-- Hier die Versionsnummer
+    const appVersion = "1.2.9"; // <-- Hier die Versionsnummer
 
     return (
         <header className="header">
