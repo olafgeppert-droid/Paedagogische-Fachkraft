@@ -379,8 +379,8 @@ const clearAllData = async (db, setStudents, setEntries, setSelectedStudent) => 
     }
 };
 
-// Exportiere alle Funktionen
-export {
+// Globale Registrierung aller Funktionen (statt "export")
+window.database = {
     setupDB,
     getEntriesByStudentId,
     getEntriesByDate,
