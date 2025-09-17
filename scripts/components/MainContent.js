@@ -1,3 +1,6 @@
+/** @jsxImportSource react */
+import React from 'react';
+
 const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditEntry }) => {
     if (viewMode === 'student' && selectedStudent) {
         return (
@@ -87,5 +90,5 @@ const EntryCard = ({ entry, student, onEdit }) => {
     );
 };
 
-// statt "export default"
+// Globale Registrierung als window-Modul
 window.MainContent = MainContent;
