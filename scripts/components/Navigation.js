@@ -1,3 +1,6 @@
+/** @jsxImportSource react */
+import React from 'react';
+
 const Navigation = ({
     isOpen,
     students,
@@ -188,5 +191,5 @@ const Navigation = ({
     );
 };
 
-// statt "export default"
+// Globale Registrierung als window-Modul
 window.Navigation = Navigation;
