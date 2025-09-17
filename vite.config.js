@@ -1,22 +1,19 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+
+// GitHub Pages Base Path
+// Setze hier den Repository-Namen, falls die Seite nicht unter root läuft
+// z.B. repo-name -> '/repo-name/'
+const base = '/root/'; // ändere 'root' auf deinen Repo-Pfad, falls nötig
 
 export default defineConfig({
+  base: base,
   plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      'components': path.resolve(__dirname, './src/components'),
-      'styles': path.resolve(__dirname, './src/styles'),
-    },
-  },
-  server: {
-    port: 5173, // beliebiger Port, z.B. 5173
-    open: true, // öffnet automatisch im Browser
-  },
   build: {
     outDir: 'dist',
-    sourcemap: true,
-  },
+    emptyOutDir: true,
+    rollupOptions: {
+      input: '/index.html'
+    }
+  }
 });
