@@ -20,4 +20,5 @@ const Header = ({ onMenuClick }) => {
     );
 };
 
-export default Header;
+// statt "export default"
+window.Header = Header;
