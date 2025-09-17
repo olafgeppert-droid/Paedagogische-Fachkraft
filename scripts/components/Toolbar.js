@@ -108,4 +108,5 @@ const Toolbar = ({
     );
 };
 
-export default Toolbar;
+// statt "export default"
+window.Toolbar = Toolbar;
