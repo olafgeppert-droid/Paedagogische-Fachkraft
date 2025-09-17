@@ -10,49 +10,45 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Build with Babel
-      run: |
-        echo "📁 VOR dem Build:"
-        ls -la
-        echo ""
-        echo "📁 scripts Ordner:"
-        ls -la scripts/ || echo "❌ scripts/ existiert nicht!"
-        echo ""
-        
-        rm -rf dist
-        mkdir -p dist
-        
-        # BABEL BUILD MIT DETAILIERTEM OUTPUT
-        echo "🚀 Starte Babel Build..."
-        npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react --verbose
-        
-        echo "📁 NACH Babel Build:"
-        ls -la dist/ || echo "❌ dist/ ist leer!"
-        echo ""
-        echo "🔍 Components Ordner:"
-        ls -la dist/components/ 2>/dev/null || echo "❌ components/ nicht gefunden!"
-        echo ""
-        echo "🔍 Utils Ordner:"
-        ls -la dist/utils/ 2>/dev/null || echo "❌ utils/ nicht gefunden!"
-        
-        # Kopiere index.html und styles
-        cp index.html dist/
-        cp -r styles/ dist/styles/ 2>/dev/null || echo "⚠️  styles nicht gefunden"
-    
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist
-        
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build with Babel
+        run: |
+          echo "📁 Vor dem Build:"
+          ls -la
+          echo ""
+
+          rm -rf dist
+          mkdir -p dist
+
+          # BABEL BUILD MIT DETAILIERTEM OUTPUT
+          echo "🚀 Starte Babel Build..."
+          npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react --verbose
+
+          echo "📁 Nach Babel Build:"
+          ls -la dist/ || echo "❌ dist/ ist leer!"
+
+          echo "🔍 Components Ordner:"
+          ls -la dist/components/ 2>/dev/null || echo "❌ components/ nicht gefunden!"
+
+          echo "🔍 Utils Ordner:"
+          ls -la dist/utils/ 2>/dev/null || echo "❌ utils/ nicht gefunden!"
+
+          # Kopiere index.html und styles
+          cp index.html dist/
+          cp -r styles/ dist/styles/ 2>/dev/null || echo "⚠️ styles nicht gefunden"
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
