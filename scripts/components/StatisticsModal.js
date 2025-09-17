@@ -1,3 +1,4 @@
+/** @jsxImportSource react */
 import React from 'react';
 
 const StatisticsModal = ({ students, entries, onClose }) => {
@@ -35,7 +36,6 @@ const StatisticsModal = ({ students, entries, onClose }) => {
     );
 };
 
-// calculateStatistics Funktion muss definiert oder importiert werden
 function calculateStatistics(students, entries) {
     const totalStudents = students.length;
     const totalEntries = entries.length;
