@@ -4,10 +4,31 @@ node_modules/
 # Build output
 dist/
 
+# Dependency directories
+jspm_packages/
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# System files
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+
+# Mac system files
 .DS_Store
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Lock files (optional, wenn du nur package.json pflegen willst)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
