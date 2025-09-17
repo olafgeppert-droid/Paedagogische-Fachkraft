@@ -27,8 +27,3 @@ pnpm-debug.log*
 .env.development.local
 .env.test.local
 .env.production.local
-
-# Lock files (optional, wenn du nur package.json pflegen willst)
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
