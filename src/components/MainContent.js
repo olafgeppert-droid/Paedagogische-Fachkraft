@@ -69,17 +69,15 @@ const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditE
 };
 
 const EntryCard = ({ entry, student, onEdit }) => {
+    const studentName = student?.name || entry.studentName || `Schüler ${entry.studentId}`;
+
     return (
         <div className="entry-card">
             <div className="entry-header">
                 <span>{entry.subject}</span>
                 <span>{new Date(entry.date).toLocaleDateString('de-DE')}</span>
             </div>
-            {student && (
-                <p>
-                    <strong>Schüler:</strong> {student.name}
-                </p>
-            )}
+            <p><strong>Schüler:</strong> {studentName}</p>
             <p><strong>Beobachtungen:</strong> {entry.observations}</p>
             <p><strong>Maßnahmen:</strong> {entry.measures}</p>
             <p><strong>Erfolg:</strong> {entry.erfolg}</p>
@@ -90,4 +88,3 @@ const EntryCard = ({ entry, student, onEdit }) => {
 };
 
 export default MainContent;
-
