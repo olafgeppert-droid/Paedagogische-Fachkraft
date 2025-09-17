@@ -107,5 +107,5 @@ const Toolbar = ({
     );
 };
 
-// statt "export default"
-window.Toolbar = Toolbar;
+// ES-Modul Export
+export default Toolbar;
