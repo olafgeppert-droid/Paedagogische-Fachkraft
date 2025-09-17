@@ -4,8 +4,9 @@
   "description": "Eine webbasierte Anwendung zur Dokumentation von Beobachtungen, Maßnahmen und Entwicklungen bei Kindern und Jugendlichen.",
   "main": "index.js",
   "scripts": {
-    "build": "babel scripts --out-dir dist --copy-files",
-    "watch": "babel scripts --out-dir dist --copy-files --watch"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "",
@@ -14,7 +15,10 @@
     "@babel/cli": "^7.28.3",
     "@babel/core": "^7.28.4",
     "@babel/preset-env": "^7.28.3",
-    "@babel/preset-react": "^7.27.1"
+    "@babel/preset-react": "^7.27.1",
+    "vite": "^5.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "babel": {
     "presets": ["@babel/preset-env", "@babel/preset-react"]
