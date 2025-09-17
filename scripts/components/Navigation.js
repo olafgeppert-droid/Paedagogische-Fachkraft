@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-
 const Navigation = ({
     isOpen,
     students,
@@ -14,8 +12,8 @@ const Navigation = ({
     onShowSettings,
     onShowHelp
 }) => {
-    const [searchTerm, setSearchTerm] = useState(filters.search);
-    const [localFilters, setLocalFilters] = useState(filters);
+    const [searchTerm, setSearchTerm] = React.useState(filters.search);
+    const [localFilters, setLocalFilters] = React.useState(filters);
 
     const handleSearchChange = (e) => {
         const value = e.target.value;
@@ -41,12 +39,13 @@ const Navigation = ({
         onFilterChange(clearedFilters);
     };
 
-    const hasActiveFilters = localFilters.search || localFilters.schoolYear || localFilters.school || localFilters.className;
+    const hasActiveFilters =
+        localFilters.search || localFilters.schoolYear || localFilters.school || localFilters.className;
 
     return (
         <nav className={`nav ${isOpen ? 'open' : ''}`}>
             <h3>Navigation</h3>
-            
+
             <div className="search-filter">
                 <div className="filter-group">
                     <input
@@ -57,7 +56,7 @@ const Navigation = ({
                         onChange={handleSearchChange}
                     />
                 </div>
-                
+
                 <div className="filter-group">
                     <label className="filter-label">Schuljahr</label>
                     <select
@@ -66,12 +65,12 @@ const Navigation = ({
                         onChange={(e) => handleFilterChange('schoolYear', e.target.value)}
                     >
                         <option value="">Alle Schuljahre</option>
-                        {masterData.schoolYears && masterData.schoolYears.map(year => (
+                        {masterData.schoolYears && masterData.schoolYears.map((year) => (
                             <option key={year} value={year}>{year}</option>
                         ))}
                     </select>
                 </div>
-                
+
                 <div className="filter-group">
                     <label className="filter-label">Schule</label>
                     <select
@@ -80,12 +79,12 @@ const Navigation = ({
                         onChange={(e) => handleFilterChange('school', e.target.value)}
                     >
                         <option value="">Alle Schulen</option>
-                        {masterData.schools && Object.keys(masterData.schools).map(school => (
+                        {masterData.schools && Object.keys(masterData.schools).map((school) => (
                             <option key={school} value={school}>{school}</option>
                         ))}
                     </select>
                 </div>
-                
+
                 <div className="filter-group">
                     <label className="filter-label">Klasse</label>
                     <select
@@ -95,12 +94,13 @@ const Navigation = ({
                         disabled={!localFilters.school}
                     >
                         <option value="">Alle Klassen</option>
-                        {localFilters.school && masterData.schools[localFilters.school]?.map(className => (
-                            <option key={className} value={className}>{className}</option>
-                        ))}
+                        {localFilters.school &&
+                            masterData.schools[localFilters.school]?.map((className) => (
+                                <option key={className} value={className}>{className}</option>
+                            ))}
                     </select>
                 </div>
-                
+
                 <div className="filter-group">
                     <label className="filter-label">Tag</label>
                     <input
@@ -110,9 +110,9 @@ const Navigation = ({
                         onChange={(e) => onDateSelect(e.target.value)}
                     />
                 </div>
-                
+
                 {hasActiveFilters && (
-                    <button 
+                    <button
                         className="button button-warning"
                         onClick={clearFilters}
                         style={{ width: '100%', marginTop: '0.5rem' }}
@@ -121,18 +121,18 @@ const Navigation = ({
                     </button>
                 )}
             </div>
-            
+
             <div className="students-section">
                 <div className="section-header">
                     <h4>Kind</h4>
                     <span className="student-count">{students.length}</span>
                 </div>
-                
+
                 {students.length === 0 ? (
                     <div className="empty-state">
                         <p>Keine Kinder gefunden</p>
                         {hasActiveFilters && (
-                            <button 
+                            <button
                                 className="button"
                                 onClick={clearFilters}
                                 style={{ marginTop: '10px', width: '100%' }}
@@ -143,15 +143,18 @@ const Navigation = ({
                     </div>
                 ) : (
                     <ul className="students-list">
-                        {students.map(student => (
+                        {students.map((student) => (
                             <li
                                 key={student.id}
                                 className={`student-item ${selectedStudent?.id === student.id ? 'selected' : ''}`}
                                 onClick={() => onStudentSelect(student)}
                             >
                                 <span className="student-avatar">
-                                    {student.gender === 'weiblich' ? '👧' : 
-                                     student.gender === 'männlich' ? '👦' : '👤'}
+                                    {student.gender === 'weiblich'
+                                        ? '👧'
+                                        : student.gender === 'männlich'
+                                            ? '👦'
+                                            : '👤'}
                                 </span>
                                 <div className="student-info">
                                     <div className="student-name">{student.name}</div>
@@ -162,7 +165,7 @@ const Navigation = ({
                     </ul>
                 )}
             </div>
-            
+
             <div className="nav-footer">
                 <div className="footer-section">
                     <h4>Aktionen</h4>
@@ -176,7 +179,7 @@ const Navigation = ({
                         ❓ Hilfe
                     </button>
                 </div>
-                
+
                 <div className="app-info">
                     <p>Willkommen! Wählen Sie ein Kind aus der Liste.</p>
                 </div>
@@ -185,4 +188,5 @@ const Navigation = ({
     );
 };
 
-export default Navigation;
+// statt "export default"
+window.Navigation = Navigation;
