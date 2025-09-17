@@ -17,11 +17,6 @@
     "@babel/preset-react": "^7.27.1"
   },
   "babel": {
-    "presets": [
-      ["@babel/preset-env"],
-      ["@babel/preset-react", {
-        "runtime": "automatic"
-      }]
-    ]
+    "presets": ["@babel/preset-env", "@babel/preset-react"]
   }
 }
