@@ -5,20 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pädagogische Dokumentation</title>
 
-    <!-- Eigene Styles -->
+    <!-- Styles -->
     <link rel="stylesheet" href="./styles/main.css">
     <link rel="stylesheet" href="./styles/components.css">
-
-    <!-- Fallback für ältere Browser -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
 </head>
 <body>
     <div id="root"></div>
 
-    <!-- React & ReactDOM -->
+    <!-- React + App -->
     <script type="module">
         import React from 'https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js';
-        import ReactDOM from 'https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js';
         import { createRoot } from 'https://cdn.jsdelivr.net/npm/react-dom@18.2.0/client.js';
 
         // Komponenten importieren
@@ -32,7 +28,6 @@
         import SettingsModal from './components/SettingsModal.js';
         import HelpModal from './components/HelpModal.js';
 
-        // Haupt-App-Komponente
         const App = () => {
             const [selectedStudent, setSelectedStudent] = React.useState(null);
             const [selectedDate, setSelectedDate] = React.useState(new Date());
