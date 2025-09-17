@@ -14,8 +14,8 @@
 
     <!-- React + App -->
     <script type="module">
-        import React from 'https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js';
-        import { createRoot } from 'https://cdn.jsdelivr.net/npm/react-dom@18.2.0/client.js';
+        import React from 'https://cdn.jsdelivr.net/npm/react@18.2.0/+esm';
+        import { createRoot } from 'https://cdn.jsdelivr.net/npm/react-dom@18.2.0/+esm';
 
         // Komponenten importieren
         import Header from './components/Header.js';
@@ -51,7 +51,7 @@
                         canUndo={false}
                         canRedo={false}
                     />
-                    <main>
+                    <main className="main">
                         <StudentDetails student={selectedStudent} />
                         <DayDetails date={selectedDate} />
                     </main>
