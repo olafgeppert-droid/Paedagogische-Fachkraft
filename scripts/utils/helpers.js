@@ -112,3 +112,13 @@ const calculateStatistics = (students, entries) => {
         ratings
     };
 };
+
+// Globale Registrierung aller Funktionen
+window.helpers = {
+    filterStudents,
+    applySettings,
+    saveEntry,
+    saveSettingsHelper,
+    saveMasterDataHelper,
+    calculateStatistics
+};
