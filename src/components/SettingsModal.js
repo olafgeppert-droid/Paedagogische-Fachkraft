@@ -7,6 +7,12 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave(formData);
+
+        // Theme direkt auf Body anwenden
+        document.body.classList.remove('light-theme', 'dark-theme', 'colored-theme');
+        if(formData.theme === 'light') document.body.classList.add('light-theme');
+        if(formData.theme === 'dark') document.body.classList.add('dark-theme');
+        if(formData.theme === 'colored') document.body.classList.add('colored-theme');
     };
 
     const handleMasterDataSubmit = (e) => {
@@ -15,6 +21,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
         onClose();
     };
 
+    /* --- Stammdaten-Handling bleibt unverändert --- */
     const addSchoolYear = () => {
         const newYear = prompt('Neues Schuljahr hinzufügen (Format: YYYY/YYYY):');
         if (newYear && !masterFormData.schoolYears.includes(newYear)) {
@@ -99,9 +106,9 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                 title="Dunkel"
                             ></div>
                             <div
-                                className={`theme-option theme-high-contrast ${formData.theme === 'high-contrast' ? 'selected' : ''}`}
-                                onClick={() => setFormData({ ...formData, theme: 'high-contrast' })}
-                                title="Kontrastreich"
+                                className={`theme-option theme-colored ${formData.theme === 'colored' ? 'selected' : ''}`}
+                                onClick={() => setFormData({ ...formData, theme: 'colored' })}
+                                title="Farbig"
                             ></div>
                         </div>
                     </div>
@@ -141,6 +148,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                 <form onSubmit={handleMasterDataSubmit}>
                     <h3>Stammdaten verwalten</h3>
 
+                    {/* Schuljahre */}
                     <div className="form-group">
                         <label className="form-label">Schuljahre</label>
                         <div>
@@ -163,6 +171,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                         </div>
                     </div>
 
+                    {/* Schulen & Klassen */}
                     <div className="form-group">
                         <label className="form-label">Schulen und Klassen</label>
                         <div>
@@ -220,5 +229,4 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
     );
 };
 
-// ES-Modul Export
 export default SettingsModal;
