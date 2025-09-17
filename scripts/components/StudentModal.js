@@ -194,5 +194,5 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
     );
 };
 
-// statt "export default"
-window.StudentModal = StudentModal;
+export default StudentModal;
+
