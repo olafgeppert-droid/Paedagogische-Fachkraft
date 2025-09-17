@@ -54,20 +54,21 @@
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/idb@7/build/umd.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- KORRIGIERTE PFADE MIT SCHLIEßENDEN TAGS -->
-    <script src="./database.js"></script>
-    <script src="./utils/helpers.js"></script>
-    <script src="./components/Header.js"></script>
-    <script src="./components/Toolbar.js"></script>
-    <script src="./components/Navigation.js"></script>
-    <script src="./components/MainContent.js"></script>
-    <script src="./components/StudentModal.js"></script>
-    <script src="./components/EntryModal.js"></script>
-    <script src="./components/SettingsModal.js"></script>
-    <script src="./components/StatisticsModal.js"></script>
-    <script src="./components/HelpModal.js"></script>
-    <script src="./app.js"></script>
+    <!-- Komponenten als window-Module -->
+    <script type="text/babel" src="./database.js"></script>
+    <script type="text/babel" src="./utils/helpers.js"></script>
+    <script type="text/babel" src="./components/Header.js"></script>
+    <script type="text/babel" src="./components/Toolbar.js"></script>
+    <script type="text/babel" src="./components/Navigation.js"></script>
+    <script type="text/babel" src="./components/MainContent.js"></script>
+    <script type="text/babel" src="./components/StudentModal.js"></script>
+    <script type="text/babel" src="./components/EntryModal.js"></script>
+    <script type="text/babel" src="./components/SettingsModal.js"></script>
+    <script type="text/babel" src="./components/StatisticsModal.js"></script>
+    <script type="text/babel" src="./components/HelpModal.js"></script>
+    <script type="text/babel" src="./app.js"></script>
 
     <!-- Fallback für Fehler -->
     <script>
