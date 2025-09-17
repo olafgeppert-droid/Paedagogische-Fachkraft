@@ -1,0 +1,40 @@
+:root {
+    /* === Allgemein / Standard (Light) === */
+    --primary-color: #007bff;       /* Hauptfarbe Header, Selected Item */
+    --secondary-color: #6c757d;     /* Buttons Standard */
+    --success-color: #28a745;       /* Erfolg */
+    --danger-color: #dc3545;        /* Gefahr / Löschen */
+    --warning-color: #ffc107;       /* Warnung / Filter löschen */
+    --background-color: #ffffff;    /* Hintergrund hell */
+    --text-color: #212529;          /* Text dunkel */
+    --border-color: #dee2e6;        /* Rahmenfarbe */
+    --font-size: 1rem;
+    --input-font-size: 0.95rem;
+
+    --header-height: 60px;
+    --toolbar-height: 70px;
+}
+
+/* === Dark Theme === */
+body.dark-theme {
+    --primary-color: #0d6efd;
+    --secondary-color: #495057;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --background-color: #343a40;
+    --text-color: #f8f9fa;
+    --border-color: #495057;
+}
+
+/* === Colored Theme (statt Farbig / ehemals High-Contrast) === */
+body.colored-theme {
+    --primary-color: #ff6f61;       /* Koralle / Header */
+    --secondary-color: #6b5b95;     /* Button Standard */
+    --success-color: #88b04b;       /* Grün für Erfolg */
+    --danger-color: #f7cac9;        /* Rosa für löschen */
+    --warning-color: #ffb347;       /* Orange für Warnungen */
+    --background-color: #fff8e7;    /* Leichter Cremeton */
+    --text-color: #2d2d2d;          /* dunkler Text */
+    --border-color: #d9d9d9;        /* leichte graue Rahmen */
+}
