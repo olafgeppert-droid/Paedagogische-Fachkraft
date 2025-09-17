@@ -1,4 +1,3 @@
-/** @jsxImportSource react */
 import React from 'react';
 
 const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditEntry }) => {
