@@ -91,4 +91,5 @@ const EntryCard = ({ entry, student, onEdit }) => {
 };
 
 // Globale Registrierung als window-Modul
-window.MainContent = MainContent;
+export default MainContent;
+
