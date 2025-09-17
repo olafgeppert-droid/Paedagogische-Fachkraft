@@ -1,5 +1,3 @@
-import React from 'react';
-
 const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditEntry }) => {
     if (viewMode === 'student' && selectedStudent) {
         return (
@@ -10,12 +8,12 @@ const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditE
                         <p>Keine Einträge für dieses Kind.</p>
                     </div>
                 ) : (
-                    entries.map(entry => (
-                        <EntryCard 
-                            key={entry.id} 
-                            entry={entry} 
+                    entries.map((entry) => (
+                        <EntryCard
+                            key={entry.id}
+                            entry={entry}
                             student={selectedStudent}
-                            onEdit={onEditEntry}
+                            onEdit={() => onEditEntry(entry)}
                         />
                     ))
                 )}
@@ -23,13 +21,13 @@ const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditE
         );
     } else if (viewMode === 'day' && selectedDate) {
         const entriesByStudent = {};
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
             if (!entriesByStudent[entry.studentId]) {
                 entriesByStudent[entry.studentId] = [];
             }
             entriesByStudent[entry.studentId].push(entry);
         });
-        
+
         return (
             <div className="main">
                 <h2>Einträge für {new Date(selectedDate).toLocaleDateString('de-DE')}</h2>
@@ -41,11 +39,11 @@ const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditE
                     Object.entries(entriesByStudent).map(([studentId, studentEntries]) => (
                         <div key={studentId} style={{ marginBottom: '2rem' }}>
                             <h3>{studentEntries[0].studentName || `Schüler ${studentId}`}</h3>
-                            {studentEntries.map(entry => (
-                                <EntryCard 
-                                    key={entry.id} 
-                                    entry={entry} 
-                                    onEdit={onEditEntry}
+                            {studentEntries.map((entry) => (
+                                <EntryCard
+                                    key={entry.id}
+                                    entry={entry}
+                                    onEdit={() => onEditEntry(entry)}
                                 />
                             ))}
                         </div>
@@ -58,8 +56,10 @@ const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditE
             <div className="main">
                 <div className="welcome-screen">
                     <h2>Willkommen!</h2>
-                    <p>Wählen Sie links ein Kind aus der Liste, um die Protokolle anzuzeigen, 
-                       oder wählen Sie einen Tag, um alle Einträge für diesen Tag zu sehen.</p>
+                    <p>
+                        Wählen Sie links ein Kind aus der Liste, um die Protokolle anzuzeigen,
+                        oder wählen Sie einen Tag, um alle Einträge für diesen Tag zu sehen.
+                    </p>
                 </div>
             </div>
         );
@@ -73,7 +73,11 @@ const EntryCard = ({ entry, student, onEdit }) => {
                 <span>{entry.subject}</span>
                 <span>{new Date(entry.date).toLocaleDateString('de-DE')}</span>
             </div>
-            {student && <p><strong>Schüler:</strong> {student.name}</p>}
+            {student && (
+                <p>
+                    <strong>Schüler:</strong> {student.name}
+                </p>
+            )}
             <p><strong>Beobachtungen:</strong> {entry.observations}</p>
             <p><strong>Maßnahmen:</strong> {entry.measures}</p>
             <p><strong>Erfolg:</strong> {entry.erfolg}</p>
@@ -83,4 +87,5 @@ const EntryCard = ({ entry, student, onEdit }) => {
     );
 };
 
-export default MainContent;
+// statt "export default"
+window.MainContent = MainContent;
