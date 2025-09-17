@@ -4,6 +4,9 @@ node_modules/
 # Build output
 dist/
 
+# Vite cache
+.vite/
+
 # Dependency directories
 jspm_packages/
 
@@ -27,3 +30,7 @@ pnpm-debug.log*
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Optional: Coverage reports, Test output
+coverage/
+*.lcov
