@@ -220,5 +220,5 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
     );
 };
 
-// Globale Registrierung als window-Modul
-window.SettingsModal = SettingsModal;
+// ES-Modul Export
+export default SettingsModal;
