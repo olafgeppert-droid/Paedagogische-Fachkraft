@@ -1,3 +1,6 @@
+/** @jsxImportSource react */
+import React from 'react';
+
 const Header = ({ onMenuClick }) => {
     const currentDate = new Date().toLocaleDateString('de-DE', {
         weekday: 'long',
@@ -20,5 +23,5 @@ const Header = ({ onMenuClick }) => {
     );
 };
 
-// statt "export default"
+// Globale Registrierung als window-Module
 window.Header = Header;
