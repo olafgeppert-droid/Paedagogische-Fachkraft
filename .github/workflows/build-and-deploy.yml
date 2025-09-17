@@ -1,58 +1,36 @@
-name: Build & Deploy All
+name: Build & Deploy
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+
     steps:
-      # 1️⃣ Code auschecken
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
 
-      # 2️⃣ Node.js einrichten
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
 
-      # 3️⃣ Abhängigkeiten installieren
-      - name: Install dependencies
-        run: npm ci
+    - name: Clean previous build
+      run: |
+        rm -rf dist
+        rm -rf node_modules
+        rm package-lock.json
 
-      # 4️⃣ Build mit Babel
-      - name: Build with Babel
-        run: |
-          echo "📁 Vor dem Build:"
-          ls -la
+    - name: Install dependencies
+      run: npm install
 
-          # dist Ordner sauber erstellen
-          rm -rf dist
-          mkdir -p dist
+    - name: Build with Babel
+      run: npx babel scripts --out-dir dist --copy-files
 
-          echo "🚀 Starte Babel Build..."
-          npx babel scripts --out-dir dist --copy-files --presets @babel/preset-env,@babel/preset-react --verbose
-
-          echo "📁 Nach Babel Build:"
-          ls -la dist/ || echo "❌ dist/ ist leer!"
-
-          # Prüfen auf Komponenten und Utils
-          echo "🔍 Components Ordner:"
-          ls -la dist/components/ 2>/dev/null || echo "❌ components/ nicht gefunden!"
-          echo "🔍 Utils Ordner:"
-          ls -la dist/utils/ 2>/dev/null || echo "❌ utils/ nicht gefunden!"
-
-          # index.html und styles kopieren
-          cp index.html dist/
-          cp -r styles/ dist/styles/ 2>/dev/null || echo "⚠️  styles nicht gefunden"
-
-      # 5️⃣ Deployment auf GitHub Pages
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
