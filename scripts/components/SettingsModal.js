@@ -1,3 +1,4 @@
+/** @jsxImportSource react */
 import React, { useState } from 'react';
 
 const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose }) => {
@@ -220,4 +221,5 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
     );
 };
 
-export default SettingsModal;
+// Globale Registrierung als window-Modul
+window.SettingsModal = SettingsModal;
