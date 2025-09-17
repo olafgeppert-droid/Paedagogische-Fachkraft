@@ -65,6 +65,9 @@ Dieses Projekt steht unter der MIT-Lizenz.
 
 pädagogische-dokumentation/ 
 │ 
+├── .github/workflows/
+│   └── build-and-deploy.yml
+├── dist/
 ├── index.html 
 ├── package.json
 ├── .gitignore
