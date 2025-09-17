@@ -1,7 +1,5 @@
-import React, { useState } from 'react';
-
 const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
-    const [formData, setFormData] = useState(student || {
+    const [formData, setFormData] = React.useState(student || {
         name: '',
         schoolYear: '',
         school: '',
@@ -11,24 +9,24 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
         germanLevel: '',
         notes: ''
     });
-    
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    
+
+    const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave(formData);
     };
-    
+
     const handleDelete = () => {
         setShowDeleteConfirm(true);
     };
-    
+
     const confirmDelete = () => {
         onDelete(student.id);
         setShowDeleteConfirm(false);
         onClose();
     };
-    
+
     const cancelDelete = () => {
         setShowDeleteConfirm(false);
     };
@@ -40,14 +38,21 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                     <h2>{student ? 'Kind bearbeiten' : 'Neues Kind hinzufügen'}</h2>
                     <button className="modal-close" onClick={onClose}>×</button>
                 </div>
-                
+
                 {showDeleteConfirm ? (
                     <div className="delete-confirmation">
                         <h3>Kind löschen</h3>
-                        <p>Sind Sie sicher, dass Sie "{student.name}" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.</p>
+                        <p>
+                            Sind Sie sicher, dass Sie "{student.name}" löschen möchten?  
+                            Diese Aktion kann nicht rückgängig gemacht werden.
+                        </p>
                         <div className="form-actions">
-                            <button type="button" className="button" onClick={cancelDelete}>Abbrechen</button>
-                            <button type="button" className="button button-danger" onClick={confirmDelete}>Endgültig löschen</button>
+                            <button type="button" className="button" onClick={cancelDelete}>
+                                Abbrechen
+                            </button>
+                            <button type="button" className="button button-danger" onClick={confirmDelete}>
+                                Endgültig löschen
+                            </button>
                         </div>
                     </div>
                 ) : (
@@ -62,7 +67,7 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                                 required
                             />
                         </div>
-                        
+
                         <div className="form-group">
                             <label className="form-label">Schuljahr</label>
                             <select
@@ -72,12 +77,14 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                                 required
                             >
                                 <option value="">Bitte wählen</option>
-                                {masterData.schoolYears.map(year => (
-                                    <option key={year} value={year}>{year}</option>
+                                {masterData.schoolYears.map((year) => (
+                                    <option key={year} value={year}>
+                                        {year}
+                                    </option>
                                 ))}
                             </select>
                         </div>
-                        
+
                         <div className="form-group">
                             <label className="form-label">Schule</label>
                             <select
@@ -87,12 +94,14 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                                 required
                             >
                                 <option value="">Bitte wählen</option>
-                                {Object.keys(masterData.schools || {}).map(school => (
-                                    <option key={school} value={school}>{school}</option>
+                                {Object.keys(masterData.schools || {}).map((school) => (
+                                    <option key={school} value={school}>
+                                        {school}
+                                    </option>
                                 ))}
                             </select>
                         </div>
-                        
+
                         <div className="form-group">
                             <label className="form-label">Klasse</label>
                             <select
@@ -102,12 +111,15 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                                 required
                             >
                                 <option value="">Bitte wählen</option>
-                                {formData.school && masterData.schools[formData.school]?.map(className => (
-                                    <option key={className} value={className}>{className}</option>
-                                ))}
+                                {formData.school &&
+                                    masterData.schools[formData.school]?.map((className) => (
+                                        <option key={className} value={className}>
+                                            {className}
+                                        </option>
+                                    ))}
                             </select>
                         </div>
-                        
+
                         <div className="form-group">
                             <label className="form-label">Geschlecht</label>
                             <select
@@ -121,7 +133,7 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                                 <option value="divers">Divers</option>
                             </select>
                         </div>
-                        
+
                         <div className="form-group">
                             <label className="form-label">Nationalität</label>
                             <input
@@ -131,7 +143,7 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                                 onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
                             />
                         </div>
-                        
+
                         <div className="form-group">
                             <label className="form-label">Deutschkenntnisse</label>
                             <select
@@ -148,7 +160,7 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                                 <option value="6">6 - Ungenügend</option>
                             </select>
                         </div>
-                        
+
                         <div className="form-group">
                             <label className="form-label">Notizen</label>
                             <textarea
@@ -157,19 +169,23 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                             />
                         </div>
-                        
+
                         <div className="form-actions">
                             {student && (
-                                <button 
-                                    type="button" 
-                                    className="button button-danger" 
+                                <button
+                                    type="button"
+                                    className="button button-danger"
                                     onClick={handleDelete}
                                 >
                                     Löschen
                                 </button>
                             )}
-                            <button type="button" className="button" onClick={onClose}>Abbrechen</button>
-                            <button type="submit" className="button button-success">Speichern</button>
+                            <button type="button" className="button" onClick={onClose}>
+                                Abbrechen
+                            </button>
+                            <button type="submit" className="button button-success">
+                                Speichern
+                            </button>
                         </div>
                     </form>
                 )}
@@ -178,4 +194,5 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
     );
 };
 
-export default StudentModal;
+// statt "export default"
+window.StudentModal = StudentModal;
