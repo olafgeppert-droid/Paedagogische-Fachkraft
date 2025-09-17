@@ -37,17 +37,21 @@
 }
 
 [data-theme="colored"] {
-    /* Benutzerdefinierte Farben - können vom Benutzer angepasst werden */
-    --primary-color: #4a6fa5;
-    --secondary-color: #166088;
-    --background-color: #f8f9fa;
-    --sidebar-bg: #7f8c8d;
-    --sidebar-text: #ecf0f1;
-    --sidebar-hover: #95a5a6;
+    /* Farbiges Theme */
+    --primary-color: #ff6f61;
+    --secondary-color: #6b5b95;
+    --background-color: #fff8e7;
+    --sidebar-bg: #f5cba7;
+    --sidebar-text: #2d2d2d;
+    --sidebar-hover: #f7d6c1;
     --card-bg: #ffffff;
-    --text-color: #2c3e50;
+    --text-color: #2d2d2d;
     --text-light: #7f8c8d;
-    --border-color: #bdc3c7;
+    --border-color: #d9d9d9;
+    --success-color: #88b04b;
+    --danger-color: #f7cac9;
+    --warning-color: #ffb347;
+    --info-color: #3498db;
 }
 
 * {
