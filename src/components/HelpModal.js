@@ -58,5 +58,5 @@ const HelpModal = ({ onClose, version }) => {
     );
 };
 
-// Globale Registrierung als window-Modul
-window.HelpModal = HelpModal;
+// ES-Modul Export
+export default HelpModal;
