@@ -1,12 +1,6 @@
 {
   "presets": [
-    ["@babel/preset-env", {
-      "modules": "umd",
-      "targets": {
-        "browsers": ["last 2 versions", "safari >= 7"]
-      }
-    }],
-    "@babel/preset-react"
-  ],
-  "ignore": ["node_modules", "dist"]
+    ["@babel/preset-env", { "targets": "> 0.25%, not dead" }],
+    ["@babel/preset-react", { "runtime": "automatic" }]
+  ]
 }
