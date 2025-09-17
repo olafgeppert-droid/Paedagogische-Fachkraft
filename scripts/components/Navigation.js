@@ -191,5 +191,5 @@ const Navigation = ({
     );
 };
 
-// Globale Registrierung als window-Modul
-window.Navigation = Navigation;
+export default Navigation;
+
