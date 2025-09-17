@@ -1,5 +1,8 @@
+/** @jsxImportSource react */
+import React, { useState } from 'react';
+
 const EntryModal = ({ entry, student, students, masterData, onSave, onClose }) => {
-    const [formData, setFormData] = React.useState(entry || {
+    const [formData, setFormData] = useState(entry || {
         studentId: student?.id || '',
         subject: '',
         observations: '',
@@ -32,9 +35,9 @@ const EntryModal = ({ entry, student, students, masterData, onSave, onClose }) =
                             required
                         >
                             <option value="">Bitte wählen</option>
-                            {students.map((student) => (
-                                <option key={student.id} value={student.id}>
-                                    {student.name}
+                            {students.map((s) => (
+                                <option key={s.id} value={s.id}>
+                                    {s.name}
                                 </option>
                             ))}
                         </select>
@@ -121,5 +124,4 @@ const EntryModal = ({ entry, student, students, masterData, onSave, onClose }) =
     );
 };
 
-// statt "export default"
-window.EntryModal = EntryModal;
+export default EntryModal;
