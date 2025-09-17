@@ -1,6 +1,8 @@
 import { openDB } from 'https://unpkg.com/idb@7/build/umd.js';
 
+// =======================
 // Datenbank-Setup
+// =======================
 export const setupDB = async () => {
     return openDB('PedagogicalDocumentationDB', 1, {
         upgrade(db) {
@@ -33,15 +35,15 @@ export const setupDB = async () => {
     });
 };
 
+// =======================
 // Schüler-Funktionen
+// =======================
 export const getEntriesByStudentId = async (db, studentId) => {
-    const index = db.transaction('entries').store.index('studentId');
-    return await index.getAll(studentId);
+    return db.getAllFromIndex('entries', 'studentId', studentId);
 };
 
 export const getEntriesByDate = async (db, date) => {
-    const index = db.transaction('entries').store.index('date');
-    return await index.getAll(date);
+    return db.getAllFromIndex('entries', 'date', date);
 };
 
 export const addStudent = async (db, studentData) => {
@@ -50,20 +52,21 @@ export const addStudent = async (db, studentData) => {
 };
 
 export const updateStudent = async (db, studentData) => {
-    return await db.put('students', studentData);
+    return db.put('students', studentData);
 };
 
 export const deleteStudent = async (db, studentId) => {
     try {
-        const tx = db.transaction('entries', 'readwrite');
+        const tx = db.transaction(['students', 'entries'], 'readwrite');
         const entryStore = tx.objectStore('entries');
         const index = entryStore.index('studentId');
         let cursor = await index.openCursor(IDBKeyRange.only(studentId));
         while (cursor) {
-            await entryStore.delete(cursor.primaryKey);
+            await cursor.delete();
             cursor = await cursor.continue();
         }
-        await db.delete('students', studentId);
+        await tx.objectStore('students').delete(studentId);
+        await tx.done;
         return true;
     } catch (error) {
         console.error('Fehler beim Löschen des Schülers:', error);
@@ -71,53 +74,61 @@ export const deleteStudent = async (db, studentId) => {
     }
 };
 
+// =======================
 // Eintrag-Funktionen
+// =======================
 export const addEntry = async (db, entryData) => {
     const id = await db.add('entries', entryData);
     return { ...entryData, id };
 };
 
 export const updateEntry = async (db, entryData) => {
-    return await db.put('entries', entryData);
+    return db.put('entries', entryData);
 };
 
 export const deleteEntry = async (db, entryId) => {
-    return await db.delete('entries', entryId);
+    return db.delete('entries', entryId);
 };
 
+// =======================
 // Einstellungen-Funktionen
+// =======================
 export const getSettings = async (db) => {
-    return await db.get('settings', 1);
+    return db.get('settings', 1);
 };
 
 export const saveSettings = async (db, settings) => {
-    return await db.put('settings', { ...settings, id: 1 });
+    return db.put('settings', { ...settings, id: 1 });
 };
 
+// =======================
 // Master-Daten-Funktionen
+// =======================
 export const getMasterData = async (db) => {
-    return await db.get('masterData', 1);
+    return db.get('masterData', 1);
 };
 
 export const saveMasterData = async (db, masterData) => {
-    return await db.put('masterData', { ...masterData, id: 1 });
+    return db.put('masterData', { ...masterData, id: 1 });
 };
 
-// History-Funktionen
-export const saveStateForUndo = async (db, history, setHistory, setHistoryIndex) => {
+// =======================
+// Undo/Redo-Funktionen
+// =======================
+export const saveStateForUndo = async (db, history, historyIndex, setHistory, setHistoryIndex) => {
     try {
-        const allStudents = await db.getAll('students');
-        const allEntries = await db.getAll('entries');
-        const currentState = {
-            students: allStudents,
-            entries: allEntries,
-            timestamp: new Date().toISOString()
-        };
+        const [allStudents, allEntries, settings, masterData] = await Promise.all([
+            db.getAll('students'),
+            db.getAll('entries'),
+            db.get('settings', 1),
+            db.get('masterData', 1)
+        ]);
+
+        const currentState = { students: allStudents, entries: allEntries, settings, masterData, timestamp: new Date().toISOString() };
         const newHistory = history.slice(0, historyIndex + 1);
         newHistory.push(currentState);
-        if (newHistory.length > 50) {
-            newHistory.shift();
-        }
+        if (newHistory.length > 50) newHistory.shift();
+
         setHistory(newHistory);
         setHistoryIndex(newHistory.length - 1);
     } catch (error) {
@@ -125,36 +136,71 @@ export const saveStateForUndo = async (db, history, setHistory, setHistoryIndex)
     }
 };
 
-// Daten-Export-Funktion
-export const exportData = async (db) => {
+export const undo = async (db, history, historyIndex, setHistoryIndex, setStudents) => {
+    if (historyIndex <= 0 || !db) return;
     try {
+        const prevState = history[historyIndex - 1];
+        const tx = db.transaction(['students','entries','settings','masterData'], 'readwrite');
+        await tx.objectStore('students').clear();
+        await tx.objectStore('entries').clear();
+        for (const student of prevState.students) await tx.objectStore('students').add(student);
+        for (const entry of prevState.entries) await tx.objectStore('entries').add(entry);
+        if (prevState.settings) await tx.objectStore('settings').put(prevState.settings);
+        if (prevState.masterData) await tx.objectStore('masterData').put(prevState.masterData);
+        await tx.done;
+
         const allStudents = await db.getAll('students');
-        const allEntries = await db.getAll('entries');
-        const settingsData = await db.get('settings', 1);
-        const masterData = await db.get('masterData', 1);
-
-        const exportData = {
-            students: allStudents,
-            entries: allEntries,
-            settings: settingsData,
-            masterData: masterData,
-            exportDate: new Date().toISOString()
-        };
-
-        const dataStr = JSON.stringify(exportData, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-        const exportFileDefaultName = 'paedagogische-dokumentation-export.json';
-        const linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', exportFileDefaultName);
-        linkElement.click();
+        setStudents(allStudents);
+        setHistoryIndex(historyIndex - 1);
     } catch (error) {
-        console.error('Fehler beim Exportieren der Daten:', error);
-        alert('Fehler beim Exportieren der Daten: ' + error.message);
+        console.error('Fehler beim Undo:', error);
     }
 };
 
-// Daten-Import-Funktion
+export const redo = async (db, history, historyIndex, setHistoryIndex, setStudents) => {
+    if (historyIndex >= history.length - 1 || !db) return;
+    try {
+        const nextState = history[historyIndex + 1];
+        const tx = db.transaction(['students','entries','settings','masterData'], 'readwrite');
+        await tx.objectStore('students').clear();
+        await tx.objectStore('entries').clear();
+        for (const student of nextState.students) await tx.objectStore('students').add(student);
+        for (const entry of nextState.entries) await tx.objectStore('entries').add(entry);
+        if (nextState.settings) await tx.objectStore('settings').put(nextState.settings);
+        if (nextState.masterData) await tx.objectStore('masterData').put(nextState.masterData);
+        await tx.done;
+
+        const allStudents = await db.getAll('students');
+        setStudents(allStudents);
+        setHistoryIndex(historyIndex + 1);
+    } catch (error) {
+        console.error('Fehler beim Redo:', error);
+    }
+};
+
+// =======================
+// Export / Import
+// =======================
+export const exportData = async (db) => {
+    try {
+        const [allStudents, allEntries, settings, masterData] = await Promise.all([
+            db.getAll('students'),
+            db.getAll('entries'),
+            db.get('settings', 1),
+            db.get('masterData', 1)
+        ]);
+
+        const dataStr = JSON.stringify({ students: allStudents, entries: allEntries, settings, masterData, exportDate: new Date().toISOString() }, null, 2);
+        const link = document.createElement('a');
+        link.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        link.download = 'paedagogische-dokumentation-export.json';
+        link.click();
+    } catch (error) {
+        console.error('Fehler beim Exportieren:', error);
+        alert('Fehler beim Exportieren: ' + error.message);
+    }
+};
+
 export const importData = async (db, event, setSettings, setMasterData, setStudents, setModal) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -162,92 +208,34 @@ export const importData = async (db, event, setSettings, setMasterData, setStude
     const reader = new FileReader();
     reader.onload = async (e) => {
         try {
-            const importData = JSON.parse(e.target.result);
+            const data = JSON.parse(e.target.result);
+            const tx = db.transaction(['students','entries','settings','masterData'], 'readwrite');
+            await tx.objectStore('students').clear();
+            await tx.objectStore('entries').clear();
 
-            await db.clear('students');
-            await db.clear('entries');
+            for (const student of data.students) await tx.objectStore('students').add(student);
+            for (const entry of data.entries) await tx.objectStore('entries').add(entry);
+            if (data.settings) await tx.objectStore('settings').put(data.settings);
+            if (data.masterData) await tx.objectStore('masterData').put(data.masterData);
+            await tx.done;
 
-            for (const student of importData.students) {
-                await db.add('students', student);
-            }
-
-            for (const entry of importData.entries) {
-                await db.add('entries', entry);
-            }
-
-            if (importData.settings) {
-                await db.put('settings', importData.settings);
-                setSettings(importData.settings);
-            }
-
-            if (importData.masterData) {
-                await db.put('masterData', importData.masterData);
-                setMasterData(importData.masterData);
-            }
-
+            if (data.settings) setSettings(data.settings);
+            if (data.masterData) setMasterData(data.masterData);
             const allStudents = await db.getAll('students');
             setStudents(allStudents);
-
             setModal(null);
             alert('Daten erfolgreich importiert!');
         } catch (error) {
-            console.error('Fehler beim Importieren der Daten:', error);
-            alert('Fehler beim Importieren der Daten: ' + error.message);
+            console.error('Fehler beim Importieren:', error);
+            alert('Fehler beim Importieren: ' + error.message);
         }
     };
-
     reader.readAsText(file);
 };
 
-// Undo-Funktion
-export const undo = async (db, history, historyIndex, setHistoryIndex, setStudents) => {
-    if (historyIndex <= 0 || !db) return;
-    try {
-        const previousState = history[historyIndex - 1];
-        await db.clear('students');
-        await db.clear('entries');
-
-        for (const student of previousState.students) {
-            await db.add('students', student);
-        }
-        for (const entry of previousState.entries) {
-            await db.add('entries', entry);
-        }
-
-        const allStudents = await db.getAll('students');
-        setStudents(allStudents);
-
-        setHistoryIndex(historyIndex - 1);
-    } catch (error) {
-        console.error('Fehler beim Undo:', error);
-    }
-};
-
-// Redo-Funktion
-export const redo = async (db, history, historyIndex, setHistoryIndex, setStudents) => {
-    if (historyIndex >= history.length - 1 || !db) return;
-    try {
-        const nextState = history[historyIndex + 1];
-        await db.clear('students');
-        await db.clear('entries');
-
-        for (const student of nextState.students) {
-            await db.add('students', student);
-        }
-        for (const entry of nextState.entries) {
-            await db.add('entries', entry);
-        }
-
-        const allStudents = await db.getAll('students');
-        setStudents(allStudents);
-
-        setHistoryIndex(historyIndex + 1);
-    } catch (error) {
-        console.error('Fehler beim Redo:', error);
-    }
-};
-
-// Beispieldaten laden
+// =======================
+// Beispieldaten
+// =======================
 export const loadSampleData = async (db, setMasterData, setStudents) => {
     if (!db) return;
     try {
@@ -259,20 +247,21 @@ export const loadSampleData = async (db, setMasterData, setStudents) => {
             { name: 'Anna Beispiel', schoolYear: '2023/2024', school: 'Grundschule Musterstadt', className: '3b', gender: 'weiblich', nationality: 'deutsch', germanLevel: 1, notes: 'Braucht Unterstützung in Mathematik' }
         ];
 
+        const addedStudents = [];
+        for (const student of sampleStudents) {
+            const id = await db.add('students', student);
+            addedStudents.push({ ...student, id });
+        }
+
         const sampleEntries = [
-            { studentId: 1, date: new Date().toISOString().split('T')[0], subject: 'Mathematik', observations: 'Max hat heute sehr gut mitgearbeitet und alle Aufgaben gelöst.', measures: 'Positive Verstärkung durch Lob', erfolg: 'Max war stolz auf seine Leistung und motiviert für weitere Aufgaben.', erfolgRating: 'positiv' },
-            { studentId: 2, date: new Date().toISOString().split('T')[0], subject: 'Deutsch', observations: 'Anna hatte Schwierigkeiten mit der Rechtschreibung.', measures: 'Individuelle Förderung angeboten', erfolg: 'Anna hat die Hilfe angenommen und Fortschritte gezeigt.', erfolgRating: 'positiv' }
+            { studentId: addedStudents[0].id, date: new Date().toISOString().split('T')[0], subject: 'Mathematik', observations: 'Max hat heute sehr gut mitgearbeitet und alle Aufgaben gelöst.', measures: 'Positive Verstärkung durch Lob', erfolg: 'Max war stolz auf seine Leistung und motiviert für weitere Aufgaben.', erfolgRating: 'positiv' },
+            { studentId: addedStudents[1].id, date: new Date().toISOString().split('T')[0], subject: 'Deutsch', observations: 'Anna hatte Schwierigkeiten mit der Rechtschreibung.', measures: 'Individuelle Förderung angeboten', erfolg: 'Anna hat die Hilfe angenommen und Fortschritte gezeigt.', erfolgRating: 'positiv' }
         ];
 
-        for (const student of sampleStudents) {
-            await db.add('students', student);
-        }
-        for (const entry of sampleEntries) {
-            await db.add('entries', entry);
-        }
+        for (const entry of sampleEntries) await db.add('entries', entry);
 
         const sampleMasterData = {
-            schoolYears: ['2022/2023', '2023/2024', '2024/2025'],
+            schoolYears: ['2022/2023','2023/2024','2024/2025'],
             schools: {
                 'Grundschule Musterstadt': ['1a','1b','2a','2b','3a','3b','4a','4b'],
                 'Mittelschule Beispieldorf': ['5a','5b','6a','6b','7a','7b','8a','8b','9a','9b']
@@ -291,7 +280,9 @@ export const loadSampleData = async (db, setMasterData, setStudents) => {
     }
 };
 
+// =======================
 // Alle Daten löschen
+// =======================
 export const clearAllData = async (db, setStudents, setEntries, setSelectedStudent) => {
     if (!db) return;
     if (!confirm('Sind Sie sicher, dass Sie alle Daten löschen möchten? Dieser Vorgang kann nicht rückgängig gemacht werden.')) return;
@@ -299,11 +290,9 @@ export const clearAllData = async (db, setStudents, setEntries, setSelectedStude
     try {
         await db.clear('students');
         await db.clear('entries');
-
         setStudents([]);
         setEntries([]);
         setSelectedStudent(null);
-
         alert('Alle Daten wurden gelöscht!');
     } catch (error) {
         console.error('Fehler beim Löschen der Daten:', error);
