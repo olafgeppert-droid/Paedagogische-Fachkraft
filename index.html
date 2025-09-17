@@ -4,81 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pädagogische Dokumentation</title>
-    
+
     <!-- Eigene Styles -->
     <link rel="stylesheet" href="./styles/main.css">
     <link rel="stylesheet" href="./styles/components.css">
 
-    <style>
-        /* Responsive Grundlagen */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f5f5f5;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        #root {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* Fallback falls CSS nicht laden */
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-size: 18px;
-            color: #666;
-        }
-    </style>
+    <!-- Fallback für ältere Browser -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
 </head>
 <body>
-    <div id="root">
-        <div class="loading">Lade Anwendung...</div>
-    </div>
+    <div id="root"></div>
 
-    <!-- Externe Abhängigkeiten -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/idb@7/build/umd.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- Komponenten als window-Module -->
-    <script type="text/babel" src="./database.js"></script>
-    <script type="text/babel" src="./utils/helpers.js"></script>
-    <script type="text/babel" src="./components/Header.js"></script>
-    <script type="text/babel" src="./components/Toolbar.js"></script>
-    <script type="text/babel" src="./components/Navigation.js"></script>
-    <script type="text/babel" src="./components/MainContent.js"></script>
-    <script type="text/babel" src="./components/StudentModal.js"></script>
-    <script type="text/babel" src="./components/EntryModal.js"></script>
-    <script type="text/babel" src="./components/SettingsModal.js"></script>
-    <script type="text/babel" src="./components/StatisticsModal.js"></script>
-    <script type="text/babel" src="./components/HelpModal.js"></script>
-    <script type="text/babel" src="./app.js"></script>
+    <!-- React & ReactDOM -->
+    <script type="module">
+        import React from 'https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js';
+        import ReactDOM from 'https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js';
+        import { createRoot } from 'https://cdn.jsdelivr.net/npm/react-dom@18.2.0/client.js';
 
-    <!-- Fallback für Fehler -->
-    <script>
-        setTimeout(function() {
-            var loading = document.querySelector('.loading');
-            if (loading && document.getElementById('root').children.length === 1) {
-                loading.innerHTML = 'Anwendung konnte nicht geladen werden. Bitte Console prüfen.';
-                loading.style.color = '#d32f2f';
-            }
-        }, 3000);
+        // Komponenten importieren
+        import Header from './components/Header.js';
+        import Navigation from './components/Navigation.js';
+        import Toolbar from './components/Toolbar.js';
+        import StudentDetails from './components/StudentDetails.js';
+        import DayDetails from './components/DayDetails.js';
+        import StudentModal from './components/StudentModal.js';
+        import EntryModal from './components/EntryModal.js';
+        import SettingsModal from './components/SettingsModal.js';
+        import HelpModal from './components/HelpModal.js';
+
+        // Haupt-App-Komponente
+        const App = () => {
+            const [selectedStudent, setSelectedStudent] = React.useState(null);
+            const [selectedDate, setSelectedDate] = React.useState(new Date());
+
+            return (
+                <div className="app">
+                    <Header />
+                    <Navigation />
+                    <Toolbar 
+                        selectedStudent={selectedStudent}
+                        selectedDate={selectedDate}
+                        onAddStudent={() => {}}
+                        onEditStudent={() => {}}
+                        onAddEntry={() => {}}
+                        onEditEntry={() => {}}
+                        onPrint={() => {}}
+                        onExport={() => {}}
+                        onImport={() => {}}
+                        onUndo={() => {}}
+                        onRedo={() => {}}
+                        canUndo={false}
+                        canRedo={false}
+                    />
+                    <main>
+                        <StudentDetails student={selectedStudent} />
+                        <DayDetails date={selectedDate} />
+                    </main>
+                    <StudentModal />
+                    <EntryModal />
+                    <SettingsModal />
+                    <HelpModal />
+                </div>
+            );
+        };
+
+        const container = document.getElementById('root');
+        const root = createRoot(container);
+        root.render(<App />);
     </script>
 </body>
 </html>
