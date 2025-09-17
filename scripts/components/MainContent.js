@@ -90,6 +90,5 @@ const EntryCard = ({ entry, student, onEdit }) => {
     );
 };
 
-// Globale Registrierung als window-Modul
 export default MainContent;
 
