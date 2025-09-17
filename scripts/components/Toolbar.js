@@ -27,14 +27,14 @@ const Toolbar = ({
                 <button 
                     className="button" 
                     onClick={onAddEntry}
-                    disabled={!selectedStudent && !selectedDate}
+                    disabled={!selectedStudent || !selectedDate}
                 >
                     📝 Protokoll anlegen
                 </button>
                 <button 
                     className="button" 
                     onClick={onEditEntry}
-                    disabled={!selectedStudent && !selectedDate}
+                    disabled={!selectedStudent || !selectedDate}
                 >
                     🔧 Protokoll bearbeiten/löschen
                 </button>
@@ -70,3 +70,5 @@ const Toolbar = ({
         </div>
     );
 };
+
+export default Toolbar;
