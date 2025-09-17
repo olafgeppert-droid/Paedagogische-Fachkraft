@@ -8,7 +8,7 @@ const Header = ({ onMenuClick }) => {
         day: 'numeric'
     });
 
-    const appVersion = "1.3.0"; // <-- Hier die Versionsnummer
+    const appVersion = "1.3.0"; // Versionsnummer
 
     return (
         <header className="header">
@@ -22,5 +22,5 @@ const Header = ({ onMenuClick }) => {
     );
 };
 
-// Globale Registrierung als window-Module
-window.Header = Header;
+// Wichtiger Unterschied: ES-Modul Export
+export default Header;
