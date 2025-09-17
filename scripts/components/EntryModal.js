@@ -1,4 +1,3 @@
-/** @jsxImportSource react */
 import React, { useState } from 'react';
 
 const EntryModal = ({ entry, student, students, masterData, onSave, onClose }) => {
