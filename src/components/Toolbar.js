@@ -17,7 +17,7 @@ const Toolbar = ({
 }) => {
     return (
         <div className="toolbar">
-            {/* Erste Zeile: Schüler & Datum */}
+            {/* Zeile 1: Schüler & Datum */}
             <div className="toolbar-row">
                 <button
                     className="button"
@@ -39,7 +39,7 @@ const Toolbar = ({
                 </span>
             </div>
 
-            {/* Zweite Zeile: Einträge */}
+            {/* Zeile 2: Einträge */}
             <div className="toolbar-row">
                 <button
                     className="button"
@@ -59,7 +59,7 @@ const Toolbar = ({
                 </button>
             </div>
 
-            {/* Dritte Zeile: Aktionen */}
+            {/* Zeile 3: Export / Import / Drucken */}
             <div className="toolbar-row">
                 <button
                     className="button"
@@ -84,7 +84,7 @@ const Toolbar = ({
                 </button>
             </div>
 
-            {/* Vierte Zeile: Rückgängig / Wiederherstellen */}
+            {/* Zeile 4: Rückgängig / Wiederherstellen */}
             <div className="toolbar-row">
                 <button
                     className="button"
@@ -107,5 +107,4 @@ const Toolbar = ({
     );
 };
 
-// ES-Modul Export
 export default Toolbar;
