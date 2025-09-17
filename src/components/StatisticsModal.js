@@ -57,5 +57,5 @@ function calculateStatistics(students, entries) {
     };
 }
 
-// Statt "export default" global verfügbar machen
-window.StatisticsModal = StatisticsModal;
+// ES-Modul Export
+export default StatisticsModal;
