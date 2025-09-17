@@ -1,25 +1,28 @@
-import React from 'react';
+/** @jsxImportSource react */
+import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
+// Komponenten importieren
 import Header from './components/Header.js';
 import Navigation from './components/Navigation.js';
 import Toolbar from './components/Toolbar.js';
-import StudentDetails from './components/StudentDetails.js';
-import DayDetails from './components/DayDetails.js';
+import StudentDetails from './components/MainContent.js';
+import DayDetails from './components/MainContent.js';
 import StudentModal from './components/StudentModal.js';
 import EntryModal from './components/EntryModal.js';
 import SettingsModal from './components/SettingsModal.js';
+import StatisticsModal from './components/StatisticsModal.js';
 import HelpModal from './components/HelpModal.js';
 
 const App = () => {
-    const [selectedStudent, setSelectedStudent] = React.useState(null);
-    const [selectedDate, setSelectedDate] = React.useState(new Date());
+    const [selectedStudent, setSelectedStudent] = useState(null);
+    const [selectedDate, setSelectedDate] = useState(new Date());
 
     return (
         <div className="app">
             <Header />
             <Navigation />
-            <Toolbar 
+            <Toolbar
                 selectedStudent={selectedStudent}
                 selectedDate={selectedDate}
                 onAddStudent={() => {}}
@@ -41,6 +44,7 @@ const App = () => {
             <StudentModal />
             <EntryModal />
             <SettingsModal />
+            <StatisticsModal />
             <HelpModal />
         </div>
     );
