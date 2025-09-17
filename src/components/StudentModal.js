@@ -1,5 +1,7 @@
+import React, { useState } from 'react';
+
 const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
-    const [formData, setFormData] = React.useState(student || {
+    const [formData, setFormData] = useState(student || {
         name: '',
         schoolYear: '',
         school: '',
@@ -10,26 +12,26 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
         notes: ''
     });
 
-    const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+    // Formular absenden
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave(formData);
     };
 
-    const handleDelete = () => {
-        setShowDeleteConfirm(true);
-    };
+    // Lösch-Dialog öffnen
+    const handleDeleteClick = () => setShowDeleteConfirm(true);
 
+    // Löschvorgang bestätigen
     const confirmDelete = () => {
         onDelete(student.id);
         setShowDeleteConfirm(false);
         onClose();
     };
 
-    const cancelDelete = () => {
-        setShowDeleteConfirm(false);
-    };
+    // Löschvorgang abbrechen
+    const cancelDelete = () => setShowDeleteConfirm(false);
 
     return (
         <div className="modal-overlay">
@@ -57,6 +59,7 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit}>
+                        {/* Name */}
                         <div className="form-group">
                             <label className="form-label">Name</label>
                             <input
@@ -68,6 +71,7 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                             />
                         </div>
 
+                        {/* Schuljahr */}
                         <div className="form-group">
                             <label className="form-label">Schuljahr</label>
                             <select
@@ -78,30 +82,28 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                             >
                                 <option value="">Bitte wählen</option>
                                 {masterData.schoolYears.map((year) => (
-                                    <option key={year} value={year}>
-                                        {year}
-                                    </option>
+                                    <option key={year} value={year}>{year}</option>
                                 ))}
                             </select>
                         </div>
 
+                        {/* Schule */}
                         <div className="form-group">
                             <label className="form-label">Schule</label>
                             <select
                                 className="form-select"
                                 value={formData.school}
-                                onChange={(e) => setFormData({ ...formData, school: e.target.value })}
+                                onChange={(e) => setFormData({ ...formData, school: e.target.value, className: '' })}
                                 required
                             >
                                 <option value="">Bitte wählen</option>
                                 {Object.keys(masterData.schools || {}).map((school) => (
-                                    <option key={school} value={school}>
-                                        {school}
-                                    </option>
+                                    <option key={school} value={school}>{school}</option>
                                 ))}
                             </select>
                         </div>
 
+                        {/* Klasse */}
                         <div className="form-group">
                             <label className="form-label">Klasse</label>
                             <select
@@ -109,17 +111,16 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                                 value={formData.className}
                                 onChange={(e) => setFormData({ ...formData, className: e.target.value })}
                                 required
+                                disabled={!formData.school}
                             >
                                 <option value="">Bitte wählen</option>
-                                {formData.school &&
-                                    masterData.schools[formData.school]?.map((className) => (
-                                        <option key={className} value={className}>
-                                            {className}
-                                        </option>
-                                    ))}
+                                {formData.school && masterData.schools[formData.school]?.map((className) => (
+                                    <option key={className} value={className}>{className}</option>
+                                ))}
                             </select>
                         </div>
 
+                        {/* Geschlecht */}
                         <div className="form-group">
                             <label className="form-label">Geschlecht</label>
                             <select
@@ -134,6 +135,7 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                             </select>
                         </div>
 
+                        {/* Nationalität */}
                         <div className="form-group">
                             <label className="form-label">Nationalität</label>
                             <input
@@ -144,6 +146,7 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                             />
                         </div>
 
+                        {/* Deutschkenntnisse */}
                         <div className="form-group">
                             <label className="form-label">Deutschkenntnisse</label>
                             <select
@@ -161,6 +164,7 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                             </select>
                         </div>
 
+                        {/* Notizen */}
                         <div className="form-group">
                             <label className="form-label">Notizen</label>
                             <textarea
@@ -170,22 +174,15 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                             />
                         </div>
 
+                        {/* Buttons */}
                         <div className="form-actions">
                             {student && (
-                                <button
-                                    type="button"
-                                    className="button button-danger"
-                                    onClick={handleDelete}
-                                >
+                                <button type="button" className="button button-danger" onClick={handleDeleteClick}>
                                     Löschen
                                 </button>
                             )}
-                            <button type="button" className="button" onClick={onClose}>
-                                Abbrechen
-                            </button>
-                            <button type="submit" className="button button-success">
-                                Speichern
-                            </button>
+                            <button type="button" className="button" onClick={onClose}>Abbrechen</button>
+                            <button type="submit" className="button button-success">Speichern</button>
                         </div>
                     </form>
                 )}
@@ -195,4 +192,3 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
 };
 
 export default StudentModal;
-
