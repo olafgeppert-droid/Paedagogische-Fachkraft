@@ -1,16 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// https://vitejs.dev/config/
+// GitHub Pages Base URL anpassen: falls Repository z. B. "https://username.github.io/paedagogische-fachkraft/"
+const repoName = 'paedagogische-fachkraft';
+
 export default defineConfig({
-  base: '/paedagogische-fachkraft/',  // Pfad zu deinem GitHub Pages Repository
+  base: `/${repoName}/`,
   plugins: [react()],
   build: {
-    outDir: 'dist',   // Ausgabeordner
-    assetsDir: 'assets',
-    sourcemap: false,
-  },
-  server: {
-    open: false,
+    outDir: 'dist',       // Build-Ordner
+    emptyOutDir: true
   }
 });
