@@ -1,4 +1,3 @@
-/** @jsxImportSource react */
 import React, { useState } from 'react';
 
 const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose }) => {
