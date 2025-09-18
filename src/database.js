@@ -1,4 +1,5 @@
-import { openDB } from 'https://unpkg.com/idb@7/build/umd.js';
+// IDB wird über das globale window-Objekt verwendet
+const { openDB } = window.idb;
 
 // =======================
 // Datenbank-Setup
