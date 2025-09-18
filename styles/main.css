@@ -16,7 +16,7 @@
     --font-size: 15px;              /* Etwas größere Schrift */
     --input-font-size: 15px;
     --header-height: auto;
-    --toolbar-height: 100px;        /* Etwas höher für bessere Sichtbarkeit */
+    --toolbar-height: auto;        /* Etwas höher für bessere Sichtbarkeit */
     --sidebar-width: 300px;
     --border-radius: 8px;           /* Abgerundetere Ecken */
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Stärkerer Schatten */
