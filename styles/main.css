@@ -684,6 +684,7 @@ body {
         z-index: 1000;
         transition: left 0.3s ease;
         box-shadow: 3px 0 15px rgba(0, 0, 0, 0.15);
+        background-color: var(--sidebar-bg) !important;
     }
 
     .nav.open {
