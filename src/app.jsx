@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 // Komponenten importieren
-import Header from './components/Header.js';
-import Toolbar from './components/Toolbar.js';
-import Navigation from './components/Navigation.js';
-import MainContent from './components/MainContent.js';
-import StudentModal from './components/StudentModal.js';
-import EntryModal from './components/EntryModal.js';
-import SettingsModal from './components/SettingsModal.js';
-import StatisticsModal from './components/StatisticsModal.js';
-import HelpModal from './components/HelpModal.js';
+import Header from './components/Header.jsx';
+import Toolbar from './components/Toolbar.jsx';
+import Navigation from './components/Navigation.jsx';
+import MainContent from './components/MainContent.jsx';
+import StudentModal from './components/StudentModal.jsx';
+import EntryModal from './components/EntryModal.jsx';
+import SettingsModal from './components/SettingsModal.jsx';
+import StatisticsModal from './components/StatisticsModal.jsx';
+import HelpModal from './components/HelpModal.jsx';
 
 // Utils / Datenbank-Funktionen importieren
 import {
