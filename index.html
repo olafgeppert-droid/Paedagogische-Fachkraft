@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pädagogische Dokumentation</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pädagogische Dokumentation</title>
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="./styles/main.css" />
-    <link rel="stylesheet" href="./styles/components.css" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <!-- Wichtig: relativer Pfad ins src-Verzeichnis -->
-    <script type="module" src="./src/main.jsx"></script>
-  </body>
+  <!-- Styles -->
+  <link rel="stylesheet" href="./styles/main.css" />
+  <link rel="stylesheet" href="./styles/components.css" />
+</head>
+<body>
+  <div id="root"></div>
+  <!-- Wichtig: nicht src/main.jsx, sondern main.js aus /dist -->
+  <script type="module" src="./assets/index.js"></script>
+</body>
 </html>
