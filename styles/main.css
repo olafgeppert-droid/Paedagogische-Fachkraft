@@ -2,10 +2,10 @@
     --primary-color: #2563eb;       /* Kräftiges Blau statt #4a6fa5 */
     --secondary-color: #1d4ed8;     /* Dunkleres Blau statt #166088 */
     --background-color: #ffffff;
-    --sidebar-bg: #64748b;          /* Dunkleres Grau für besseren Kontrast */
-    --sidebar-text: #00000;        /* Schwarzer Text für besseren Kontrast */
+    --sidebar-bg: #c2c2c2;          /* Dunkleres Grau für besseren Kontrast */
+    --sidebar-text: #00000;         /* Schwarzer Text für besseren Kontrast */
     --sidebar-hover: #94a3b8;       /* Hellerer Hover für besseren Kontrast */
-    --card-bg: #f8fafc;             /* Hellgrau statt reinweiß */
+    --card-bg: #f8fafc;             /* Mittelgrau statt reinweiß */
     --text-color: #1f2937;          /* Dunkleres Grau statt #2c3e50 */
     --text-light: #6b7280;          /* Mittleres Grau statt #7f8c8d */
     --border-color: #d1d5db;        /* Deutlichere Kanten statt #bdc3c7 */
@@ -16,7 +16,7 @@
     --font-size: 15px;              /* Etwas größere Schrift */
     --input-font-size: 15px;
     --header-height: auto;
-    --toolbar-height: auto;        /* Etwas höher für bessere Sichtbarkeit */
+    --toolbar-height: auto;         /* Etwas höher für bessere Sichtbarkeit */
     --sidebar-width: 300px;
     --border-radius: 8px;           /* Abgerundetere Ecken */
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Stärkerer Schatten */
