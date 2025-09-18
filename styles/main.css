@@ -3,7 +3,7 @@
     --secondary-color: #1d4ed8;     /* Dunkleres Blau statt #166088 */
     --background-color: #ffffff;
     --sidebar-bg: #64748b;          /* Dunkleres Grau für besseren Kontrast */
-    --sidebar-text: #f8fafc;        /* Hellerer Text für besseren Kontrast */
+    --sidebar-text: #00000;        /* Schwarzer Text für besseren Kontrast */
     --sidebar-hover: #94a3b8;       /* Hellerer Hover für besseren Kontrast */
     --card-bg: #f8fafc;             /* Hellgrau statt reinweiß */
     --text-color: #1f2937;          /* Dunkleres Grau statt #2c3e50 */
