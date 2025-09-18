@@ -884,3 +884,57 @@ p, li, span {
     color: var(--warning-color);
     font-weight: 700;
 }
+
+/* Custom Color Overrides für das colored Theme */
+[data-theme="colored"].custom-colors-applied .toolbar {
+    /* Toolbar Hintergrund */
+    background-color: var(--toolbar-bg-custom, var(--card-bg)) !important;
+}
+
+[data-theme="colored"].custom-colors-applied .modal {
+    /* Modal Hintergründe */
+    background-color: var(--modal-bg-custom, var(--card-bg)) !important;
+}
+
+[data-theme="colored"].custom-colors-applied .entry-card {
+    /* Entry Cards Hintergründe */
+    background-color: var(--card-bg, #ffffff) !important;
+}
+
+[data-theme="colored"].custom-colors-applied .main {
+    /* Main Content Bereich */
+    background-color: var(--background-color, #fef7ed) !important;
+}
+
+[data-theme="colored"].custom-colors-applied .nav {
+    /* Navigation Sidebar */
+    background-color: var(--sidebar-bg, #fed7aa) !important;
+}
+
+[data-theme="colored"].custom-colors-applied .header {
+    /* Header */
+    background: linear-gradient(135deg, 
+        var(--primary-color, #dc2626), 
+        var(--secondary-color, #b91c1c)
+    ) !important;
+}
+
+/* Spezifische Anpassungen für bessere Lesbarkeit */
+[data-theme="colored"].custom-colors-applied .nav h3,
+[data-theme="colored"].custom-colors-applied .nav .filter-label,
+[data-theme="colored"].custom-colors-applied .nav .student-name {
+    color: var(--sidebar-text) !important;
+}
+
+/* Sicherstellen, dass Textfarben kontrastreich bleiben */
+[data-theme="colored"].custom-colors-applied {
+    --text-color: #1f2937;
+    --text-light: #6b7280;
+}
+
+/* Responsive Anpassungen */
+@media (max-width: 768px) {
+    [data-theme="colored"].custom-colors-applied .nav {
+        background-color: var(--sidebar-bg, #fed7aa) !important;
+    }
+}
