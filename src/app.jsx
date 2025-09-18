@@ -27,7 +27,7 @@ import {
     filterStudents
 } from './database.js';
 
-const App = () => {
+const app = () => {
     const [db, setDb] = useState(null);
     const [students, setStudents] = useState([]);
     const [entries, setEntries] = useState([]);
