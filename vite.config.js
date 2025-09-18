@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Vite Konfiguration für GitHub Pages
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/paedagogische-fachkraft/', // genau Repo-Name
+  base: '/Paedagogische-Fachkraft/', // exakt wie der Repo-Name
   build: {
-    outDir: 'dist', // Build Ausgabe
+    outDir: 'dist',
   },
 })
