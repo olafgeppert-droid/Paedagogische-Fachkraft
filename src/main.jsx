@@ -3,16 +3,16 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
 // Komponenten importieren
-import Header from './components/Header.js';
-import Navigation from './components/Navigation.js';
-import Toolbar from './components/Toolbar.js';
-import StudentDetails from './components/MainContent.js';
-import DayDetails from './components/MainContent.js';
-import StudentModal from './components/StudentModal.js';
-import EntryModal from './components/EntryModal.js';
-import SettingsModal from './components/SettingsModal.js';
-import StatisticsModal from './components/StatisticsModal.js';
-import HelpModal from './components/HelpModal.js';
+import Header from './components/Header.jsx';
+import Navigation from './components/Navigation.jsx';
+import Toolbar from './components/Toolbar.jsx';
+import StudentDetails from './components/MainContent.jsx';
+import DayDetails from './components/MainContent.jsx';
+import StudentModal from './components/StudentModal.jsx';
+import EntryModal from './components/EntryModal.jsx';
+import SettingsModal from './components/SettingsModal.jsx';
+import StatisticsModal from './components/StatisticsModal.jsx';
+import HelpModal from './components/HelpModal.jsx';
 
 const App = () => {
     const [selectedStudent, setSelectedStudent] = useState(null);
