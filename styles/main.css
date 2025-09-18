@@ -264,7 +264,7 @@ body {
     align-items: center;
     padding: 1.25rem;
     margin-bottom: 0.75rem;
-    background-color: rgba(255, 255, 255, 0.12);
+    background-color: transparent;
     border-radius: var(--border-radius);
     cursor: pointer;
     transition: var(--transition);
