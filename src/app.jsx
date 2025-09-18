@@ -71,7 +71,7 @@ const App = () => {
         // Werkzeugleiste -> Toolbar
         root.style.setProperty('--toolbar-bg-custom', colors.toolbar || '#f8fafc');
         
-        // Protokoll-Hintergrund -> Hauptinhalt und Dialoge
+        // Fenster-Hintergrund -> Hauptinhalt und Dialoge
         root.style.setProperty('--background-color', colors.protocol || '#fef7ed');
         root.style.setProperty('--card-bg', colors.protocol ? lightenColor(colors.protocol, 10) : '#ffffff');
         root.style.setProperty('--modal-bg-custom', colors.protocol || '#ffffff');
