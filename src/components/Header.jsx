@@ -11,7 +11,7 @@ const Header = () => {
     <header className="header">
       <div className="header-left">
         {/* Hier steht Ihr bestehender Header-Inhalt */}
-        <h1>Ihre Anwendung</h1>
+        <h1>Dokumentation pädagogische Arbeit - Irina Geppert</h1>
         {/* Navigation oder andere Elemente */}
       </div>
       
