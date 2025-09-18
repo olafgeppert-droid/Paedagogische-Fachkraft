@@ -59,14 +59,22 @@ const App = () => {
     // Funktion zum Anwenden benutzerdefinierter Farben
     const applyCustomColors = (colors) => {
         const root = document.documentElement;
-        root.style.setProperty('--primary-color', colors.navigation || '#dc2626');
-        root.style.setProperty('--secondary-color', colors.toolbar || '#7c3aed');
-        root.style.setProperty('--sidebar-bg', colors.header || '#fed7aa');
-        root.style.setProperty('--background-color', colors.protocol || '#fef7ed');
         
-        // Zusätzliche Farbanpassungen für bessere Konsistenz
-        root.style.setProperty('--info-color', colors.navigation || '#2563eb');
-        root.style.setProperty('--border-color', colors.toolbar ? lightenColor(colors.toolbar, 30) : '#e5e7eb');
+        // SPEZIFISCHE FARBZUWESUNGEN:
+        // Navigation -> linkes Navigationsmenü
+        root.style.setProperty('--sidebar-bg', colors.navigation || '#fed7aa');
+        
+        // Header -> Kopfbereich
+        root.style.setProperty('--primary-color', colors.header || '#dc2626');
+        root.style.setProperty('--secondary-color', colors.header ? darkenColor(colors.header, 20) : '#b91c1c');
+        
+        // Werkzeugleiste -> Toolbar
+        root.style.setProperty('--toolbar-bg-custom', colors.toolbar || '#f8fafc');
+        
+        // Protokoll-Hintergrund -> Hauptinhalt und Dialoge
+        root.style.setProperty('--background-color', colors.protocol || '#fef7ed');
+        root.style.setProperty('--card-bg', colors.protocol ? lightenColor(colors.protocol, 10) : '#ffffff');
+        root.style.setProperty('--modal-bg-custom', colors.protocol || '#ffffff');
         
         // Für das farbige Theme spezifische Anpassungen
         document.documentElement.classList.add('custom-colors-applied');
@@ -76,12 +84,13 @@ const App = () => {
     const resetCustomColors = () => {
         const root = document.documentElement;
         // Entferne alle benutzerdefinierten Farbüberschreibungen
+        root.style.removeProperty('--sidebar-bg');
         root.style.removeProperty('--primary-color');
         root.style.removeProperty('--secondary-color');
-        root.style.removeProperty('--sidebar-bg');
+        root.style.removeProperty('--toolbar-bg-custom');
         root.style.removeProperty('--background-color');
-        root.style.removeProperty('--info-color');
-        root.style.removeProperty('--border-color');
+        root.style.removeProperty('--card-bg');
+        root.style.removeProperty('--modal-bg-custom');
         
         document.documentElement.classList.remove('custom-colors-applied');
     };
@@ -98,6 +107,21 @@ const App = () => {
             (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
             (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
             (B < 255 ? B < 1 ? 0 : B : 255)
+        ).toString(16).slice(1);
+    };
+
+    // Hilfsfunktion zum Abdunkeln von Farben
+    const darkenColor = (color, percent) => {
+        const num = parseInt(color.replace('#', ''), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = (num >> 16) - amt;
+        const G = (num >> 8 & 0x00FF) - amt;
+        const B = (num & 0x0000FF) - amt;
+        return '#' + (
+            0x1000000 +
+            (R > 0 ? R : 0) * 0x10000 +
+            (G > 0 ? G : 0) * 0x100 +
+            (B > 0 ? B : 0)
         ).toString(16).slice(1);
     };
 
@@ -254,7 +278,7 @@ const App = () => {
                 filters={filters}
                 masterData={masterData}
                 onStudentSelect={(student) => { setSelectedStudent(student); setViewMode('student'); }}
-                onDateSelect={(date) => { setSelectedDate(date); setViewDate('day'); }}
+                onDateSelect={(date) => { setSelectedDate(date); setViewMode('day'); }}
                 onFilterChange={setFilters}
                 onShowStats={() => setModal('statistics')}
                 onShowSettings={() => setModal('settings')}
