@@ -22,6 +22,25 @@
     color: white;
 }
 
+.header-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.header-date {
+    font-size: 0.85rem;
+    color: white;
+    margin-bottom: 0.15rem;
+}
+
+.header-version {
+    font-size: 0.75rem;
+    color: #a8d5ff;
+    font-weight: bold;
+}
+
 .hamburger-menu {
     display: none;
     background: none;
@@ -362,6 +381,19 @@
     .hamburger-menu {
         display: block;
     }
+
+    .header-right {
+        align-items: center;
+        text-align: center;
+    }
+
+    .header-date {
+        font-size: 0.8rem;
+    }
+
+    .header-version {
+        font-size: 0.7rem;
+    }
 }
 
 @media (max-width: 576px) {
@@ -388,11 +420,11 @@
     }
 
     .header-date {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
 
     .header-version {
-        font-size: 0.75rem;
+        font-size: 0.65rem;
     }
 }
 
