@@ -1,11 +1,10 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/paedagogische-fachkraft/', // GitHub Pages Pfad
+  base: '/paedagogische-fachkraft/', // Name deines GitHub Repo
   build: {
-    outDir: 'dist', // Output für gh-pages
+    outDir: 'dist', // fertiger Bundle
   },
-});
+})
