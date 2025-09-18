@@ -105,242 +105,296 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
         <>
             {/* Haupt-Einstellungen Modal */}
             <div className="modal-overlay">
-                <div className="modal large-modal">
+                <div className="modal settings-modal">
                     <div className="modal-header">
                         <h2>⚙️ Einstellungen</h2>
                         <button className="modal-close" onClick={onClose}>✖️</button>
                     </div>
 
-                    <form onSubmit={handleSubmit}>
-                        <h3>🎨 Farbschema</h3>
-                        
-                        <div className="form-group">
-                            <div className="theme-radio-group">
-                                <label className="radio-label">
-                                    <input
-                                        type="radio"
-                                        name="theme"
-                                        value="light"
-                                        checked={formData.theme === 'light'}
-                                        onChange={(e) => setFormData({ ...formData, theme: e.target.value })}
-                                    />
-                                    <span className="radio-checkmark">☀️</span>
-                                    Standard (Hell)
-                                </label>
+                    <div className="modal-content">
+                        <form onSubmit={handleSubmit}>
+                            <div className="settings-section">
+                                <h3>🎨 Farbschema</h3>
                                 
-                                <label className="radio-label">
-                                    <input
-                                        type="radio"
-                                        name="theme"
-                                        value="dark"
-                                        checked={formData.theme === 'dark'}
-                                        onChange={(e) => setFormData({ ...formData, theme: e.target.value })}
-                                    />
-                                    <span className="radio-checkmark">🌙</span>
-                                    Dunkel
-                                </label>
-                                
-                                <label className="radio-label">
-                                    <input
-                                        type="radio"
-                                        name="theme"
-                                        value="colored"
-                                        checked={formData.theme === 'colored'}
-                                        onChange={(e) => setFormData({ ...formData, theme: e.target.value })}
-                                    />
-                                    <span className="radio-checkmark">🌈</span>
-                                    Farbig (Benutzerdefiniert)
-                                </label>
+                                <div className="form-group">
+                                    <div className="theme-grid">
+                                        <div 
+                                            className={`theme-card ${formData.theme === 'light' ? 'active' : ''}`}
+                                            onClick={() => setFormData({ ...formData, theme: 'light' })}
+                                        >
+                                            <div className="theme-preview light-theme-preview">
+                                                <div className="preview-header"></div>
+                                                <div className="preview-toolbar"></div>
+                                                <div className="preview-content"></div>
+                                            </div>
+                                            <div className="theme-info">
+                                                <span className="radio-checkmark">☀️</span>
+                                                <span>Standard (Hell)</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div 
+                                            className={`theme-card ${formData.theme === 'dark' ? 'active' : ''}`}
+                                            onClick={() => setFormData({ ...formData, theme: 'dark' })}
+                                        >
+                                            <div className="theme-preview dark-theme-preview">
+                                                <div className="preview-header"></div>
+                                                <div className="preview-toolbar"></div>
+                                                <div className="preview-content"></div>
+                                            </div>
+                                            <div className="theme-info">
+                                                <span className="radio-checkmark">🌙</span>
+                                                <span>Dunkel</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div 
+                                            className={`theme-card ${formData.theme === 'colored' ? 'active' : ''}`}
+                                            onClick={() => setFormData({ ...formData, theme: 'colored' })}
+                                        >
+                                            <div className="theme-preview colored-theme-preview">
+                                                <div className="preview-header"></div>
+                                                <div className="preview-toolbar"></div>
+                                                <div className="preview-content"></div>
+                                            </div>
+                                            <div className="theme-info">
+                                                <span className="radio-checkmark">🌈</span>
+                                                <span>Farbig</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {formData.theme === 'colored' && (
+                                    <div className="color-customization">
+                                        <h4>🎨 Benutzerdefinierte Farben</h4>
+                                        <div className="color-grid">
+                                            <div className="color-item">
+                                                <label>Navigation</label>
+                                                <div className="color-input-group">
+                                                    <input
+                                                        type="color"
+                                                        value={customColors.navigation}
+                                                        onChange={(e) => setCustomColors({ ...customColors, navigation: e.target.value })}
+                                                        className="color-picker"
+                                                    />
+                                                    <span className="color-value">{customColors.navigation}</span>
+                                                </div>
+                                            </div>
+                                            <div className="color-item">
+                                                <label>Werkzeugleiste</label>
+                                                <div className="color-input-group">
+                                                    <input
+                                                        type="color"
+                                                        value={customColors.toolbar}
+                                                        onChange={(e) => setCustomColors({ ...customColors, toolbar: e.target.value })}
+                                                        className="color-picker"
+                                                    />
+                                                    <span className="color-value">{customColors.toolbar}</span>
+                                                </div>
+                                            </div>
+                                            <div className="color-item">
+                                                <label>Header</label>
+                                                <div className="color-input-group">
+                                                    <input
+                                                        type="color"
+                                                        value={customColors.header}
+                                                        onChange={(e) => setCustomColors({ ...customColors, header: e.target.value })}
+                                                        className="color-picker"
+                                                    />
+                                                    <span className="color-value">{customColors.header}</span>
+                                                </div>
+                                            </div>
+                                            <div className="color-item">
+                                                <label>Protokoll-Hintergrund</label>
+                                                <div className="color-input-group">
+                                                    <input
+                                                        type="color"
+                                                        value={customColors.protocol}
+                                                        onChange={(e) => setCustomColors({ ...customColors, protocol: e.target.value })}
+                                                        className="color-picker"
+                                                    />
+                                                    <span className="color-value">{customColors.protocol}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        </div>
 
-                        {formData.theme === 'colored' && (
-                            <div className="color-picker-group">
-                                <h4>🎨 Farben anpassen</h4>
-                                <div className="color-picker-row">
-                                    <label>Navigation</label>
-                                    <input
-                                        type="color"
-                                        value={customColors.navigation}
-                                        onChange={(e) => setCustomColors({ ...customColors, navigation: e.target.value })}
-                                        className="color-picker"
-                                    />
-                                </div>
-                                <div className="color-picker-row">
-                                    <label>Werkzeugleiste</label>
-                                    <input
-                                        type="color"
-                                        value={customColors.toolbar}
-                                        onChange={(e) => setCustomColors({ ...customColors, toolbar: e.target.value })}
-                                        className="color-picker"
-                                    />
-                                </div>
-                                <div className="color-picker-row">
-                                    <label>Header</label>
-                                    <input
-                                        type="color"
-                                        value={customColors.header}
-                                        onChange={(e) => setCustomColors({ ...customColors, header: e.target.value })}
-                                        className="color-picker"
-                                    />
-                                </div>
-                                <div className="color-picker-row">
-                                    <label>Protokoll-Hintergrund</label>
-                                    <input
-                                        type="color"
-                                        value={customColors.protocol}
-                                        onChange={(e) => setCustomColors({ ...customColors, protocol: e.target.value })}
-                                        className="color-picker"
-                                    />
+                            <div className="settings-section">
+                                <h3>📝 Schriftgrößen</h3>
+
+                                <div className="slider-group">
+                                    <div className="slider-item">
+                                        <label className="slider-label">
+                                            <span className="label-text">Schriftgröße Labels</span>
+                                            <span className="label-size">{formData.fontSize}px</span>
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="12"
+                                            max="24"
+                                            value={formData.fontSize}
+                                            onChange={(e) => setFormData({ ...formData, fontSize: parseInt(e.target.value) })}
+                                            className="slider"
+                                        />
+                                        <div className="slider-scale">
+                                            <span>A</span>
+                                            <span>A</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="slider-item">
+                                        <label className="slider-label">
+                                            <span className="label-text">Schriftgröße Eingabefelder</span>
+                                            <span className="label-size">{formData.inputFontSize}px</span>
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="12"
+                                            max="24"
+                                            value={formData.inputFontSize}
+                                            onChange={(e) => setFormData({ ...formData, inputFontSize: parseInt(e.target.value) })}
+                                            className="slider"
+                                        />
+                                        <div className="slider-scale">
+                                            <span>A</span>
+                                            <span>A</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        )}
 
-                        <h3>📝 Schriftgrößen</h3>
+                            <div className="settings-section">
+                                <h3>📊 Stammdaten</h3>
+                                <div className="master-data-card">
+                                    <p>Verwalten Sie Schuljahre, Schulen und Klassen</p>
+                                    <button 
+                                        type="button" 
+                                        className="button button-primary"
+                                        onClick={() => setShowMasterDataModal(true)}
+                                    >
+                                        📋 Stammdaten verwalten
+                                    </button>
+                                </div>
+                            </div>
 
-                        <div className="form-group">
-                            <label className="form-label">A → A Schriftgröße Labels: {formData.fontSize}px</label>
-                            <input
-                                type="range"
-                                min="12"
-                                max="24"
-                                value={formData.fontSize}
-                                onChange={(e) => setFormData({ ...formData, fontSize: parseInt(e.target.value) })}
-                                className="slider"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">A → A Schriftgröße Eingabefelder: {formData.inputFontSize}px</label>
-                            <input
-                                type="range"
-                                min="12"
-                                max="24"
-                                value={formData.inputFontSize}
-                                onChange={(e) => setFormData({ ...formData, inputFontSize: parseInt(e.target.value) })}
-                                className="slider"
-                            />
-                        </div>
-
-                        <h3>📊 Stammdaten</h3>
-                        <div className="form-group">
-                            <button 
-                                type="button" 
-                                className="button button-info"
-                                onClick={() => setShowMasterDataModal(true)}
-                            >
-                                📋 Stammdaten verwalten...
-                            </button>
-                        </div>
-
-                        <div className="form-actions">
-                            <button type="button" className="button button-warning" onClick={resetToDefault}>
-                                🔄 Standard
-                            </button>
-                            <button type="button" className="button button-danger" onClick={onClose}>
-                                ❌ Abbrechen
-                            </button>
-                            <button type="submit" className="button button-success">
-                                ✅ Übernehmen
-                            </button>
-                        </div>
-                    </form>
+                            <div className="modal-actions">
+                                <button type="button" className="button button-secondary" onClick={resetToDefault}>
+                                    🔄 Standard
+                                </button>
+                                <div className="action-group">
+                                    <button type="button" className="button button-outline" onClick={onClose}>
+                                        ❌ Abbrechen
+                                    </button>
+                                    <button type="submit" className="button button-primary">
+                                        ✅ Übernehmen
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
 
             {/* Stammdaten Modal */}
             {showMasterDataModal && (
                 <div className="modal-overlay">
-                    <div className="modal large-modal">
+                    <div className="modal masterdata-modal">
                         <div className="modal-header">
                             <h2>📊 Stammdaten verwalten</h2>
                             <button className="modal-close" onClick={() => setShowMasterDataModal(false)}>✖️</button>
                         </div>
 
-                        <form onSubmit={handleMasterDataSubmit}>
-                            <h3>📅 Schuljahre</h3>
-                            <div className="form-group">
-                                <p>Z.B. 2025/2026</p>
-                                <div className="list-container">
-                                    {masterFormData.schoolYears.map(year => (
-                                        <div key={year} className="list-item">
-                                            <span>{year}</span>
-                                            <button
-                                                type="button"
-                                                className="button button-danger small"
-                                                onClick={() => removeSchoolYear(year)}
-                                                title="Schuljahr löschen"
-                                            >
-                                                ❌
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                                <button type="button" className="button" onClick={addSchoolYear}>
-                                    ➕ Hinzufügen
-                                </button>
-                            </div>
-
-                            <hr />
-
-                            <h3>🏫 Schulen und Klassen</h3>
-                            <div className="form-group">
-                                <button type="button" className="button" onClick={addSchool}>
-                                    ➕ Neue Schule hinzufügen
-                                </button>
-                                
-                                <div className="schools-container">
-                                    {Object.entries(masterFormData.schools || {}).map(([school, classes]) => (
-                                        <div key={school} className="school-section">
-                                            <div className="school-header">
-                                                <h4>{school}</h4>
+                        <div className="modal-content">
+                            <form onSubmit={handleMasterDataSubmit}>
+                                <div className="data-section">
+                                    <h3>📅 Schuljahre</h3>
+                                    <p className="section-description">Z.B. 2025/2026</p>
+                                    
+                                    <div className="data-list">
+                                        {masterFormData.schoolYears.map(year => (
+                                            <div key={year} className="data-item">
+                                                <span className="item-text">{year}</span>
                                                 <button
                                                     type="button"
-                                                    className="button button-danger small"
-                                                    onClick={() => removeSchool(school)}
-                                                    title="Schule löschen"
+                                                    className="button button-danger button-icon"
+                                                    onClick={() => removeSchoolYear(year)}
+                                                    title="Schuljahr löschen"
                                                 >
                                                     ❌
                                                 </button>
                                             </div>
-                                            
-                                            <p>Klassen für "{school}"</p>
-                                            <div className="list-container">
-                                                {classes.map(className => (
-                                                    <div key={className} className="list-item">
-                                                        <span>{className}</span>
-                                                        <button
-                                                            type="button"
-                                                            className="button button-danger small"
-                                                            onClick={() => removeClass(school, className)}
-                                                            title="Klasse löschen"
-                                                        >
-                                                            ❌
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <button
-                                                type="button"
-                                                className="button small"
-                                                onClick={() => addClass(school)}
-                                            >
-                                                ➕ Neue Klasse hinzufügen
-                                            </button>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
+                                    <button type="button" className="button button-outline" onClick={addSchoolYear}>
+                                        ➕ Schuljahr hinzufügen
+                                    </button>
                                 </div>
-                            </div>
 
-                            <div className="form-actions">
-                                <button type="button" className="button button-danger" onClick={() => setShowMasterDataModal(false)}>
-                                    ❌ Schließen
-                                </button>
-                                <button type="submit" className="button button-success">
-                                    ✅ Änderungen übernehmen
-                                </button>
-                            </div>
-                        </form>
+                                <div className="divider"></div>
+
+                                <div className="data-section">
+                                    <h3>🏫 Schulen und Klassen</h3>
+                                    
+                                    <button type="button" className="button button-outline" onClick={addSchool}>
+                                        ➕ Neue Schule hinzufügen
+                                    </button>
+                                    
+                                    <div className="schools-list">
+                                        {Object.entries(masterFormData.schools || {}).map(([school, classes]) => (
+                                            <div key={school} className="school-card">
+                                                <div className="school-header">
+                                                    <h4>{school}</h4>
+                                                    <button
+                                                        type="button"
+                                                        className="button button-danger button-icon"
+                                                        onClick={() => removeSchool(school)}
+                                                        title="Schule löschen"
+                                                    >
+                                                        ❌
+                                                    </button>
+                                                </div>
+                                                
+                                                <p className="classes-title">Klassen für "{school}"</p>
+                                                <div className="classes-list">
+                                                    {classes.map(className => (
+                                                        <div key={className} className="class-item">
+                                                            <span className="item-text">{className}</span>
+                                                            <button
+                                                                type="button"
+                                                                className="button button-danger button-icon"
+                                                                onClick={() => removeClass(school, className)}
+                                                                title="Klasse löschen"
+                                                            >
+                                                                ❌
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="button button-outline button-small"
+                                                    onClick={() => addClass(school)}
+                                                >
+                                                    ➕ Klasse hinzufügen
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="modal-actions">
+                                    <button type="button" className="button button-outline" onClick={() => setShowMasterDataModal(false)}>
+                                        ❌ Schließen
+                                    </button>
+                                    <button type="submit" className="button button-primary">
+                                        ✅ Änderungen übernehmen
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             )}
