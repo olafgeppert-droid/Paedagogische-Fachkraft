@@ -60,6 +60,8 @@
     box-shadow: var(--shadow);
     position: relative;
     z-index: 5;
+    height: auto;
+    min-height: 100px;
 }
 
 .toolbar-row {
