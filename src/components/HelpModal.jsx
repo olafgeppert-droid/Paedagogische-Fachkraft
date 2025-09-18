@@ -8,8 +8,8 @@ const HelpModal = ({ onClose, version }) => {
                     <h2>❓ Hilfe zur Anwendung</h2>
                     <button className="modal-close" onClick={onClose}>×</button>
                 </div>
-                
-                <div style={{ paddingRight: '1rem', maxHeight: '60vh', overflowY: 'auto' }}>
+
+                    <div style={{ paddingRight: '1rem', maxHeight: '60vh', overflowY: 'auto' }}>
                     <p>Willkommen bei der Hilfe für Ihre Anwendung zur pädagogischen Dokumentation.</p>
 
                     <h3>👥 1. Kinder verwalten</h3>
