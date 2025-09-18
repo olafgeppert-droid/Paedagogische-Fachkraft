@@ -1,5 +1,5 @@
 {
-  "name": "paedagogische-fachkraft",
+  "name": "Paedagogische-Fachkraft",
   "version": "1.0.0",
   "scripts": {
     "dev": "vite",
@@ -15,5 +15,5 @@
     "vite": "^5.0.0",
     "gh-pages": "^5.0.0"
   },
-  "homepage": "https://olafgeppert-droid.github.io/paedagogische-fachkraft"
+  "homepage": "https://olafgeppert-droid.github.io/Paedagogische-Fachkraft"
 }
