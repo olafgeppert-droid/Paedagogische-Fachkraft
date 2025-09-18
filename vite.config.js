@@ -1,11 +1,11 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/paedagogische-fachkraft/', // wichtig für GitHub Pages
+  base: '/paedagogische-fachkraft/', // GitHub Pages Pfad
   build: {
-    outDir: 'dist',
+    outDir: 'dist', // Output für gh-pages
   },
-})
+});
