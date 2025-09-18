@@ -16,7 +16,7 @@
     --font-size: 14px;
     --input-font-size: 14px;
     --header-height: auto;
-    --toolbar-height: 90px;
+    --toolbar-height: auto;
     --sidebar-width: 280px;
     --border-radius: 6px;
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
