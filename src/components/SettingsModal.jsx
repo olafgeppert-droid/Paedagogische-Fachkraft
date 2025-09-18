@@ -206,7 +206,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                                 </div>
                                             </div>
                                             <div className="color-item">
-                                                <label>Protokoll-Hintergrund</label>
+                                                <label>Fenster-Hintergrund</label>
                                                 <div className="color-input-group">
                                                     <input
                                                         type="color"
