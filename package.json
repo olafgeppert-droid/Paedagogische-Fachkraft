@@ -1,9 +1,10 @@
 {
-  "name": "Paedagogische-Fachkraft",
+  "name": "paedagogische-fachkraft",
   "version": "1.0.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "preview": "vite preview",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
@@ -15,5 +16,5 @@
     "vite": "^5.0.0",
     "gh-pages": "^5.0.0"
   },
-  "homepage": "https://olafgeppert-droid.github.io/Paedagogische-Fachkraft"
+  "homepage": "https://olafgeppert.github.io/Paedagogische-Fachkraft"
 }
