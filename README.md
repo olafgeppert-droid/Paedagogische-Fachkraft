@@ -63,32 +63,33 @@ Die App unterstützt alle modernen Browser mit IndexedDB-Unterstützung:
 
 Dieses Projekt steht unter der MIT-Lizenz.
 
-pädagogische-dokumentation/ 
-│ 
-├── .github/workflows/
-│   └── build-and-deploy.yml
-├── dist/
-├── index.html 
+pädagogische-dokumentation/
+│
+├── src/
+│   ├── app.jsx
+│   ├── main.jsx
+│   ├── database.js
+│   ├── utils/
+│   │   └── helpers.js
+│   ├── components/
+│   │   ├── Header.jsx
+│   │   ├── Toolbar.jsx
+│   │   ├── Navigation.jsx
+│   │   ├── MainContent.jsx
+│   │   ├── StudentModal.jsx
+│   │   ├── EntryModal.jsx
+│   │   ├── SettingsModal.jsx
+│   │   ├── StatisticsModal.jsx
+│   │   └── HelpModal.jsx
+│
+├── styles/
+│   ├── main.css
+│   └── components.css
+│
+├── index.html
 ├── package.json
+├── vite.config.js
 ├── .gitignore
-├── .babelrc
 ├── .nojekyll
-├── styles/ 
-│ ├── main.css 
-│ └── components.css 
-├── scripts/ 
-│ ├── app.js 
-│ ├── database.js 
-│ ├── components/ 
-│ │ ├── Header.js 
-│ │ ├── Toolbar.js 
-│ │ ├── Navigation.js 
-│ │ ├── MainContent.js 
-│ │ ├── StudentModal.js 
-│ │ ├── EntryModal.js 
-│ │ ├── SettingsModal.js 
-│ │ ├── StatisticsModal.js 
-│ │ └── HelpModal.js 
-│ └── utils/ 
-│   └── helpers.js 
-└── README.md
+├── README.md
+
