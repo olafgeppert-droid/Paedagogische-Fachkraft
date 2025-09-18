@@ -27,7 +27,7 @@ import {
     filterStudents
 } from './database.js';
 
-const app = () => {
+const App = () => {
     const [db, setDb] = useState(null);
     const [students, setStudents] = useState([]);
     const [entries, setEntries] = useState([]);
@@ -42,10 +42,63 @@ const app = () => {
     const [history, setHistory] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
 
-    const applySettings = (settings) => {
+    const applySettings = useCallback((settings) => {
         document.documentElement.setAttribute('data-theme', settings.theme);
         document.documentElement.style.setProperty('--font-size', `${settings.fontSize}px`);
         document.documentElement.style.setProperty('--input-font-size', `${settings.inputFontSize}px`);
+        
+        // Benutzerdefinierte Farben anwenden
+        if (settings.theme === 'colored' && settings.customColors) {
+            applyCustomColors(settings.customColors);
+        } else {
+            // Zurücksetzen der benutzerdefinierten Farben bei anderen Themes
+            resetCustomColors();
+        }
+    }, []);
+
+    // Funktion zum Anwenden benutzerdefinierter Farben
+    const applyCustomColors = (colors) => {
+        const root = document.documentElement;
+        root.style.setProperty('--primary-color', colors.navigation || '#dc2626');
+        root.style.setProperty('--secondary-color', colors.toolbar || '#7c3aed');
+        root.style.setProperty('--sidebar-bg', colors.header || '#fed7aa');
+        root.style.setProperty('--background-color', colors.protocol || '#fef7ed');
+        
+        // Zusätzliche Farbanpassungen für bessere Konsistenz
+        root.style.setProperty('--info-color', colors.navigation || '#2563eb');
+        root.style.setProperty('--border-color', colors.toolbar ? lightenColor(colors.toolbar, 30) : '#e5e7eb');
+        
+        // Für das farbige Theme spezifische Anpassungen
+        document.documentElement.classList.add('custom-colors-applied');
+    };
+
+    // Funktion zum Zurücksetzen der benutzerdefinierten Farben
+    const resetCustomColors = () => {
+        const root = document.documentElement;
+        // Entferne alle benutzerdefinierten Farbüberschreibungen
+        root.style.removeProperty('--primary-color');
+        root.style.removeProperty('--secondary-color');
+        root.style.removeProperty('--sidebar-bg');
+        root.style.removeProperty('--background-color');
+        root.style.removeProperty('--info-color');
+        root.style.removeProperty('--border-color');
+        
+        document.documentElement.classList.remove('custom-colors-applied');
+    };
+
+    // Hilfsfunktion zum Aufhellen von Farben
+    const lightenColor = (color, percent) => {
+        const num = parseInt(color.replace('#', ''), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = (num >> 16) + amt;
+        const G = (num >> 8 & 0x00FF) + amt;
+        const B = (num & 0x0000FF) + amt;
+        return '#' + (
+            0x1000000 +
+            (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+            (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+            (B < 255 ? B < 1 ? 0 : B : 255)
+        ).toString(16).slice(1);
     };
 
     useEffect(() => {
@@ -70,7 +123,7 @@ const app = () => {
             }
         };
         initDB();
-    }, []);
+    }, [applySettings]);
 
     useEffect(() => {
         const loadEntries = async () => {
@@ -167,7 +220,7 @@ const app = () => {
     };
 
     const handleExport = async () => { await exportData(db); };
-    const handleImport = async (event) => { await importData(db, event, setSettings, setMasterData, setStudents, setModal); };
+    const handleImport = async (event) => { await importData(db, event, setSettings, setMasterData, setStudents, setModal, applySettings); };
     const handleUndo = async () => { await undo(db, history, historyIndex, setHistoryIndex, setStudents); };
     const handleRedo = async () => { await redo(db, history, historyIndex, setHistoryIndex, setStudents); };
     const handleLoadSampleData = async () => { await loadSampleData(db, setMasterData, setStudents); };
@@ -201,7 +254,7 @@ const app = () => {
                 filters={filters}
                 masterData={masterData}
                 onStudentSelect={(student) => { setSelectedStudent(student); setViewMode('student'); }}
-                onDateSelect={(date) => { setSelectedDate(date); setViewMode('day'); }}
+                onDateSelect={(date) => { setSelectedDate(date); setViewDate('day'); }}
                 onFilterChange={setFilters}
                 onShowStats={() => setModal('statistics')}
                 onShowSettings={() => setModal('settings')}
@@ -218,4 +271,4 @@ const app = () => {
     );
 };
 
-export default app;
+export default App;
