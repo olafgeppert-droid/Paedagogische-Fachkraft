@@ -15,8 +15,8 @@
     --info-color: #2563eb;          /* Konsistentes Blau statt #3498db */
     --font-size: 15px;              /* Etwas größere Schrift */
     --input-font-size: 15px;
-    --header-height: auto;
-    --toolbar-height: auto;         /* Etwas höher für bessere Sichtbarkeit */
+    --header-height: 70px;
+    --toolbar-height: 110px;
     --sidebar-width: 300px;
     --border-radius: 8px;           /* Abgerundetere Ecken */
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Stärkerer Schatten */
@@ -75,6 +75,7 @@ body {
     font-weight: 500; /* Etwas dickere Schrift für bessere Lesbarkeit */
 }
 
+/* === KORREKTUR: APP LAYOUT FIXIEREN === */
 .app {
     display: grid;
     grid-template-areas:
@@ -84,9 +85,14 @@ body {
     grid-template-rows: var(--header-height) var(--toolbar-height) 1fr;
     grid-template-columns: var(--sidebar-width) 1fr;
     height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
 }
 
-/* Header Styles */
+/* === KORREKTUR: HEADER IMMER SICHTBAR === */
 .header {
     grid-area: header;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
@@ -96,8 +102,10 @@ body {
     align-items: center;
     justify-content: space-between;
     box-shadow: var(--shadow);
-    position: relative;
-    z-index: 10;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: var(--header-height);
     border-bottom: 2px solid var(--border-color);
 }
 
@@ -135,7 +143,7 @@ body {
     min-width: 45px;
 }
 
-/* Toolbar Styles */
+/* === KORREKTUR: TOOLBAR IMMER SICHTBAR === */
 .toolbar {
     grid-area: toolbar;
     display: flex;
@@ -145,8 +153,12 @@ body {
     background-color: var(--card-bg);
     border-bottom: 2px solid var(--border-color);
     box-shadow: var(--shadow);
-    position: relative;
-    z-index: 5;
+    position: sticky;
+    top: var(--header-height);
+    z-index: 90;
+    min-height: var(--toolbar-height);
+    height: auto;
+    overflow: visible;
 }
 
 .toolbar-row {
@@ -155,6 +167,9 @@ body {
     flex-wrap: nowrap;
     justify-content: center;
     width: 100%;
+    overflow-x: auto; /* Nur bei Bedarf scrollen */
+    overflow-y: hidden;
+    padding-bottom: 2px;
 }
 
 .toolbar-row .button {
@@ -171,20 +186,25 @@ body {
     border: 2px solid transparent;
 }
 
-/* Navigation Styles */
+/* === KORREKTUR: NAVIGATION HORIZONTAL FIXIEREN === */
 .nav {
     grid-area: nav;
     background-color: var(--sidebar-bg);
     color: var(--sidebar-text);
-    padding: 1.5rem; /* Reduziertes Padding für engere Anordnung */
+    padding: 1.5rem;
     overflow-y: auto;
+    overflow-x: hidden; /* Kein horizontales Scrollen */
     border-right: 2px solid var(--border-color);
-    height: 100%;
+    height: calc(100vh - var(--header-height) - var(--toolbar-height));
+    width: var(--sidebar-width);
+    position: fixed;
+    top: calc(var(--header-height) + var(--toolbar-height));
+    left: 0;
 }
 
 .nav h3 {
     color: var(--sidebar-text);
-    margin-bottom: 1.5rem; /* Reduzierter Abstand */
+    margin-bottom: 1.5rem;
     font-size: 1.3rem;
     font-weight: 700;
     padding-bottom: 0.75rem;
@@ -192,13 +212,13 @@ body {
 }
 
 .search-filter {
-    margin-bottom: 1.75rem; /* Reduzierter Abstand */
+    margin-bottom: 1.75rem;
 }
 
 .search-input, .filter-select {
     width: 100%;
-    padding: 0.75rem; /* Reduziertes Padding für engere Anordnung */
-    margin-bottom: 1rem; /* Reduzierter Abstand */
+    padding: 0.75rem;
+    margin-bottom: 1rem;
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
     background-color: var(--card-bg);
@@ -215,12 +235,12 @@ body {
 }
 
 .filter-group {
-    margin-bottom: 1rem; /* Reduzierter Abstand */
+    margin-bottom: 1rem;
 }
 
 .filter-label {
     display: block;
-    margin-bottom: 0.6rem; /* Reduzierter Abstand */
+    margin-bottom: 0.6rem;
     color: var(--sidebar-text);
     font-weight: 600;
     font-size: 1rem;
@@ -228,14 +248,14 @@ body {
 
 /* Students List */
 .students-section {
-    margin-top: 2rem; /* Reduzierter Abstand */
+    margin-top: 2rem;
 }
 
 .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem; /* Reduzierter Abstand */
+    margin-bottom: 1rem;
 }
 
 .section-header h4 {
@@ -262,8 +282,8 @@ body {
 .student-item {
     display: flex;
     align-items: center;
-    padding: 1rem; /* Reduziertes Padding für engere Anordnung */
-    margin-bottom: 0.5rem; /* Reduzierter Abstand */
+    padding: 1rem;
+    margin-bottom: 0.5rem;
     background-color: transparent;
     border-radius: var(--border-radius);
     cursor: pointer;
@@ -296,7 +316,7 @@ body {
 
 .student-name {
     font-weight: 700;
-    margin-bottom: 0.3rem; /* Reduzierter Abstand */
+    margin-bottom: 0.3rem;
     color: var(--sidebar-text);
     font-size: 1.05rem;
 }
@@ -309,50 +329,51 @@ body {
 
 /* Navigation Footer */
 .nav-footer {
-    margin-top: 2rem; /* Reduzierter Abstand */
-    padding-top: 1.5rem; /* Reduziertes Padding */
+    margin-top: 2rem;
+    padding-top: 1.5rem;
     border-top: 2px solid var(--border-color);
 }
 
 .footer-section {
-    margin-bottom: 1.5rem; /* Reduzierter Abstand */
+    margin-bottom: 1.5rem;
 }
 
 .footer-section h4 {
     color: var(--sidebar-text);
-    margin-bottom: 0.75rem; /* Reduzierter Abstand */
+    margin-bottom: 0.75rem;
     font-size: 1rem;
     font-weight: 700;
 }
 
 .footer-section .button {
     width: 100%;
-    margin-bottom: 0.6rem; /* Reduzierter Abstand */
+    margin-bottom: 0.6rem;
     text-align: left;
-    padding: 0.75rem; /* Reduziertes Padding */
+    padding: 0.75rem;
     justify-content: flex-start;
     font-weight: 600;
 }
 
 .app-info {
     text-align: center;
-    margin-top: 2rem; /* Reduzierter Abstand */
-    padding-top: 1rem; /* Reduziertes Padding */
+    margin-top: 2rem;
+    padding-top: 1rem;
     border-top: 2px solid var(--border-color);
     color: var(--sidebar-text);
     font-size: 0.9rem;
     opacity: 0.8;
 }
 
-/* Main Content */
+/* === KORREKTUR: MAIN CONTENT BEREICH === */
 .main {
     grid-area: main;
-    padding: 2rem; /* Reduziertes Padding */
+    padding: 2rem;
     overflow-y: auto;
+    overflow-x: hidden; /* Kein horizontales Scrollen */
     background-color: var(--background-color);
-    height: 100%;
-    /* Scrollbars für alle Geräte */
-    overflow: auto;
+    height: calc(100vh - var(--header-height) - var(--toolbar-height));
+    margin-left: var(--sidebar-width);
+    margin-top: calc(var(--header-height) + var(--toolbar-height));
 }
 
 .welcome-screen {
@@ -432,8 +453,8 @@ body {
     background-color: var(--card-bg);
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
-    padding: 1.5rem; /* Reduziertes Padding */
-    margin-bottom: 1.25rem; /* Reduzierter Abstand */
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
     box-shadow: var(--shadow);
     transition: var(--transition);
 }
@@ -447,7 +468,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem; /* Reduzierter Abstand */
+    margin-bottom: 1rem;
     padding-bottom: 0.75rem;
     border-bottom: 2px solid var(--border-color);
 }
@@ -465,7 +486,7 @@ body {
 }
 
 .entry-card p {
-    margin-bottom: 0.75rem; /* Reduzierter Abstand */
+    margin-bottom: 0.75rem;
     line-height: 1.6;
     font-weight: 500;
 }
@@ -504,7 +525,7 @@ body {
 }
 
 .modal-header {
-    padding: 1.5rem; /* Reduziertes Padding */
+    padding: 1.5rem;
     border-bottom: 2px solid var(--border-color);
     display: flex;
     justify-content: space-between;
@@ -529,13 +550,13 @@ body {
 }
 
 .modal-body {
-    padding: 1.5rem; /* Reduziertes Padding */
+    padding: 1.5rem;
     flex: 1;
     overflow-y: auto;
 }
 
 .modal-footer {
-    padding: 1.25rem 1.5rem; /* Reduziertes Padding */
+    padding: 1.25rem 1.5rem;
     border-top: 2px solid var(--border-color);
     display: flex;
     justify-content: space-between;
@@ -551,11 +572,11 @@ body {
 
 /* Settings Modal Specific */
 .settings-section {
-    margin-bottom: 2rem; /* Reduzierter Abstand */
+    margin-bottom: 2rem;
 }
 
 .settings-section h3 {
-    margin-bottom: 1rem; /* Reduzierter Abstand */
+    margin-bottom: 1rem;
     color: var(--text-color);
     font-size: 1.3rem;
     font-weight: 700;
@@ -565,15 +586,15 @@ body {
 
 .theme-selector {
     display: flex;
-    gap: 1rem; /* Reduzierter Abstand */
-    margin-bottom: 1.5rem; /* Reduzierter Abstand */
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .theme-option {
     flex: 1;
     text-align: center;
     cursor: pointer;
-    padding: 1rem; /* Reduziertes Padding */
+    padding: 1rem;
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
     transition: var(--transition);
@@ -592,7 +613,7 @@ body {
 }
 
 .theme-option h4 {
-    margin-bottom: 0.5rem; /* Reduzierter Abstand */
+    margin-bottom: 0.5rem;
     color: var(--text-color);
     font-weight: 700;
     font-size: 1.1rem;
@@ -606,9 +627,9 @@ body {
 
 .color-picker {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Kompaktere Darstellung */
-    gap: 1rem; /* Reduzierter Abstand */
-    margin-top: 1rem; /* Reduzierter Abstand */
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
 }
 
 .color-option {
@@ -617,7 +638,7 @@ body {
 }
 
 .color-option label {
-    margin-bottom: 0.5rem; /* Reduzierter Abstand */
+    margin-bottom: 0.5rem;
     font-weight: 600;
     color: var(--text-color);
     font-size: 1rem;
@@ -625,7 +646,7 @@ body {
 
 .color-input {
     width: 100%;
-    height: 40px; /* Reduzierte Höhe */
+    height: 40px;
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
     padding: 0.375rem;
@@ -678,11 +699,11 @@ body {
 
     .nav {
         position: fixed;
-        top: var(--header-height);
+        top: calc(var(--header-height) + var(--toolbar-height));
         left: -100%;
         width: 85%;
         max-width: 340px;
-        height: calc(100% - var(--header-height));
+        height: calc(100% - var(--header-height) - var(--toolbar-height));
         z-index: 1000;
         transition: left 0.3s ease;
         box-shadow: 3px 0 15px rgba(0, 0, 0, 0.15);
@@ -719,7 +740,8 @@ body {
 
     .main {
         padding: 1.25rem;
-        /* Verbesserte Scrollbarkeit auf Mobilgeräten */
+        margin-left: 0;
+        margin-top: calc(var(--header-height) + var(--toolbar-height));
         overflow: auto;
         -webkit-overflow-scrolling: touch;
     }
@@ -893,32 +915,26 @@ p, li, span {
 
 /* Custom Color Overrides für das colored Theme */
 [data-theme="colored"].custom-colors-applied .toolbar {
-    /* Toolbar Hintergrund */
     background-color: var(--toolbar-bg-custom, var(--card-bg)) !important;
 }
 
 [data-theme="colored"].custom-colors-applied .modal {
-    /* Modal Hintergründe */
     background-color: var(--modal-bg-custom, var(--card-bg)) !important;
 }
 
 [data-theme="colored"].custom-colors-applied .entry-card {
-    /* Entry Cards Hintergründe */
     background-color: var(--card-bg, #ffffff) !important;
 }
 
 [data-theme="colored"].custom-colors-applied .main {
-    /* Main Content Bereich */
     background-color: var(--background-color, #fef7ed) !important;
 }
 
 [data-theme="colored"].custom-colors-applied .nav {
-    /* Navigation Sidebar */
     background-color: var(--sidebar-bg, #fed7aa) !important;
 }
 
 [data-theme="colored"].custom-colors-applied .header {
-    /* Header */
     background: linear-gradient(135deg, 
         var(--primary-color, #dc2626), 
         var(--secondary-color, #b91c1c)
