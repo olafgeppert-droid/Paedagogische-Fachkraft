@@ -1069,7 +1069,7 @@
 }
 
 /* Kontrastreiche Eingabefelder */
-.form-input, .form-select, .form-textarea, .search-input, .filter-select {
+.form-input, .form-select, .form-textarea {
     background-color: var(--input-bg, #ffffff) !important;
     color: var(--input-color, #1f2937) !important;
     border: 2px solid var(--input-border, #9ca3af) !important;
