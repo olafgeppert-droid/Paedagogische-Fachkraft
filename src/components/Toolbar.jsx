@@ -13,7 +13,8 @@ const Toolbar = ({
     onUndo,
     onRedo,
     canUndo,
-    canRedo
+    canRedo,
+    onClearFilter // Neue Prop für Filter löschen
 }) => {
     return (
         <div className="toolbar">
@@ -36,11 +37,21 @@ const Toolbar = ({
                     ✏️ Schüler bearbeiten
                 </button>
                 
+                {/* Filter löschen Button - nur sichtbar wenn ein Schüler selektiert ist */}
+                {selectedStudent && (
+                    <button
+                        className="button"
+                        onClick={onClearFilter}
+                        title="Filter löschen"
+                    >
+                        ❌ Filter löschen
+                    </button>
+                )}
+                
                 <button
                     className="button"
                     onClick={onAddEntry}
                     title="Neues Protokoll anlegen"
-                    disabled={!selectedStudent || !selectedDate}
                 >
                     📝 Protokoll anlegen
                 </button>
