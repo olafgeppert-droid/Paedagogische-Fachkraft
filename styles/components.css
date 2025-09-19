@@ -95,7 +95,7 @@
     border-right: 2px solid var(--border-color);
     padding: 1.25rem;
     overflow-y: auto;
-    background-color: var(--background-color);
+    background-color: var(--sidebar-bg);
 }
 
 .main {
