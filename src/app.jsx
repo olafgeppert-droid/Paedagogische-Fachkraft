@@ -293,7 +293,6 @@ const App = () => {
                 onRedo={handleRedo}
                 canUndo={historyIndex > 0}
                 canRedo={historyIndex < history.length - 1}
-                onClearFilter={handleClearFilter} // NEU: Filter löschen
             />
             <Navigation
                 isOpen={navOpen}
