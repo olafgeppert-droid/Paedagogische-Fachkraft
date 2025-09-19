@@ -47,7 +47,7 @@ const Navigation = ({
         localFilters.schoolYear || 
         localFilters.school || 
         localFilters.className || 
-        selectedDate; // Jetzt inklusive Datumsfilter
+        selectedDate;
 
     return (
         <nav className={`nav ${isOpen ? 'open' : ''}`}>
@@ -138,15 +138,7 @@ const Navigation = ({
                 {students.length === 0 ? (
                     <div className="empty-state">
                         <p>Keine Kinder gefunden</p>
-                        {hasActiveFilters && (
-                            <button
-                                className="button"
-                                onClick={clearAllFilters}
-                                style={{ marginTop: '8px', width: '100%', padding: '0.5rem' }}
-                            >
-                                Filter löschen
-                            </button>
-                        )}
+                        {/* Button wurde hier entfernt */}
                     </div>
                 ) : (
                     <ul className="students-list">
