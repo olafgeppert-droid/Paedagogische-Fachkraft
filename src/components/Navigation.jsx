@@ -41,12 +41,8 @@ const Navigation = ({
         onFilterChange(clearedFilters);
     };
 
-    const clearDateFilter = () => {
-        onDateSelect(''); // Leert das Datumsfeld
-    };
-
     const hasActiveFilters =
-        localFilters.search || localFilters.schoolYear || localFilters.school || localFilters.className || selectedDate;
+        localFilters.search || localFilters.schoolYear || localFilters.school || localFilters.className;
 
     return (
         <nav className={`nav ${isOpen ? 'open' : ''}`}>
@@ -109,32 +105,12 @@ const Navigation = ({
 
                 <div className="filter-group">
                     <label className="filter-label">Tag</label>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <input
-                            type="date"
-                            className="filter-select"
-                            value={selectedDate}
-                            onChange={(e) => onDateSelect(e.target.value)}
-                            style={{ flex: 1 }}
-                        />
-                        {selectedDate && (
-                            <button
-                                onClick={clearDateFilter}
-                                className="button button-danger"
-                                style={{ 
-                                    padding: '0.5rem',
-                                    minWidth: 'auto',
-                                    height: '42px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}
-                                title="Datum löschen"
-                            >
-                                ❌
-                            </button>
-                        )}
-                    </div>
+                    <input
+                        type="date"
+                        className="filter-select"
+                        value={selectedDate}
+                        onChange={(e) => onDateSelect(e.target.value)}
+                    />
                 </div>
 
                 {hasActiveFilters && (
@@ -143,7 +119,7 @@ const Navigation = ({
                         onClick={clearFilters}
                         style={{ width: '100%', marginTop: '0.3rem', padding: '0.5rem' }}
                     >
-                        ❌ Alle Filter löschen
+                        ❌ Filter löschen
                     </button>
                 )}
             </div>
