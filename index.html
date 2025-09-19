@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pädagogische Dokumentation</title>
+
+    <link rel="stylesheet" href="./styles/main.css" />
+    <link rel="stylesheet" href="./styles/components.css" />
+    
+    <!-- IDB Bibliothek hinzufügen -->
+    <script src="https://unpkg.com/idb@7/build/umd.js"></script>
+    
+    <style>
+      /* Temporäre Lösung für Scrollbars auf mobilen Geräten */
+      @media (max-width: 768px) {
+        body {
+          overflow: auto !important;
+          height: auto !important;
+        }
+        #root {
+          overflow: auto !important;
+          height: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
