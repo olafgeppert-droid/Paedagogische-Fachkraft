@@ -24,9 +24,9 @@ const EntryModal = ({ entry, student, students, masterData, onSave, onClose }) =
                     <button className="modal-close" onClick={onClose}>×</button>
                 </div>
                 <form onSubmit={handleSubmit}>
-                    {/* Datumsfeld für Protokolldatum */}
+                    {/* Datumsfeld für Protokolldatum - Jetzt oben und hervorgehoben */}
                     <div className="form-group">
-                        <label className="form-label">Protokolldatum</label>
+                        <label className="form-label">Protokolldatum *</label>
                         <input
                             type="date"
                             className="form-input"
@@ -39,7 +39,7 @@ const EntryModal = ({ entry, student, students, masterData, onSave, onClose }) =
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Kind</label>
+                        <label className="form-label">Kind *</label>
                         <select
                             className="form-select"
                             value={formData.studentId}
@@ -58,7 +58,7 @@ const EntryModal = ({ entry, student, students, masterData, onSave, onClose }) =
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Thema</label>
+                        <label className="form-label">Thema *</label>
                         <input
                             type="text"
                             className="form-input"
@@ -71,7 +71,7 @@ const EntryModal = ({ entry, student, students, masterData, onSave, onClose }) =
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Beobachtungen</label>
+                        <label className="form-label">Beobachtungen *</label>
                         <textarea
                             className="form-textarea"
                             value={formData.observations}
@@ -83,7 +83,7 @@ const EntryModal = ({ entry, student, students, masterData, onSave, onClose }) =
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Maßnahmen</label>
+                        <label className="form-label">Maßnahmen *</label>
                         <textarea
                             className="form-textarea"
                             value={formData.measures}
