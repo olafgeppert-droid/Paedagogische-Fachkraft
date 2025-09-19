@@ -166,7 +166,7 @@ const App = () => {
             }
         };
         loadEntries();
-    }, [db, selectedStudent, selectedDate, viewMode]);
+    }, [db, selectedStudent, selectedDate, viewMode, filters]); // filters hinzugefügt
 
     const filteredStudents = useCallback(() => filterStudents(students, filters), [students, filters]);
 
@@ -274,6 +274,21 @@ const App = () => {
         setSelectedDate(''); // Datum zurücksetzen
     };
 
+    // Funktion zum Finden des zu bearbeitenden Eintrags
+    const findEntryToEdit = () => {
+        if (!selectedStudent || !selectedDate || entries.length === 0) {
+            return null;
+        }
+        
+        // Suche nach Eintrag für selektierten Schüler und Datum
+        const entryToEdit = entries.find(entry => 
+            entry.studentId === selectedStudent.id && 
+            entry.date === selectedDate
+        );
+        
+        return entryToEdit || null;
+    };
+
     if (!db) return <div>Datenbank wird initialisiert...</div>;
 
     return (
@@ -285,7 +300,12 @@ const App = () => {
                 onAddStudent={handleShowNewStudent} // Immer "Neuer Schüler"
                 onEditStudent={() => setModal('student')}
                 onAddEntry={handleShowNewProtocol} // Immer "Protokoll anlegen"
-                onEditEntry={() => entries.length > 0 && handleEditProtocol(entries[0])} // Erstes Protokoll bearbeiten
+                onEditEntry={() => {
+                    const entryToEdit = findEntryToEdit();
+                    if (entryToEdit) {
+                        handleEditProtocol(entryToEdit);
+                    }
+                }}
                 onPrint={() => window.print()}
                 onExport={handleExport}
                 onImport={handleImport}
@@ -319,7 +339,7 @@ const App = () => {
                 selectedStudent={selectedStudent} 
                 selectedDate={selectedDate} 
                 entries={entries} 
-                onEditEntry={handleEditProtocol} // Korrigierte Bearbeitungsfunktion
+                onEditEntry={handleEditProtocol}
             />
             
             {modal === 'student' && (
@@ -333,7 +353,7 @@ const App = () => {
             )}
             {modal === 'entry' && (
                 <EntryModal 
-                    entry={editingEntry} // Bearbeitung oder neues Protokoll
+                    entry={editingEntry}
                     student={selectedStudent} 
                     students={students} 
                     masterData={masterData} 
