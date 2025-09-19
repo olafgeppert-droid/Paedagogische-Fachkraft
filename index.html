@@ -12,15 +12,29 @@
     <script src="https://unpkg.com/idb@7/build/umd.js"></script>
     
     <style>
-      /* Temporäre Lösung für Scrollbars auf mobilen Geräten */
-      @media (max-width: 768px) {
+      /* Verbesserte Scrollbars für alle Geräte */
+      body, #root {
+        overflow: auto;
+        height: auto;
+      }
+      
+      /* iOS Safari spezifische Fixes */
+      @supports (-webkit-touch-callout: none) {
         body {
-          overflow: auto !important;
-          height: auto !important;
+          -webkit-overflow-scrolling: touch;
         }
         #root {
-          overflow: auto !important;
-          height: auto !important;
+          position: relative;
+          overflow: auto;
+        }
+      }
+
+      /* Bessere Handhabung von mobilen Geräten */
+      @media (max-width: 768px) {
+        body, #root {
+          overflow: auto;
+          height: auto;
+          overscroll-behavior: none;
         }
       }
     </style>
