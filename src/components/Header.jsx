@@ -17,7 +17,7 @@ const Header = () => {
       
       <div className="header-right">
         <div className="header-date">{currentDate}</div>
-        <div className="header-version">Version 1.5.0</div>
+        <div className="header-version">Version 1.5.1</div>
       </div>
     </header>
   );
