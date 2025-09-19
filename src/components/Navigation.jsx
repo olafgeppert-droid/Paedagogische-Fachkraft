@@ -12,7 +12,9 @@ const Navigation = ({
     onFilterChange,
     onShowStats,
     onShowSettings,
-    onShowHelp
+    onShowHelp,
+    onShowNewStudent,
+    onShowNewProtocol
 }) => {
     const [searchTerm, setSearchTerm] = React.useState(filters.search);
     const [localFilters, setLocalFilters] = React.useState(filters);
@@ -39,7 +41,8 @@ const Navigation = ({
         setSearchTerm('');
         setLocalFilters(clearedFilters);
         onFilterChange(clearedFilters);
-        onDateSelect(''); // Leert auch das Datumsfeld
+        onDateSelect(''); // Leert das Datumsfeld
+        onStudentSelect(null); // Deselektiert das Kind
     };
 
     const hasActiveFilters =
@@ -47,7 +50,8 @@ const Navigation = ({
         localFilters.schoolYear || 
         localFilters.school || 
         localFilters.className || 
-        selectedDate;
+        selectedDate ||
+        selectedStudent; // WICHTIG: Jetzt inklusive selektiertem Kind
 
     return (
         <nav className={`nav ${isOpen ? 'open' : ''}`}>
@@ -138,7 +142,6 @@ const Navigation = ({
                 {students.length === 0 ? (
                     <div className="empty-state">
                         <p>Keine Kinder gefunden</p>
-                        {/* Button wurde hier entfernt */}
                     </div>
                 ) : (
                     <ul className="students-list">
@@ -168,13 +171,39 @@ const Navigation = ({
             <div className="nav-footer">
                 <div className="footer-section">
                     <h4>Aktionen</h4>
-                    <button className="button button-info" onClick={onShowStats} style={{ padding: '0.6rem' }}>
+                    <button 
+                        className="button button-info" 
+                        onClick={onShowNewStudent}
+                        style={{ padding: '0.6rem' }}
+                    >
+                        ➕ Neuer Schüler
+                    </button>
+                    <button 
+                        className="button button-success" 
+                        onClick={onShowNewProtocol}
+                        style={{ padding: '0.6rem' }}
+                    >
+                        📝 Protokoll anlegen
+                    </button>
+                    <button 
+                        className="button button-info" 
+                        onClick={onShowStats} 
+                        style={{ padding: '0.6rem' }}
+                    >
                         📊 Statistiken
                     </button>
-                    <button className="button button-info" onClick={onShowSettings} style={{ padding: '0.6rem' }}>
+                    <button 
+                        className="button button-info" 
+                        onClick={onShowSettings} 
+                        style={{ padding: '0.6rem' }}
+                    >
                         ⚙️ Einstellungen
                     </button>
-                    <button className="button button-info" onClick={onShowHelp} style={{ padding: '0.6rem' }}>
+                    <button 
+                        className="button button-info" 
+                        onClick={onShowHelp} 
+                        style={{ padding: '0.6rem' }}
+                    >
                         ❓ Hilfe
                     </button>
                 </div>
