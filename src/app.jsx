@@ -41,6 +41,7 @@ const App = () => {
     const [navOpen, setNavOpen] = useState(false);
     const [history, setHistory] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
+    const [editingEntry, setEditingEntry] = useState(null); // Für Protokollbearbeitung
 
     const applySettings = useCallback((settings) => {
         document.documentElement.setAttribute('data-theme', settings.theme);
@@ -212,10 +213,11 @@ const App = () => {
                 await updateEntry(db, entryData);
                 setEntries(entries.map(e => e.id === entryData.id ? entryData : e));
             } else {
-                const newEntry = await addEntry(db, entryData); // Datum wird jetzt vom EntryModal übergeben
+                const newEntry = await addEntry(db, entryData);
                 setEntries([...entries, newEntry]);
             }
             setModal(null);
+            setEditingEntry(null);
         } catch (error) {
             console.error('Fehler beim Speichern des Eintrags:', error);
         }
@@ -257,7 +259,19 @@ const App = () => {
     };
 
     const handleShowNewProtocol = () => {
+        setEditingEntry(null); // Für neues Protokoll
         setModal('entry');
+    };
+
+    const handleEditProtocol = (entry) => {
+        setEditingEntry(entry); // Protokoll zum Bearbeiten setzen
+        setModal('entry');
+    };
+
+    const handleClearFilter = () => {
+        setSelectedStudent(null); // Kind deselektieren
+        setFilters({ search: '', schoolYear: '', school: '', className: '' }); // Filter zurücksetzen
+        setSelectedDate(''); // Datum zurücksetzen
     };
 
     if (!db) return <div>Datenbank wird initialisiert...</div>;
@@ -271,7 +285,7 @@ const App = () => {
                 onAddStudent={handleShowNewStudent} // Immer "Neuer Schüler"
                 onEditStudent={() => setModal('student')}
                 onAddEntry={handleShowNewProtocol} // Immer "Protokoll anlegen"
-                onEditEntry={() => setModal('entry')}
+                onEditEntry={() => entries.length > 0 && handleEditProtocol(entries[0])} // Erstes Protokoll bearbeiten
                 onPrint={() => window.print()}
                 onExport={handleExport}
                 onImport={handleImport}
@@ -279,6 +293,7 @@ const App = () => {
                 onRedo={handleRedo}
                 canUndo={historyIndex > 0}
                 canRedo={historyIndex < history.length - 1}
+                onClearFilter={handleClearFilter} // NEU: Filter löschen
             />
             <Navigation
                 isOpen={navOpen}
@@ -299,19 +314,13 @@ const App = () => {
                 onShowStats={() => setModal('statistics')}
                 onShowSettings={() => setModal('settings')}
                 onShowHelp={() => setModal('help')}
-                onShowNewStudent={handleShowNewStudent} // NEU
-                onShowNewProtocol={handleShowNewProtocol} // NEU
             />
             <MainContent 
                 viewMode={viewMode} 
                 selectedStudent={selectedStudent} 
                 selectedDate={selectedDate} 
                 entries={entries} 
-                onEditEntry={(entry) => {
-                    // Für Bearbeitung muss der Eintrag an EntryModal übergeben werden
-                    setModal('entry');
-                    // Hier müsste der zu bearbeitende Eintrag gespeichert werden
-                }} 
+                onEditEntry={handleEditProtocol} // Korrigierte Bearbeitungsfunktion
             />
             
             {modal === 'student' && (
@@ -325,12 +334,15 @@ const App = () => {
             )}
             {modal === 'entry' && (
                 <EntryModal 
-                    entry={null} // Immer neues Protokoll, Bearbeitung separat handhaben
+                    entry={editingEntry} // Bearbeitung oder neues Protokoll
                     student={selectedStudent} 
                     students={students} 
                     masterData={masterData} 
                     onSave={saveEntryHandler} 
-                    onClose={() => setModal(null)} 
+                    onClose={() => {
+                        setModal(null);
+                        setEditingEntry(null);
+                    }} 
                 />
             )}
             {modal === 'settings' && (
