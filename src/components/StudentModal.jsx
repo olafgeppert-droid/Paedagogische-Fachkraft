@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import NationalityDropdown from './nations.jsx';
+import NationalityDropdown from './Nations.jsx';
 
 const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
     const [formData, setFormData] = useState(student || {
