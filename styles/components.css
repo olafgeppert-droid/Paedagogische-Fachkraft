@@ -103,7 +103,7 @@
     padding: 1.25rem;
     overflow-y: auto;
     background-color: var(--background-color);
-    /* Scrollbars für Hauptfenster auf allen Geräten */
+    /* Scrollbars für alle Geräte */
     overflow: auto;
 }
 
