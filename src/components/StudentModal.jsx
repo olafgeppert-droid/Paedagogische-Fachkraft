@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import NationalityDropdown from './nations.jsx';
 
 const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
     const [formData, setFormData] = useState(student || {
@@ -135,16 +136,11 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
                             </select>
                         </div>
 
-                        {/* Nationalität */}
-                        <div className="form-group">
-                            <label className="form-label">Nationalität</label>
-                            <input
-                                type="text"
-                                className="form-input"
-                                value={formData.nationality}
-                                onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
-                            />
-                        </div>
+                        {/* Nationalität - JETZT ALS DROPDOWN */}
+                        <NationalityDropdown
+                            value={formData.nationality}
+                            onChange={(value) => setFormData({ ...formData, nationality: value })}
+                        />
 
                         {/* Deutschkenntnisse */}
                         <div className="form-group">
