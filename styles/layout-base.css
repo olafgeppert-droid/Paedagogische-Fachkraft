@@ -663,3 +663,118 @@ p, li, span {
         background-color: var(--sidebar-bg, #fed7aa) !important;
     }
 }
+
+/* === ENTRY CARDS SPEZIFISCHE STILE FÜR FARBSCHEMEN === */
+[data-theme="farbig"].custom-colors-applied .entry-card {
+    background-color: #fff7ed;
+    border: 2px solid #fbbf24;
+    box-shadow: 0 4px 10px rgba(251, 191, 36, 0.2);
+}
+
+[data-theme="farbig"].custom-colors-applied .entry-card:hover {
+    background-color: #fed7aa;
+    border-color: #f59e0b;
+    transform: translateY(-2px);
+}
+
+[data-theme="farbig"].custom-colors-applied .entry-subject {
+    color: #b45309;
+    font-weight: 600;
+}
+
+/* === FOKUS UND INTERAKTIONEN === */
+[data-theme="farbig"].custom-colors-applied .button:focus,
+[data-theme="farbig"].custom-colors-applied input:focus,
+[data-theme="farbig"].custom-colors-applied select:focus,
+[data-theme="farbig"].custom-colors-applied textarea:focus {
+    outline: 2px solid #f59e0b;
+    outline-offset: 2px;
+}
+
+/* === MODAL UND OVERLAY === */
+.modal {
+    background-color: var(--background-color, #ffffff);
+    border-radius: 16px;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.25);
+    max-width: 600px;
+    width: 90%;
+    padding: 2rem;
+    position: relative;
+    z-index: 1100;
+}
+
+.modal-header {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-color, #1f2937);
+}
+
+.modal-body {
+    font-size: 1rem;
+    color: var(--text-color, #1f2937);
+    line-height: 1.6;
+}
+
+.modal-footer {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+/* === BUTTON VARIATIONEN === */
+.button-primary {
+    background-color: var(--primary-color, #2563eb);
+    color: white;
+    padding: 0.625rem 1.25rem;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.button-primary:hover {
+    background-color: var(--secondary-color, #1d4ed8);
+}
+
+.button-secondary {
+    background-color: #f3f4f6;
+    color: var(--text-color, #1f2937);
+    padding: 0.625rem 1.25rem;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.button-secondary:hover {
+    background-color: #e5e7eb;
+}
+
+/* === TOOLTIP === */
+.tooltip {
+    position: absolute;
+    background-color: #111827;
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    z-index: 1200;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.tooltip.show {
+    opacity: 1;
+}
+
+/* === RESPONSIVES TOOLTIP === */
+@media (max-width: 576px) {
+    .tooltip {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.6rem;
+    }
+}
+
+/* === ENDE DER CUSTOM STYLES === */
