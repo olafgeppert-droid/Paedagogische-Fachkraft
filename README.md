@@ -61,16 +61,20 @@ Die App unterstützt alle modernen Browser mit IndexedDB-Unterstützung:
 
 ## Lizenz
 
-Dieses Projekt steht unter der MIT-Lizenz.
-
 pädagogische-dokumentation/
-│
+├── index.html
+├── package.json
+├── package-lock.json
+├── vite.config.js
+├── README.md
+├── .nojekyll
+├── .gitignore
+├── .github/
+│   └── workflows/
+│       └── deploy.yml
 ├── src/
-│   ├── app.jsx
 │   ├── main.jsx
-│   ├── database.js
-│   ├── utils/
-│   │   └── helpers.js
+│   ├── app.jsx
 │   ├── components/
 │   │   ├── Header.jsx
 │   │   ├── Toolbar.jsx
@@ -80,16 +84,14 @@ pädagogische-dokumentation/
 │   │   ├── EntryModal.jsx
 │   │   ├── SettingsModal.jsx
 │   │   ├── StatisticsModal.jsx
-│   │   └── HelpModal.jsx
-│
-├── styles/
-│   ├── main.css
-│   └── components.css
-│
-├── index.html
-├── package.json
-├── vite.config.js
-├── .gitignore
-├── .nojekyll
-├── README.md
-
+│   │   ├── HelpModal.jsx
+│   │   └── Nations.jsx
+│   ├── utils/
+│   │   └── helpers.js          (KORRIGIERT: war utils.js)
+│   └── database.js
+└── styles/
+    ├── main.css                 (wird ersetzt)
+    ├── components.css          (wird ersetzt)
+    ├── theme-variables.css     (NEU)
+    ├── layout-base.css         (NEU)
+    └── components-3d.css       (NEU)
