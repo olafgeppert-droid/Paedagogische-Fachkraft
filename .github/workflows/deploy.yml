@@ -3,38 +3,32 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main  # Wird nur bei Push auf main ausgelöst
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1️⃣ Repository auschecken
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Node.js Setup
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'npm'
 
-      # 3️⃣ Abhängigkeiten installieren
       - name: Install Dependencies
         run: npm ci
 
-      # 4️⃣ Projekt bauen
       - name: Build Project
         run: npm run build
 
-      # 5️⃣ Nur deployen, wenn Build erfolgreich war
       - name: Deploy to GitHub Pages
-        if: success()  # stellt sicher, dass nur bei erfolgreichem Build deployt wird
+        if: success()
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           publish_branch: gh-pages
-          # Optional: Force Push, falls ältere Deploys Konflikte verursachen
           force_orphan: true
