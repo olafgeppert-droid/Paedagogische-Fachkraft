@@ -4,20 +4,32 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pädagogische Dokumentation</title>
+    <link rel="icon" href="/Paedagogische-Fachkraft/favicon.ico" />
 
-    <!-- CSS-IMPORTS MIT RELATIVEN PFADEN -->
-    <link rel="stylesheet" href="./styles/theme-variables.css" />
-    <link rel="stylesheet" href="./styles/layout-base.css" />
-    <link rel="stylesheet" href="./styles/components-3d.css" />
- 
+    <!-- Vite Build CSS -->
+    <!-- Diese Datei wird beim Build generiert -->
+    <link rel="stylesheet" href="/Paedagogische-Fachkraft/assets/index.css" />
+
     <style>
-      /* Verbesserte Scrollbars für alle Geräte */
+      /* Notfall-Hintergrund für weißen Bildschirm */
       body, #root {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background-color: #ffffff;
         overflow: auto;
-        height: auto;
       }
-      
-      /* iOS Safari spezifische Fixes */
+
+      .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-size: 18px;
+        color: #333;
+      }
+
+      /* iOS Safari fixes */
       @supports (-webkit-touch-callout: none) {
         body {
           -webkit-overflow-scrolling: touch;
@@ -28,72 +40,13 @@
         }
       }
 
-      /* Bessere Handhabung von mobilen Geräten */
-      @media (max-width: 768px) {
-        body, #root {
-          overflow: auto;
-          height: auto;
-          overscroll-behavior: none;
-        }
-      }
-
-      /* CSS-Farbvariablen für das farbige Theme */
-      :root {
-        --sidebar-bg-custom: #fed7aa;
-        --primary-color-custom: #dc2626;
-        --secondary-color-custom: #b91c1c;
-        --toolbar-bg-custom: #f8fafc;
-        --background-color-custom: #fef7ed;
-        --card-bg-custom: #ffffff;
-        --modal-bg-custom: #ffffff;
-      }
-
-      /* Stile für das farbige Theme */
-      [data-theme="farbig"].custom-colors-applied {
-        --sidebar-bg: var(--sidebar-bg-custom, #fed7aa);
-        --primary-color: var(--primary-color-custom, #dc2626);
-        --secondary-color: var(--secondary-color-custom, #b91c1c);
-        --toolbar-bg: var(--toolbar-bg-custom, #f8fafc);
-        --background-color: var(--background-color-custom, #fef7ed);
-        --card-bg: var(--card-bg-custom, #ffffff);
-        --modal-bg: var(--modal-bg-custom, #ffffff);
-      }
-
-      /* Spezifische iPad/iOS Farbkorrekturen */
-      @media (max-width: 1024px) {
-        .button {
-          -webkit-tap-highlight-color: transparent;
-        }
-        
-        input, select, textarea {
-          -webkit-appearance: none;
-          border-radius: 6px;
-        }
-      }
-
       /* Initiales Laden ohne Flackern */
       body:not([data-theme]) {
         opacity: 0;
         transition: opacity 0.3s ease;
       }
-      
       body[data-theme] {
         opacity: 1;
-      }
-
-      /* NOTFALL-STYLES FÜR WEISSEN BILDSCHIRM */
-      #root {
-        min-height: 100vh;
-        background-color: #ffffff;
-      }
-      
-      .loading {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        font-size: 18px;
-        color: #333;
       }
     </style>
   </head>
@@ -101,7 +54,9 @@
     <div id="root">
       <div class="loading">Anwendung wird geladen...</div>
     </div>
-    <!-- RELATIVER PFAD FÜR JS -->
-    <script type="module" src="./src/main.jsx"></script>
+
+    <!-- Vite Build JS -->
+    <!-- Diese Datei wird beim Build generiert -->
+    <script type="module" src="/Paedagogische-Fachkraft/assets/index.js"></script>
   </body>
 </html>
