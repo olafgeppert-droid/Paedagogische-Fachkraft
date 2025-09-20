@@ -6,12 +6,5 @@ export default defineConfig({
   base: '/Paedagogische-Fachkraft/',
   build: {
     outDir: 'dist',
-    rollupOptions: {
-      external: [] // Stellen Sie sicher, dass keine wichtigen Imports externalisiert werden
-    }
   },
-  server: {
-    host: true,
-    port: 3000
-  }
 })
