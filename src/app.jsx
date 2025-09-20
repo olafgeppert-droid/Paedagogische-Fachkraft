@@ -27,6 +27,36 @@ import {
     filterStudents
 } from './database.js';
 
+// Hilfsfunktion zum Aufhellen von Farben
+const lightenColor = (color, percent) => {
+    const num = parseInt(color.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = (num >> 16) + amt;
+    const G = (num >> 8 & 0x00FF) + amt;
+    const B = (num & 0x0000FF) + amt;
+    return '#' + (
+        0x1000000 +
+        (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+        (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+        (B < 255 ? B < 1 ? 0 : B : 255)
+    ).toString(16).slice(1);
+};
+
+// Hilfsfunktion zum Abdunkeln von Farben
+const darkenColor = (color, percent) => {
+    const num = parseInt(color.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = (num >> 16) - amt;
+    const G = (num >> 8 & 0x00FF) - amt;
+    const B = (num & 0x0000FF) - amt;
+    return '#' + (
+        0x1000000 +
+        (R > 0 ? R : 0) * 0x10000 +
+        (G > 0 ? G : 0) * 0x100 +
+        (B > 0 ? B : 0)
+    ).toString(16).slice(1);
+};
+
 const App = () => {
     const [db, setDb] = useState(null);
     const [students, setStudents] = useState([]);
@@ -35,59 +65,32 @@ const App = () => {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [viewMode, setViewMode] = useState('student');
     const [filters, setFilters] = useState({ search: '', schoolYear: '', school: '', className: '' });
-    const [settings, setSettings] = useState({ theme: 'hell', fontSize: 16, inputFontSize: 16, customColors: {} }); // THEME GEÄNDERT
+    const [settings, setSettings] = useState({ theme: 'hell', fontSize: 16, inputFontSize: 16, customColors: {} });
     const [masterData, setMasterData] = useState({ schoolYears: [], schools: {} });
     const [modal, setModal] = useState(null);
     const [navOpen, setNavOpen] = useState(false);
     const [history, setHistory] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
-    const [editingEntry, setEditingEntry] = useState(null); // Für Protokollbearbeitung
-
-    const applySettings = useCallback((settings) => {
-        // THEME-NAMEN AKTUALISIERT
-        document.documentElement.setAttribute('data-theme', settings.theme === 'light' ? 'hell' : 
-                                 settings.theme === 'dark' ? 'dunkel' : 
-                                 settings.theme === 'colored' ? 'farbig' : 'hell');
-        document.documentElement.style.setProperty('--font-size', `${settings.fontSize}px`);
-        document.documentElement.style.setProperty('--input-font-size', `${settings.inputFontSize}px`);
-        
-        // Benutzerdefinierte Farben anwenden
-        if (settings.theme === 'colored' && settings.customColors) {
-            applyCustomColors(settings.customColors);
-        } else {
-            // Zurücksetzen der benutzerdefinierten Farben bei anderen Themes
-            resetCustomColors();
-        }
-    }, []);
+    const [editingEntry, setEditingEntry] = useState(null);
 
     // Funktion zum Anwenden benutzerdefinierter Farben
-    const applyCustomColors = (colors) => {
+    const applyCustomColors = useCallback((colors) => {
         const root = document.documentElement;
         
-        // SPEZIFISCHE FARBZUWESUNGEN:
-        // Navigation -> linkes Navigationsmenü
         root.style.setProperty('--sidebar-bg', colors.navigation || '#fed7aa');
-        
-        // Header -> Kopfbereich
         root.style.setProperty('--primary-color', colors.header || '#dc2626');
         root.style.setProperty('--secondary-color', colors.header ? darkenColor(colors.header, 20) : '#b91c1c');
-        
-        // Werkzeugleiste -> Toolbar
         root.style.setProperty('--toolbar-bg-custom', colors.toolbar || '#f8fafc');
-        
-        // Fenster-Hintergrund -> Hauptinhalt und Dialoge
         root.style.setProperty('--background-color', colors.protocol || '#fef7ed');
         root.style.setProperty('--card-bg', colors.protocol ? lightenColor(colors.protocol, 10) : '#ffffff');
         root.style.setProperty('--modal-bg-custom', colors.protocol || '#ffffff');
         
-        // Für das farbige Theme spezifische Anpassungen
         document.documentElement.classList.add('custom-colors-applied');
-    };
+    }, []);
 
     // Funktion zum Zurücksetzen der benutzerdefinierten Farben
-    const resetCustomColors = () => {
+    const resetCustomColors = useCallback(() => {
         const root = document.documentElement;
-        // Entferne alle benutzerdefinierten Farbüberschreibungen
         root.style.removeProperty('--sidebar-bg');
         root.style.removeProperty('--primary-color');
         root.style.removeProperty('--secondary-color');
@@ -97,37 +100,19 @@ const App = () => {
         root.style.removeProperty('--modal-bg-custom');
         
         document.documentElement.classList.remove('custom-colors-applied');
-    };
+    }, []);
 
-    // Hilfsfunktion zum Aufhellen von Farben
-    const lightenColor = (color, percent) => {
-        const num = parseInt(color.replace('#', ''), 16);
-        const amt = Math.round(2.55 * percent);
-        const R = (num >> 16) + amt;
-        const G = (num >> 8 & 0x00FF) + amt;
-        const B = (num & 0x0000FF) + amt;
-        return '#' + (
-            0x1000000 +
-            (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
-            (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
-            (B < 255 ? B < 1 ? 0 : B : 255)
-        ).toString(16).slice(1);
-    };
-
-    // Hilfsfunktion zum Abdunkeln von Farben
-    const darkenColor = (color, percent) => {
-        const num = parseInt(color.replace('#', ''), 16);
-        const amt = Math.round(2.55 * percent);
-        const R = (num >> 16) - amt;
-        const G = (num >> 8 & 0x00FF) - amt;
-        const B = (num & 0x0000FF) - amt;
-        return '#' + (
-            0x1000000 +
-            (R > 0 ? R : 0) * 0x10000 +
-            (G > 0 ? G : 0) * 0x100 +
-            (B > 0 ? B : 0)
-        ).toString(16).slice(1);
-    };
+    const applySettings = useCallback((settings) => {
+        document.documentElement.setAttribute('data-theme', settings.theme);
+        document.documentElement.style.setProperty('--font-size', `${settings.fontSize}px`);
+        document.documentElement.style.setProperty('--input-font-size', `${settings.inputFontSize}px`);
+        
+        if (settings.theme === 'farbig' && settings.customColors) {
+            applyCustomColors(settings.customColors);
+        } else {
+            resetCustomColors();
+        }
+    }, [applyCustomColors, resetCustomColors]);
 
     useEffect(() => {
         const initDB = async () => {
@@ -137,12 +122,15 @@ const App = () => {
 
                 const settingsData = await database.get('settings', 1);
                 if (settingsData) {
-                    // KONVERTIERE ALTE THEME-NAMEN ZU NEUEN
+                    // Konvertiere alte Theme-Namen zu neuen
+                    const themeMapping = {
+                        'light': 'hell',
+                        'dark': 'dunkel', 
+                        'colored': 'farbig'
+                    };
                     const convertedSettings = {
                         ...settingsData,
-                        theme: settingsData.theme === 'light' ? 'hell' : 
-                               settingsData.theme === 'dark' ? 'dunkel' : 
-                               settingsData.theme === 'colored' ? 'farbig' : 'hell'
+                        theme: themeMapping[settingsData.theme] || 'hell'
                     };
                     setSettings(convertedSettings);
                     applySettings(convertedSettings);
@@ -176,14 +164,14 @@ const App = () => {
             }
         };
         loadEntries();
-    }, [db, selectedStudent, selectedDate, viewMode, filters]); // filters hinzugefügt
+    }, [db, selectedStudent, selectedDate, viewMode]);
 
     const filteredStudents = useCallback(() => filterStudents(students, filters), [students, filters]);
 
     const saveStudentHandler = async (studentData) => {
         if (!db) return;
         try {
-            await saveStateForUndo(db, history, setHistory, setHistoryIndex);
+            await saveStateForUndo(db, history, historyIndex, setHistory, setHistoryIndex);
             if (studentData.id) {
                 await updateStudent(db, studentData);
                 setStudents(students.map(s => s.id === studentData.id ? studentData : s));
@@ -200,25 +188,21 @@ const App = () => {
     const deleteStudentHandler = async (studentId) => {
         if (!db) return;
         try {
-            await saveStateForUndo(db, history, setHistory, setHistoryIndex);
+            await saveStateForUndo(db, history, historyIndex, setHistory, setHistoryIndex);
             const success = await deleteStudent(db, studentId);
             if (success) {
                 setStudents(students.filter(s => s.id !== studentId));
                 if (selectedStudent && selectedStudent.id === studentId) setSelectedStudent(null);
-                alert('Kind wurde erfolgreich gelöscht.');
-            } else {
-                alert('Fehler beim Löschen des Kindes.');
             }
         } catch (error) {
             console.error('Fehler beim Löschen des Schülers:', error);
-            alert('Fehler beim Löschen des Kindes: ' + error.message);
         }
     };
 
     const saveEntryHandler = async (entryData) => {
         if (!db) return;
         try {
-            await saveStateForUndo(db, history, setHistory, setHistoryIndex);
+            await saveStateForUndo(db, history, historyIndex, setHistory, setHistoryIndex);
             if (entryData.id) {
                 await updateEntry(db, entryData);
                 setEntries(entries.map(e => e.id === entryData.id ? entryData : e));
@@ -236,12 +220,15 @@ const App = () => {
     const saveSettingsHandler = async (newSettings) => {
         if (!db) return;
         try {
-            // KONVERTIERE THEME-NAMEN FÜR DIE SPEICHERUNG
+            // Konvertiere Theme-Namen für die Speicherung
+            const themeMapping = {
+                'hell': 'light',
+                'dunkel': 'dark', 
+                'farbig': 'colored'
+            };
             const settingsToSave = {
                 ...newSettings,
-                theme: newSettings.theme === 'hell' ? 'light' : 
-                       newSettings.theme === 'dunkel' ? 'dark' : 
-                       newSettings.theme === 'farbig' ? 'colored' : 'light'
+                theme: themeMapping[newSettings.theme] || 'light'
             };
             
             await db.put('settings', { ...settingsToSave, id: 1 });
@@ -263,42 +250,50 @@ const App = () => {
         }
     };
 
-    const handleExport = async () => { await exportData(db); };
-    const handleImport = async (event) => { await importData(db, event, setSettings, setMasterData, setStudents, setModal, applySettings); };
-    const handleUndo = async () => { await undo(db, history, historyIndex, setHistoryIndex, setStudents); };
-    const handleRedo = async () => { await redo(db, history, historyIndex, setHistoryIndex, setStudents); };
-    const handleLoadSampleData = async () => { await loadSampleData(db, setMasterData, setStudents); };
-    const handleClearData = async () => { await clearAllData(db, setStudents, setEntries, setSelectedStudent); };
+    const handleExport = async () => { 
+        if (db) await exportData(db); 
+    };
 
-    // NEUE HANDLER FÜR NAVIGATION
+    const handleImport = async (event) => { 
+        if (db) await importData(db, event, setSettings, setMasterData, setStudents, setModal); 
+    };
+
+    const handleUndo = async () => { 
+        if (db) await undo(db, history, historyIndex, setHistoryIndex, setStudents); 
+    };
+
+    const handleRedo = async () => { 
+        if (db) await redo(db, history, historyIndex, setHistoryIndex, setStudents); 
+    };
+
+    const handleLoadSampleData = async () => { 
+        if (db) await loadSampleData(db, setMasterData, setStudents, setEntries); 
+    };
+
+    const handleClearData = async () => { 
+        if (db) await clearAllData(db, setStudents, setEntries, setSelectedStudent); 
+    };
+
     const handleShowNewStudent = () => {
-        setSelectedStudent(null); // Sicherstellen, dass kein Schüler ausgewählt ist
+        setSelectedStudent(null);
         setModal('student');
     };
 
     const handleShowNewProtocol = () => {
-        setEditingEntry(null); // Für neues Protokoll
+        setEditingEntry(null);
         setModal('entry');
     };
 
     const handleEditProtocol = (entry) => {
-        setEditingEntry(entry); // Protokoll zum Bearbeiten setzen
+        setEditingEntry(entry);
         setModal('entry');
     };
 
-    const handleClearFilter = () => {
-        setSelectedStudent(null); // Kind deselektieren
-        setFilters({ search: '', schoolYear: '', school: '', className: '' }); // Filter zurücksetzen
-        setSelectedDate(''); // Datum zurücksetzen
-    };
-
-    // Funktion zum Finden des zu bearbeitenden Eintrags
     const findEntryToEdit = () => {
         if (!selectedStudent || !selectedDate || entries.length === 0) {
             return null;
         }
         
-        // Suche nach Eintrag für selektierten Schüler und Datum
         const entryToEdit = entries.find(entry => 
             entry.studentId === selectedStudent.id && 
             entry.date === selectedDate
@@ -315,9 +310,9 @@ const App = () => {
             <Toolbar
                 selectedStudent={selectedStudent}
                 selectedDate={selectedDate}
-                onAddStudent={handleShowNewStudent} // Immer "Neuer Schüler"
+                onAddStudent={handleShowNewStudent}
                 onEditStudent={() => setModal('student')}
-                onAddEntry={handleShowNewProtocol} // Immer "Protokoll anlegen"
+                onAddEntry={handleShowNewProtocol}
                 onEditEntry={() => {
                     const entryToEdit = findEntryToEdit();
                     if (entryToEdit) {
@@ -400,8 +395,6 @@ const App = () => {
             )}
             {modal === 'help' && (
                 <HelpModal 
-                    onLoadSampleData={handleLoadSampleData} 
-                    onClearData={handleClearData} 
                     onClose={() => setModal(null)} 
                 />
             )}
