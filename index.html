@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pädagogische Dokumentation</title>
 
-    <!-- CSS-IMPORTS mit korrekten Pfaden für GitHub Pages -->
-    <link rel="stylesheet" href="./styles/theme-variables.css" />
-    <link rel="stylesheet" href="./styles/layout-base.css" />
-    <link rel="stylesheet" href="./styles/components-3d.css" />
+    <!-- CSS-IMPORTS mit absoluten Pfaden für GitHub Pages -->
+    <link rel="stylesheet" href="/pädagogische-dokumentation/styles/theme-variables.css" />
+    <link rel="stylesheet" href="/pädagogische-dokumentation/styles/layout-base.css" />
+    <link rel="stylesheet" href="/pädagogische-dokumentation/styles/components-3d.css" />
     
     <!-- IDB Bibliothek hinzufügen -->
     <script src="https://unpkg.com/idb@7/build/umd.js"></script>
@@ -83,10 +83,27 @@
       body[data-theme] {
         opacity: 1;
       }
+
+      /* NOTFALL-STYLES FÜR WEISSEN BILDSCHIRM */
+      #root {
+        min-height: 100vh;
+        background-color: #ffffff;
+      }
+      
+      .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-size: 18px;
+        color: #333;
+      }
     </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <div id="root">
+      <div class="loading">Anwendung wird geladen...</div>
+    </div>
+    <script type="module" src="/pädagogische-dokumentation/src/main.jsx"></script>
   </body>
 </html>
