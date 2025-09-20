@@ -1,0 +1,90 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app {
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "toolbar toolbar"
+    "nav main";
+  grid-template-rows: var(--header-height) var(--toolbar-height) 1fr;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  height: 100vh;
+}
+
+/* Header Styles */
+.header {
+  grid-area: header;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-strong);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-height);
+}
+
+/* Navigation mit Hamburger-Menü für Mobile */
+.nav {
+  grid-area: nav;
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  padding: 1.5rem;
+  overflow-y: auto;
+  border-right: 2px solid var(--border-color);
+}
+
+/* Main Content */
+.main {
+  grid-area: main;
+  padding: 2rem;
+  overflow-y: auto;
+  background-color: var(--background-color);
+}
+
+/* Responsive Design für Mobile */
+@media (max-width: 768px) {
+  .app {
+    grid-template-areas:
+      "header"
+      "toolbar"
+      "main";
+    grid-template-columns: 1fr;
+  }
+
+  .nav {
+    position: fixed;
+    top: var(--header-height);
+    left: -100%;
+    width: 85%;
+    max-width: 340px;
+    height: calc(100% - var(--header-height));
+    z-index: 1000;
+    transition: left 0.3s ease;
+    box-shadow: 3px 0 15px rgba(0, 0, 0, 0.15);
+  }
+
+  .nav.open {
+    left: 0;
+  }
+
+  .hamburger-menu {
+    display: block;
+  }
+}
