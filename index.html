@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pädagogische Dokumentation</title>
 
-    <!-- CSS-IMPORTS mit absoluten Pfaden für GitHub Pages -->
-    <link rel="stylesheet" href="/Paedagogische-Fachkraft/styles/theme-variables.css" />
-    <link rel="stylesheet" href="/Paedagogische-Fachkraft/styles/layout-base.css" />
-    <link rel="stylesheet" href="/Paedagogische-Fachkraft/styles/components-3d.css" />
+    <!-- CSS-IMPORTS MIT RELATIVEN PFADEN -->
+    <link rel="stylesheet" href="./styles/theme-variables.css" />
+    <link rel="stylesheet" href="./styles/layout-base.css" />
+    <link rel="stylesheet" href="./styles/components-3d.css" />
     
     <!-- IDB Bibliothek hinzufügen -->
     <script src="https://unpkg.com/idb@7/build/umd.js"></script>
@@ -40,7 +40,7 @@
         }
       }
 
-      /* CSS-Farbvariablen für das farbige Theme - AKTUALISIERT FÜR NEUES SYSTEM */
+      /* CSS-Farbvariablen für das farbige Theme */
       :root {
         --sidebar-bg-custom: #fed7aa;
         --primary-color-custom: #dc2626;
@@ -51,7 +51,7 @@
         --modal-bg-custom: #ffffff;
       }
 
-      /* Stile für das farbige Theme - AKTUALISIERT FÜR NEUES SYSTEM */
+      /* Stile für das farbige Theme */
       [data-theme="farbig"].custom-colors-applied {
         --sidebar-bg: var(--sidebar-bg-custom, #fed7aa);
         --primary-color: var(--primary-color-custom, #dc2626);
@@ -74,7 +74,7 @@
         }
       }
 
-      /* Initiales Laden ohne Flackern - FÜR NEUES THEME-SYSTEM */
+      /* Initiales Laden ohne Flackern */
       body:not([data-theme]) {
         opacity: 0;
         transition: opacity 0.3s ease;
@@ -104,6 +104,7 @@
     <div id="root">
       <div class="loading">Anwendung wird geladen...</div>
     </div>
-    <script type="module" src="/Paedagogische-Fachkraft/src/main.jsx"></script>
+    <!-- RELATIVER PFAD FÜR JS -->
+    <script type="module" src="./src/main.jsx"></script>
   </body>
 </html>
