@@ -1,5 +1,6 @@
-// IDB wird über das globale window-Objekt verwendet
-const { openDB } = window.idb;
+// src/database.js
+// IDB über das npm-paket importieren (stabiler als window.idb/CDN)
+import { openDB } from 'idb';
 
 // =======================
 // Datenbank-Setup
