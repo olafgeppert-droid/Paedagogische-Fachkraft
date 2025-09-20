@@ -1,15 +1,16 @@
-import React from 'react'
-import { createRoot } from 'react-dom/client'
-import app from './app.jsx'
-// ALTE CSS-IMPORTS ENTFERNT
-// import '../styles/main.css'
-// import '../styles/components.css'
+// src/main.jsx
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './app.jsx';
 
-// NEUE CSS-IMPORTS
-import '../styles/theme-variables.css'
-import '../styles/layout-base.css'
-import '../styles/components-3d.css'
+// CSS-Imports
+import '../styles/theme-variables.css';
+import '../styles/layout-base.css';
+import '../styles/components-3d.css';
 
-const container = document.getElementById('root')
-const root = createRoot(container)
-root.render(React.createElement(app))
+const container = document.getElementById('root');
+if (!container) {
+  throw new Error("Root-Element mit id 'root' nicht gefunden. Überprüfe die index.html (id='root').");
+}
+const root = createRoot(container);
+root.render(<App />);
