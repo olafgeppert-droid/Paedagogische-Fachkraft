@@ -1,4 +1,3 @@
-/* ================= PART 1 ================= */
 /* === 3D-BUTTONS === */
 .button {
     display: inline-flex;
@@ -17,19 +16,19 @@
     gap: 0.75rem;
     height: 42px;
     border: 2px solid transparent;
-    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2), -1px -1px 4px rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-button, 3px 3px 8px rgba(0, 0, 0, 0.2), -1px -1px 4px rgba(255, 255, 255, 0.1));
     position: relative;
     overflow: hidden;
 }
 
 .button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-button-hover, 5px 5px 15px rgba(0, 0, 0, 0.3), -2px -2px 8px rgba(255, 255, 255, 0.15));
 }
 
 .button:active:not(:disabled) {
     transform: translateY(1px);
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2), -1px -1px 3px rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-button-active, 2px 2px 5px rgba(0, 0, 0, 0.2), -1px -1px 3px rgba(255, 255, 255, 0.1));
 }
 
 .button:disabled {
@@ -74,11 +73,11 @@
 }
 
 /* === FORMULARELEMENTE === */
-.search-input,
+.search-input, 
 .filter-select,
 .filter-group input[type="date"],
-.form-input,
-.form-select,
+.form-input, 
+.form-select, 
 .form-textarea {
     width: 100%;
     padding: 0.875rem;
@@ -89,18 +88,17 @@
     color: var(--input-color, #1f2937);
     font-weight: 500;
     transition: var(--transition, all 0.3s ease);
-    box-sizing: border-box;
 }
 
-.search-input:focus,
+.search-input:focus, 
 .filter-select:focus,
 .filter-group input[type="date"]:focus,
-.form-input:focus,
-.form-select:focus,
+.form-input:focus, 
+.form-select:focus, 
 .form-textarea:focus {
     border-color: var(--primary-color, #2563eb);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    box-shadow: 0 0 0 3px var(--input-focus, rgba(37, 99, 235, 0.15));
 }
 
 /* Platzhaltertexte */
@@ -112,13 +110,13 @@
     font-weight: 400;
 }
 
-/* Datumsfeld */
+/* Spezifische Anpassungen für Datumsfeld */
 .filter-group input[type="date"] {
     height: 42px;
     font-family: inherit;
-    padding: 0.55rem 0.6rem;
 }
 
+/* Browser-spezifische Anpassungen für Datumsfeld */
 .filter-group input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
     opacity: 0.7;
@@ -127,6 +125,20 @@
 
 .filter-group input[type="date"]::-webkit-calendar-picker-indicator:hover {
     opacity: 1;
+}
+
+/* Firefox: Leicht angepasstes Padding */
+@-moz-document url-prefix() {
+    .filter-group input[type="date"] {
+        padding: 0.55rem 0.6rem;
+    }
+}
+
+/* Safari/WebKit: Leicht angepasstes Padding */
+@media not all and (min-resolution: 0.001dpcm) {
+    .filter-group input[type="date"] {
+        padding: 0.55rem 0.6rem;
+    }
 }
 
 .form-textarea {
@@ -162,15 +174,15 @@
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     background-color: var(--card-bg, #f8fafc);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s ease;
+    box-shadow: var(--shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
+    transition: var(--transition, all 0.3s ease);
     width: 100%;
     box-sizing: border-box;
 }
 
 .entry-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-strong, 0 8px 25px rgba(0, 0, 0, 0.2));
 }
 
 .entry-header {
@@ -212,7 +224,15 @@
 }
 
 /* === WILLKOMMENSSEITE === */
-.welcome-screen,
+.welcome-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+}
+
 .welcome-screen.centered {
     display: flex;
     flex-direction: column;
@@ -309,8 +329,6 @@
     overflow-y: auto;
 }
 
-/* ================= PART 2 ================= */
-/* === MODALE FOOTER === */
 .modal-footer {
     padding: 1.25rem 1.5rem;
     border-top: 2px solid var(--border-color, #d1d5db);
@@ -336,7 +354,6 @@
     overflow-y: auto;
 }
 
-/* SETTINGS-SECTIONS */
 .settings-section {
     margin-bottom: 2rem;
     padding: 1.5rem;
@@ -355,7 +372,7 @@
     padding-bottom: 0.75rem;
 }
 
-/* THEME GRID */
+/* Theme Grid */
 .theme-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -425,7 +442,7 @@
     text-align: center;
 }
 
-/* COLOR CUSTOMIZATION */
+/* Color Customization */
 .color-customization {
     background: rgba(0, 0, 0, 0.03);
     padding: 1.5rem;
@@ -485,7 +502,7 @@
     border: 1px solid var(--border-color, #d1d5db);
 }
 
-/* SLIDER GROUP */
+/* Slider Groups */
 .slider-group {
     display: flex;
     flex-direction: column;
@@ -539,7 +556,7 @@
     border: 1px solid var(--border-color, #d1d5db);
 }
 
-/* MASTER DATA CARD */
+/* Master Data Card */
 .master-data-card {
     background: rgba(0, 0, 0, 0.03);
     padding: 1.5rem;
@@ -555,7 +572,7 @@
     font-weight: 500;
 }
 
-/* DATA SECTIONS */
+/* Data Sections */
 .data-section {
     margin-bottom: 2rem;
 }
@@ -593,7 +610,7 @@
     font-size: 1rem;
 }
 
-/* SCHOOLS LIST */
+/* Schools List */
 .schools-list {
     display: flex;
     flex-direction: column;
@@ -632,7 +649,7 @@
     font-weight: 600;
 }
 
-/* MODAL ACTIONS */
+/* Modal Actions */
 .modal-actions {
     display: flex;
     justify-content: space-between;
@@ -647,15 +664,16 @@
     gap: 0.75rem;
 }
 
-/* BUTTON STYLES */
+/* Spezielle Button-Styles */
 .button-primary {
     background: var(--primary-color, #2563eb);
     color: white;
-    border: 2px solid transparent;
+    border: none;
     padding: 0.875rem 1.5rem;
     border-radius: 12px;
     font-weight: 600;
     font-size: 1rem;
+    border: 2px solid transparent;
 }
 
 .button-primary:hover {
@@ -684,11 +702,12 @@
 .button-secondary {
     background: var(--warning-color, #d97706);
     color: white;
-    border: 2px solid transparent;
+    border: none;
     padding: 0.875rem 1.5rem;
     border-radius: 12px;
     font-weight: 600;
     font-size: 1rem;
+    border: 2px solid transparent;
 }
 
 .button-secondary:hover {
@@ -696,7 +715,6 @@
     transform: translateY(-2px);
 }
 
-/* BUTTON ICON & SMALL */
 .button-icon {
     padding: 0.75rem;
     border-radius: 10px;
@@ -710,14 +728,14 @@
     font-weight: 600;
 }
 
-/* DIVIDER */
+/* Divider */
 .divider {
     height: 2px;
     background: var(--border-color, #d1d5db);
     margin: 2rem 0;
 }
 
-/* DELETE CONFIRMATION */
+/* Löschbestätigung */
 .delete-confirmation {
     text-align: center;
 }
@@ -736,39 +754,43 @@
     font-size: 1.1rem;
 }
 
-/* RESPONSIVE DESIGN */
+/* Responsive Design für Modale */
 @media (max-width: 768px) {
     .modal-content {
         padding: 1.5rem;
     }
-
-    .theme-grid,
-    .color-grid {
+    
+    .theme-grid {
         grid-template-columns: 1fr;
         gap: 1.25rem;
     }
-
+    
+    .color-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
     .modal-actions {
         flex-direction: column;
         gap: 1rem;
         align-items: stretch;
     }
-
+    
     .action-group {
         justify-content: space-between;
         gap: 0.75rem;
     }
-
+    
     .school-header {
         flex-direction: column;
         gap: 0.75rem;
         align-items: flex-start;
     }
-
+    
     .settings-section {
         padding: 1.25rem;
     }
-
+    
     .button-primary,
     .button-outline,
     .button-secondary {
@@ -777,7 +799,7 @@
     }
 }
 
-/* SCROLLBAR MODAL */
+/* Scrollbar für Modal Content */
 .modal-content::-webkit-scrollbar {
     width: 10px;
 }
@@ -797,24 +819,67 @@
     background: var(--secondary-color, #1d4ed8);
 }
 
-/* BUTTON BACK TO MAIN */
+/* Spezielle Klasse für den Standard-Button, der zur Hauptansicht zurückführt */
 .button-back-to-main {
     background-color: var(--info-color, #2563eb);
     margin-right: auto;
 }
 
+/* Spezielle Klasse für den Standard-Button im Hover-Zustand */
 .button-back-to-main:hover {
     background-color: var(--secondary-color, #1d4ed8);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* THEME COLOR OVERRIDES */
-[data-theme="farbig"].custom-colors-applied {
-    --text-color: #1f2937;
-    --text-light: #6b7280;
+/* Hervorhebungen für bessere Sichtbarkeit */
+.button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
+.theme-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Verbesserte Kontraste für alle Texte */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-color, #1f2937);
+    font-weight: 700;
+}
+
+p, span, div {
+    color: var(--text-color, #1f2937);
+}
+
+/* Zusätzliche Kontrastverbesserungen */
+.settings-section {
+    background: var(--card-bg, #f8fafc) !important;
+}
+
+.data-item, .class-item, .school-card {
+    background: var(--card-bg, #f8fafc) !important;
+    border-color: var(--border-color, #d1d5db) !important;
+}
+
+/* Footer-Buttons */
+.nav-footer .button {
+    width: 100%;
+    margin-bottom: 0.6rem;
+    text-align: left;
+    padding: 0.75rem;
+    justify-content: flex-start;
+    font-weight: 600;
+}
+
+.version-info {
+    font-size: 0.9rem;
+    color: var(--text-color, #1f2937);
+    font-weight: 500;
+}
+
+/* Custom Color Overrides für das farbige Theme */
 [data-theme="farbig"].custom-colors-applied .toolbar {
     background-color: var(--toolbar-bg-custom, var(--card-bg, #f8fafc)) !important;
 }
@@ -836,28 +901,21 @@
 }
 
 [data-theme="farbig"].custom-colors-applied .header {
-    background: linear-gradient(135deg, var(--primary-color, #dc2626), var(--secondary-color, #b91c1c)) !important;
+    background: linear-gradient(135deg, 
+        var(--primary-color, #dc2626), 
+        var(--secondary-color, #b91c1c)
+    ) !important;
 }
 
+/* Sicherstellen, dass Textfarben kontrastreich bleiben */
+[data-theme="farbig"].custom-colors-applied {
+    --text-color: #1f2937;
+    --text-light: #6b7280;
+}
+
+/* Responsive Anpassungen */
 @media (max-width: 768px) {
     [data-theme="farbig"].custom-colors-applied .nav {
         background-color: var(--sidebar-bg, #fed7aa) !important;
     }
-}
-
-/* FOOTER BUTTONS */
-.nav-footer .button {
-    width: 100%;
-    margin-bottom: 0.6rem;
-    text-align: left;
-    padding: 0.75rem;
-    justify-content: flex-start;
-    font-weight: 600;
-}
-
-/* VERSION INFO */
-.version-info {
-    font-size: 0.9rem;
-    color: var(--text-color, #1f2937);
-    font-weight: 500;
 }
