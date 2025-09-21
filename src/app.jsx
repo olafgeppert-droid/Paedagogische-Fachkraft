@@ -256,7 +256,12 @@ const App = () => {
     const handleUndo = async () => { if (db) await undo(db, history, historyIndex, setHistoryIndex, setStudents); };
     const handleRedo = async () => { if (db) await redo(db, history, historyIndex, setHistoryIndex, setStudents); };
     const handleLoadSampleData = async () => { if (db) await loadSampleData(db, setMasterData, setStudents, setEntries); };
-    const handleClearData = async () => { if (db) await clearAllData(db, setStudents, setEntries, setSettings, setMasterData); };
+    const handleClearData = async () => {
+    if (!db) return;
+    await clearAllData(db, setStudents, setEntries, setSettings, setMasterData);
+    setStudents([]);
+    setEntries([]);
+};
 
     // =======================
     // Modale & Protokolle
