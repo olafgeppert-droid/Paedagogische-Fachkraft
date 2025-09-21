@@ -1,15 +1,30 @@
 import React, { useState } from 'react';
 import { setupDB, loadSampleData, clearAllData } from '../database'; // Import der DB-Funktionen
 
-const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose, setStudents, setEntries, setSelectedStudent }) => {
-    const [formData, setFormData] = useState(settings);
-    const [masterFormData, setMasterFormData] = useState(masterData);
+const SettingsModal = ({
+    settings,
+    masterData,
+    onSave,
+    onSaveMasterData,
+    onClose,
+    setStudents,
+    setEntries,
+    setSelectedStudent
+}) => {
+    const [formData, setFormData] = useState(settings || {
+        theme: 'hell',
+        fontSize: 16,
+        inputFontSize: 16
+    });
+
+    const [masterFormData, setMasterFormData] = useState(masterData || { schoolYears: [], schools: {} });
     const [showMasterDataModal, setShowMasterDataModal] = useState(false);
+
     const [customColors, setCustomColors] = useState({
         navigation: '#3498db',
         toolbar: '#2ecc71',
         header: '#e74c3c',
-        protocol: '#f39c12'
+        windowBackground: '#f39c12'
     });
 
     const handleSubmit = (e) => {
@@ -33,7 +48,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
             navigation: '#3498db',
             toolbar: '#2ecc71',
             header: '#e74c3c',
-            protocol: '#f39c12'
+            windowBackground: '#f39c12'
         });
         setTimeout(() => {
             onClose();
@@ -43,61 +58,76 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
     /* --- Stammdaten-Handling --- */
     const addSchoolYear = () => {
         const newYear = prompt('Neues Schuljahr hinzufügen (Format: YYYY/YYYY):', '2025/2026');
-        if (newYear && !masterFormData.schoolYears.includes(newYear)) {
-            setMasterFormData({
-                ...masterFormData,
-                schoolYears: [...masterFormData.schoolYears, newYear].sort()
-            });
+        if (newYear && /^\d{4}\/\d{4}$/.test(newYear)) {
+            if (!masterFormData.schoolYears.includes(newYear)) {
+                setMasterFormData(prev => ({
+                    ...prev,
+                    schoolYears: [...prev.schoolYears, newYear].sort((a, b) => a.localeCompare(b))
+                }));
+            } else {
+                alert('Dieses Schuljahr existiert bereits!');
+            }
+        } else if (newYear) {
+            alert('Ungültiges Format. Bitte "YYYY/YYYY" eingeben.');
         }
     };
 
     const removeSchoolYear = (year) => {
-        setMasterFormData({
-            ...masterFormData,
-            schoolYears: masterFormData.schoolYears.filter(y => y !== year)
-        });
+        setMasterFormData(prev => ({
+            ...prev,
+            schoolYears: prev.schoolYears.filter(y => y !== year)
+        }));
     };
 
     const addSchool = () => {
         const newSchool = prompt('Neue Schule hinzufügen:', 'Heinz-Sielmann-Schule, Grundschule Neustadt an der Weinstraße');
         if (newSchool && !masterFormData.schools[newSchool]) {
-            setMasterFormData({
-                ...masterFormData,
-                schools: { ...masterFormData.schools, [newSchool]: [] }
-            });
+            setMasterFormData(prev => ({
+                ...prev,
+                schools: { ...prev.schools, [newSchool]: [] }
+            }));
+        } else if (newSchool) {
+            alert('Diese Schule existiert bereits!');
         }
     };
 
     const removeSchool = (school) => {
-        const newSchools = { ...masterFormData.schools };
-        delete newSchools[school];
-        setMasterFormData({
-            ...masterFormData,
-            schools: newSchools
+        setMasterFormData(prev => {
+            const newSchools = { ...prev.schools };
+            delete newSchools[school];
+            return { ...prev, schools: newSchools };
         });
     };
 
     const addClass = (school) => {
         const newClass = prompt('Neue Klasse hinzufügen:', 'Klasse 1a');
-        if (newClass && !masterFormData.schools[school].includes(newClass)) {
-            setMasterFormData({
-                ...masterFormData,
-                schools: {
-                    ...masterFormData.schools,
-                    [school]: [...masterFormData.schools[school], newClass].sort()
+        if (newClass) {
+            setMasterFormData(prev => {
+                const currentClasses = prev.schools[school] || [];
+                if (!currentClasses.includes(newClass)) {
+                    return {
+                        ...prev,
+                        schools: {
+                            ...prev.schools,
+                            [school]: [...currentClasses, newClass].sort((a, b) => a.localeCompare(b))
+                        }
+                    };
+                } else {
+                    alert('Diese Klasse existiert bereits!');
+                    return prev;
                 }
             });
         }
     };
 
     const removeClass = (school, className) => {
-        setMasterFormData({
-            ...masterFormData,
+        setMasterFormData(prev => ({
+            ...prev,
             schools: {
-                ...masterFormData.schools,
-                [school]: masterFormData.schools[school].filter(c => c !== className)
+                ...prev.schools,
+                [school]: prev.schools[school].filter(c => c !== className)
             }
-        });
+        }));
     };
 
     /* --- Neue Funktionen: Beispieldaten laden und alle Daten löschen --- */
@@ -112,13 +142,9 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
     };
 
     const handleClearAllData = async () => {
-        if (window.confirm(
-            'Wollen Sie wirklich alle Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden!'
-        )) {
-            const db = await setupDB();
-            await clearAllData(db, setStudents, setEntries, setSelectedStudent);
-            onClose();
-        }
+        const db = await setupDB();
+        await clearAllData(db, setStudents, setEntries, setSelectedStudent);
+        onClose();
     };
 
     return (
@@ -128,7 +154,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                 <div className="modal settings-modal">
                     <div className="modal-header">
                         <h2>⚙️ Einstellungen</h2>
-                        <button className="modal-close" onClick={onClose}>✖️</button>
+                        <button className="modal-close" onClick={onClose} aria-label="Schließen">✖️</button>
                     </div>
 
                     <div className="modal-content">
@@ -138,50 +164,25 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                 <h3>🎨 Farbschema</h3>
                                 <div className="form-group">
                                     <div className="theme-grid">
-                                        <div 
-                                            className={`theme-card ${formData.theme === 'hell' ? 'active' : ''}`}
-                                            onClick={() => setFormData({ ...formData, theme: 'hell' })}
-                                        >
-                                            <div className="theme-preview light-theme-preview">
-                                                <div className="preview-header"></div>
-                                                <div className="preview-toolbar"></div>
-                                                <div className="preview-content"></div>
+                                        {['hell','dunkel','farbig'].map(theme => (
+                                            <div
+                                                key={theme}
+                                                className={`theme-card ${formData.theme === theme ? 'active' : ''}`}
+                                                onClick={() => setFormData({ ...formData, theme })}
+                                            >
+                                                <div className={`theme-preview ${theme}-theme-preview`}>
+                                                    <div className="preview-header"></div>
+                                                    <div className="preview-toolbar"></div>
+                                                    <div className="preview-content"></div>
+                                                </div>
+                                                <div className="theme-info">
+                                                    <span className="radio-checkmark">
+                                                        {theme === 'hell' ? '☀️' : theme === 'dunkel' ? '🌙' : '🌈'}
+                                                    </span>
+                                                    <span>{theme === 'hell' ? 'Standard (Hell)' : theme === 'dunkel' ? 'Dunkel' : 'Farbig'}</span>
+                                                </div>
                                             </div>
-                                            <div className="theme-info">
-                                                <span className="radio-checkmark">☀️</span>
-                                                <span>Standard (Hell)</span>
-                                            </div>
-                                        </div>
-                                        
-                                        <div 
-                                            className={`theme-card ${formData.theme === 'dunkel' ? 'active' : ''}`}
-                                            onClick={() => setFormData({ ...formData, theme: 'dunkel' })}
-                                        >
-                                            <div className="theme-preview dark-theme-preview">
-                                                <div className="preview-header"></div>
-                                                <div className="preview-toolbar"></div>
-                                                <div className="preview-content"></div>
-                                            </div>
-                                            <div className="theme-info">
-                                                <span className="radio-checkmark">🌙</span>
-                                                <span>Dunkel</span>
-                                            </div>
-                                        </div>
-                                        
-                                        <div 
-                                            className={`theme-card ${formData.theme === 'farbig' ? 'active' : ''}`}
-                                            onClick={() => setFormData({ ...formData, theme: 'farbig' })}
-                                        >
-                                            <div className="theme-preview colored-theme-preview">
-                                                <div className="preview-header"></div>
-                                                <div className="preview-toolbar"></div>
-                                                <div className="preview-content"></div>
-                                            </div>
-                                            <div className="theme-info">
-                                                <span className="radio-checkmark">🌈</span>
-                                                <span>Farbig</span>
-                                            </div>
-                                        </div>
+                                        ))}
                                     </div>
                                 </div>
 
@@ -189,54 +190,26 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                     <div className="color-customization">
                                         <h4>🎨 Benutzerdefinierte Farben</h4>
                                         <div className="color-grid">
-                                            <div className="color-item">
-                                                <label>Navigation</label>
-                                                <div className="color-input-group">
-                                                    <input
-                                                        type="color"
-                                                        value={customColors.navigation}
-                                                        onChange={(e) => setCustomColors({ ...customColors, navigation: e.target.value })}
-                                                        className="color-picker"
-                                                    />
-                                                    <span className="color-value">{customColors.navigation}</span>
+                                            {[
+                                                { label: 'Navigation', key: 'navigation' },
+                                                { label: 'Werkzeugleiste', key: 'toolbar' },
+                                                { label: 'Header', key: 'header' },
+                                                { label: 'Fenster-Hintergrund', key: 'windowBackground' }
+                                            ].map(color => (
+                                                <div key={color.key} className="color-item">
+                                                    <label>{color.label}</label>
+                                                    <div className="color-input-group">
+                                                        <input
+                                                            type="color"
+                                                            value={customColors[color.key]}
+                                                            onChange={(e) => setCustomColors(prev => ({ ...prev, [color.key]: e.target.value }))}
+                                                            className="color-picker"
+                                                            aria-label={`Farbe für ${color.label}`}
+                                                        />
+                                                        <span className="color-value">{customColors[color.key]}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="color-item">
-                                                <label>Werkzeugleiste</label>
-                                                <div className="color-input-group">
-                                                    <input
-                                                        type="color"
-                                                        value={customColors.toolbar}
-                                                        onChange={(e) => setCustomColors({ ...customColors, toolbar: e.target.value })}
-                                                        className="color-picker"
-                                                    />
-                                                    <span className="color-value">{customColors.toolbar}</span>
-                                                </div>
-                                            </div>
-                                            <div className="color-item">
-                                                <label>Header</label>
-                                                <div className="color-input-group">
-                                                    <input
-                                                        type="color"
-                                                        value={customColors.header}
-                                                        onChange={(e) => setCustomColors({ ...customColors, header: e.target.value })}
-                                                        className="color-picker"
-                                                    />
-                                                    <span className="color-value">{customColors.header}</span>
-                                                </div>
-                                            </div>
-                                            <div className="color-item">
-                                                <label>Fenster-Hintergrund</label>
-                                                <div className="color-input-group">
-                                                    <input
-                                                        type="color"
-                                                        value={customColors.protocol}
-                                                        onChange={(e) => setCustomColors({ ...customColors, protocol: e.target.value })}
-                                                        className="color-picker"
-                                                    />
-                                                    <span className="color-value">{customColors.protocol}</span>
-                                                </div>
-                                            </div>
+                                            ))}
                                         </div>
                                     </div>
                                 )}
@@ -245,48 +218,32 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                             {/* Schriftgrößen Section */}
                             <div className="settings-section">
                                 <h3>📝 Schriftgrößen</h3>
-                                                                <div className="slider-group">
-                                    <div className="slider-item">
-                                        <label className="slider-label">
-                                            <span className="label-text">Schriftgröße Labels</span>
-                                            <span className="label-size">{formData.fontSize}px</span>
-                                        </label>
-                                        <input
-                                            type="range"
-                                            min="12"
-                                            max="24"
-                                            value={formData.fontSize}
-                                            onChange={(e) => setFormData({ ...formData, fontSize: parseInt(e.target.value) })}
-                                            className="slider"
-                                        />
-                                        <div className="slider-scale">
-                                            <span style={{fontSize: '12px'}}>A</span>
-                                            <span style={{fontSize: '16px'}}>A</span>
-                                            <span style={{fontSize: '20px'}}>A</span>
-                                            <span style={{fontSize: '24px'}}>A</span>
+                                <div className="slider-group">
+                                    {[
+                                        { label: 'Labels', value: formData.fontSize, key: 'fontSize' },
+                                        { label: 'Eingabefelder', value: formData.inputFontSize, key: 'inputFontSize' }
+                                    ].map(slider => (
+                                        <div key={slider.key} className="slider-item">
+                                            <label className="slider-label">
+                                                <span className="label-text">Schriftgröße {slider.label}</span>
+                                                <span className="label-size">{slider.value}px</span>
+                                            </label>
+                                            <input
+                                                type="range"
+                                                min="12"
+                                                max="24"
+                                                value={slider.value}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, [slider.key]: parseInt(e.target.value) }))}
+                                                className="slider"
+                                            />
+                                            <div className="slider-scale">
+                                                <span style={{fontSize: '12px'}}>A</span>
+                                                <span style={{fontSize: '16px'}}>A</span>
+                                                <span style={{fontSize: '20px'}}>A</span>
+                                                <span style={{fontSize: '24px'}}>A</span>
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    <div className="slider-item">
-                                        <label className="slider-label">
-                                            <span className="label-text">Schriftgröße Eingabefelder</span>
-                                            <span className="label-size">{formData.inputFontSize}px</span>
-                                        </label>
-                                        <input
-                                            type="range"
-                                            min="12"
-                                            max="24"
-                                            value={formData.inputFontSize}
-                                            onChange={(e) => setFormData({ ...formData, inputFontSize: parseInt(e.target.value) })}
-                                            className="slider"
-                                        />
-                                        <div className="slider-scale">
-                                            <span style={{fontSize: '12px'}}>A</span>
-                                            <span style={{fontSize: '16px'}}>A</span>
-                                            <span style={{fontSize: '20px'}}>A</span>
-                                            <span style={{fontSize: '24px'}}>A</span>
-                                        </div>
-                                    </div>
+                                    ))}
                                 </div>
                             </div>
 
@@ -295,8 +252,8 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                 <h3>📊 Stammdaten</h3>
                                 <div className="master-data-card">
                                     <p>Verwalten Sie Schuljahre, Schulen und Klassen</p>
-                                    <button 
-                                        type="button" 
+                                    <button
+                                        type="button"
                                         className="button button-primary"
                                         onClick={() => setShowMasterDataModal(true)}
                                     >
@@ -316,12 +273,12 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
 
                             {/* Modal Actions */}
                             <div className="modal-actions">
-                                <button 
-                                    type="button" 
-                                    className="button button-secondary button-back-to-main" 
+                                <button
+                                    type="button"
+                                    className="button button-secondary button-back-to-main"
                                     onClick={resetToDefault}
                                 >
-                                    🔄 Standard
+                                                                        🔄 Standard
                                 </button>
                                 <div className="action-group">
                                     <button type="button" className="button button-outline" onClick={onClose}>
@@ -343,15 +300,16 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                     <div className="modal masterdata-modal">
                         <div className="modal-header">
                             <h2>📊 Stammdaten verwalten</h2>
-                            <button className="modal-close" onClick={() => setShowMasterDataModal(false)}>✖️</button>
+                            <button className="modal-close" onClick={() => setShowMasterDataModal(false)} aria-label="Schließen">✖️</button>
                         </div>
 
                         <div className="modal-content">
                             <form onSubmit={handleMasterDataSubmit}>
+                                {/* Schuljahre Section */}
                                 <div className="data-section">
                                     <h3>📅 Schuljahre</h3>
                                     <p className="section-description">Z.B. 2025/2026</p>
-                                    
+
                                     <div className="data-list">
                                         {masterFormData.schoolYears && masterFormData.schoolYears.map(year => (
                                             <div key={year} className="data-item">
@@ -374,13 +332,14 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
 
                                 <div className="divider"></div>
 
+                                {/* Schulen und Klassen Section */}
                                 <div className="data-section">
                                     <h3>🏫 Schulen und Klassen</h3>
-                                    
+
                                     <button type="button" className="button button-outline" onClick={addSchool}>
                                         ➕ Neue Schule hinzufügen
                                     </button>
-                                    
+
                                     <div className="schools-list">
                                         {masterFormData.schools && Object.entries(masterFormData.schools).map(([school, classes]) => (
                                             <div key={school} className="school-card">
@@ -395,7 +354,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                                         ❌
                                                     </button>
                                                 </div>
-                                                
+
                                                 <p className="classes-title">Klassen für "{school}"</p>
                                                 <div className="classes-list">
                                                     {classes && classes.map(className => (
