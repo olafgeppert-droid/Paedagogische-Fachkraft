@@ -167,7 +167,8 @@ const SettingsModal = ({
             alert('Fehler beim Laden der Beispieldaten: ' + (error.message || error));
         }
     };
-        const handleClearAllData = async () => {
+
+    const handleClearAllData = async () => {
         if (!window.confirm('Wollen Sie wirklich alle Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden!')) return;
 
         try {
@@ -187,8 +188,7 @@ const SettingsModal = ({
             alert('Fehler beim Löschen aller Daten: ' + (error.message || error));
         }
     };
-
-    return (
+        return (
         <>
             {/* Haupt-Einstellungen Modal */}
             <div className="modal-overlay">
