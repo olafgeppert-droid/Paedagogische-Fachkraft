@@ -255,7 +255,12 @@ const App = () => {
     const handleImport = async (event) => { if (db) await importData(db, event, setSettings, setMasterData, setStudents, setModal); };
     const handleUndo = async () => { if (db) await undo(db, history, historyIndex, setHistoryIndex, setStudents); };
     const handleRedo = async () => { if (db) await redo(db, history, historyIndex, setHistoryIndex, setStudents); };
-    const handleLoadSampleData = async () => { if (db) await loadSampleData(db, setMasterData, setStudents, setEntries); };
+    const handleLoadSampleData = async () => { 
+    if (db) {
+        await loadSampleData(db, setMasterData, setStudents, setEntries);
+        window.location.reload(); // Seite neu laden nach dem Laden der Beispieldaten
+    }
+};
     const handleClearData = async () => {
     if (!db) return;
     await clearAllData(db, setStudents, setEntries, setSettings, setMasterData);
