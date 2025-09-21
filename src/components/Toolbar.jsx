@@ -5,8 +5,8 @@ const Toolbar = ({
     selectedDate, 
     onAddStudent, 
     onEditStudent,      // Schüler bearbeiten
-    onAddEntry, 
     onSearchProtocol,   // Protokoll suchen
+    onAddEntry, 
     onPrint,
     onExport,
     onImport,
