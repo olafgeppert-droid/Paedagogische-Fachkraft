@@ -116,6 +116,7 @@ export const saveStateForUndo = async (db, history, historyIndex, setHistory, se
         console.error('Fehler beim Speichern des Zustands für Undo:', err);
     }
 };
+
 export const undo = async (db, history, historyIndex, setHistoryIndex, setStudents) => {
     if (historyIndex <= 0 || !db) return;
     try {
@@ -155,6 +156,7 @@ export const redo = async (db, history, historyIndex, setHistoryIndex, setStuden
         console.error('Fehler beim Redo:', err);
     }
 };
+
 // =======================
 // Export / Import
 // =======================
