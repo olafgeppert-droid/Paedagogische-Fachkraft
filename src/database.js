@@ -155,7 +155,6 @@ export const redo = async (db, history, historyIndex, setHistoryIndex, setStuden
         console.error('Fehler beim Redo:', err);
     }
 };
-
 // =======================
 // Export / Import
 // =======================
