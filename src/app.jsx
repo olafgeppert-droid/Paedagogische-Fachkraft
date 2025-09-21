@@ -25,7 +25,6 @@ import {
     redo,
     loadSampleData,
     clearAllData,
-    // Wichtig: filterStudents existiert jetzt in database.js
     filterStudents
 } from './database.js';
 
@@ -137,15 +136,14 @@ const App = () => {
                 if (masterDataLoaded) setMasterData(masterDataLoaded);
 
                 const allStudents = await database.getAll('students');
-                setStudents(allStudents);
+                setStudents(allStudents || []);
             } catch (error) {
                 console.error('Datenbank-Initialisierungsfehler:', error);
             }
         };
         initDB();
     }, [applySettings]);
-
-    // =======================
+        // =======================
     // Einträge laden
     // =======================
     useEffect(() => {
@@ -155,7 +153,7 @@ const App = () => {
                 let entriesData = [];
                 if (viewMode === 'student' && selectedStudent) entriesData = await getEntriesByStudentId(db, selectedStudent.id);
                 else if (viewMode === 'day' && selectedDate) entriesData = await getEntriesByDate(db, selectedDate);
-                setEntries(entriesData);
+                setEntries(entriesData || []);
             } catch (error) {
                 console.error('Fehler beim Laden der Einträge:', error);
             }
@@ -167,7 +165,8 @@ const App = () => {
     // Filter & Suche
     // =======================
     const filteredStudents = useCallback(() => filterStudents(students, filters), [students, filters]);
-        // =======================
+
+    // =======================
     // Schüler-Handler
     // =======================
     const saveStudentHandler = async (studentData) => {
@@ -290,7 +289,7 @@ const App = () => {
             }
             return match;
         });
-        setSearchResults(filtered);
+        setSearchResults(filtered || []);
         setViewMode('search');
         handleCloseSearch();
     };
