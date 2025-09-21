@@ -263,20 +263,15 @@ const App = () => {
     const handleUndo = async () => { if (db) await undo(db, history, historyIndex, setHistoryIndex, setStudents); };
     const handleRedo = async () => { if (db) await redo(db, history, historyIndex, setHistoryIndex, setStudents); };
 
-    const [contentKey, setContentKey] = useState(0);
-
-const handleLoadSampleData = async () => {
+    const handleLoadSampleData = async () => { 
     if (!db) return;
     await loadSampleData(db, setMasterData, setStudents, setEntries);
     setSelectedStudent(null);
     setSelectedDate(new Date().toISOString().split('T')[0]);
     setViewMode('student');
-    setContentKey(prev => prev + 1);
-    safariRenderHack(); // CSS-Hack für Safari
-    // Optional: Nur für iOS Safari neu laden
-    if (/iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent)) {
-        window.location.reload();
-    }
+
+    // Seite komplett neu aufrufen
+    window.location.href = 'https://olafgeppert-droid.github.io/Paedagogische-Fachkraft/';
 };
 
 const handleClearData = async () => {
@@ -285,13 +280,11 @@ const handleClearData = async () => {
     setSelectedStudent(null);
     setSelectedDate(new Date().toISOString().split('T')[0]);
     setViewMode('student');
-    setContentKey(prev => prev + 1);
-    safariRenderHack(); // CSS-Hack für Safari
-    if (/iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent)) {
-        window.location.reload();
-    }
-};
 
+    // Seite komplett neu aufrufen
+    window.location.href = 'https://olafgeppert-droid.github.io/Paedagogische-Fachkraft/';
+};
+    
     // =======================
     // Modale & Protokolle
     // =======================
