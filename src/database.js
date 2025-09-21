@@ -237,7 +237,7 @@ export const importData = async (db, event, setSettings, setMasterData, setStude
 // =======================
 // Beispieldaten
 // =======================
-export const loadSampleData = async (db, setMasterData, setStudents, setEntries) => {
+export const loadSampleData = async (db, masterDataHandler, setStudents, setEntries) => {
     if (!db) return;
     try {
         await db.clear('students');
@@ -270,11 +270,15 @@ export const loadSampleData = async (db, setMasterData, setStudents, setEntries)
         };
         await db.put('masterData', { ...sampleMasterData, id: 1 });
 
-        setMasterData(sampleMasterData);
+        // Flexibel: falls React-State-Setter übergeben oder Save-Funktion
+        if (typeof masterDataHandler === 'function') {
+            masterDataHandler(sampleMasterData);
+        }
+
         const allStudents = await db.getAll('students');
-        setStudents(allStudents);
+        if (setStudents) setStudents(allStudents);
         const allEntries = await db.getAll('entries');
-        setEntries(allEntries);
+        if (setEntries) setEntries(allEntries);
 
         alert('Beispieldaten erfolgreich geladen!');
     } catch (error) {
