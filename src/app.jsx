@@ -265,13 +265,15 @@ const App = () => {
 
     // **Angepasste Versionen – kein Refresh nötig + Force-Update**
     const handleLoadSampleData = async () => { 
-        if (!db) return;
-        await loadSampleData(db, setMasterData, setStudents, setEntries);
-        setSelectedStudent(null);
-        setSelectedDate(new Date().toISOString().split('T')[0]);
-        setViewMode('student');
-        triggerRender(); // <-- Force Update hinzugefügt
-    };
+    if (!db) return;
+    await loadSampleData(db, setMasterData, setStudents, setEntries);
+    setSelectedStudent(null);
+    setSelectedDate(new Date().toISOString().split('T')[0]);
+    setViewMode('student');
+
+    // Für iPad/Safari erzwingen
+    window.location.reload();
+};
 
     const handleClearData = async () => {
         if (!db) return;
