@@ -112,9 +112,13 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
     };
 
     const handleClearAllData = async () => {
-        const db = await setupDB();
-        await clearAllData(db, setStudents, setEntries, setSelectedStudent);
-        onClose();
+        if (window.confirm(
+            'Wollen Sie wirklich alle Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden!'
+        )) {
+            const db = await setupDB();
+            await clearAllData(db, setStudents, setEntries, setSelectedStudent);
+            onClose();
+        }
     };
 
     return (
@@ -241,8 +245,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                             {/* Schriftgrößen Section */}
                             <div className="settings-section">
                                 <h3>📝 Schriftgrößen</h3>
-
-                                <div className="slider-group">
+                                                                <div className="slider-group">
                                     <div className="slider-item">
                                         <label className="slider-label">
                                             <span className="label-text">Schriftgröße Labels</span>
@@ -286,7 +289,8 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                     </div>
                                 </div>
                             </div>
-                                                        {/* Stammdaten Section */}
+
+                            {/* Stammdaten Section */}
                             <div className="settings-section">
                                 <h3>📊 Stammdaten</h3>
                                 <div className="master-data-card">
@@ -300,7 +304,6 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                     </button>
                                 </div>
 
-                                {/* Neue Buttons: Abstand durch gap */}
                                 <div className="settings-action-buttons" style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
                                     <button type="button" className="button button-warning" onClick={handleLoadSampleData}>
                                         📂 Beispieldaten laden
@@ -345,7 +348,6 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
 
                         <div className="modal-content">
                             <form onSubmit={handleMasterDataSubmit}>
-                                {/* Schuljahre Section */}
                                 <div className="data-section">
                                     <h3>📅 Schuljahre</h3>
                                     <p className="section-description">Z.B. 2025/2026</p>
@@ -372,7 +374,6 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
 
                                 <div className="divider"></div>
 
-                                {/* Schulen und Klassen Section */}
                                 <div className="data-section">
                                     <h3>🏫 Schulen und Klassen</h3>
                                     
