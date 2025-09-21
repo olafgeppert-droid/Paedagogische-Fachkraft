@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { loadSampleData, clearAllData } from '../database'; // Import der Beispieldaten Funktionen
+import { setupDB, loadSampleData, clearAllData } from '../database'; // Import der DB-Funktionen
 
-const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose }) => {
+const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose, setStudents, setEntries, setSelectedStudent }) => {
     const [formData, setFormData] = useState(settings);
     const [masterFormData, setMasterFormData] = useState(masterData);
     const [showMasterDataModal, setShowMasterDataModal] = useState(false);
@@ -101,26 +101,20 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
     };
 
     /* --- Neue Funktionen: Beispieldaten laden und alle Daten löschen --- */
-    const handleLoadSampleData = () => {
+    const handleLoadSampleData = async () => {
         if (window.confirm(
             'Wollen Sie wirklich die Beispieldaten laden? Das überschreibt alle Ihre vorhandenen Daten. Speichern Sie Ihre eigenen Daten vorher!'
         )) {
-            const samples = loadSampleData();
-            onSaveMasterData(samples.masterData);
-            onSave(samples.settings);
-            setShowMasterDataModal(false);
+            const db = await setupDB();
+            await loadSampleData(db, setMasterFormData, setStudents, setEntries);
+            onClose();
         }
     };
 
-    const handleClearAllData = () => {
-        if (window.confirm(
-            'Wollen Sie wirklich alle Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden!'
-        )) {
-            clearAllData();
-            onSaveMasterData({ schoolYears: [], schools: {} });
-            onSave(settings);
-            setShowMasterDataModal(false);
-        }
+    const handleClearAllData = async () => {
+        const db = await setupDB();
+        await clearAllData(db, setStudents, setEntries, setSelectedStudent);
+        onClose();
     };
 
     return (
@@ -292,8 +286,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Stammdaten Section */}
+                                                        {/* Stammdaten Section */}
                             <div className="settings-section">
                                 <h3>📊 Stammdaten</h3>
                                 <div className="master-data-card">
@@ -307,7 +300,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                     </button>
                                 </div>
 
-                                {/* Neue Buttons: Abstand durch margin */}
+                                {/* Neue Buttons: Abstand durch gap */}
                                 <div className="settings-action-buttons" style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
                                     <button type="button" className="button button-warning" onClick={handleLoadSampleData}>
                                         📂 Beispieldaten laden
