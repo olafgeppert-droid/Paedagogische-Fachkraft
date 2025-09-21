@@ -269,10 +269,11 @@ export const clearAllData = async (db, setStudents, setEntries, setSettings, set
         await tx.objectStore('masterData').clear();
         await tx.done;
 
-        if (setStudents) setStudents([]);
-        if (setEntries) setEntries([]);
-        if (setSettings) setSettings(null);
-        if (setMasterData) setMasterData(null);
+        // Sicherstellen, dass States korrekt geleert werden
+        if (setStudents) setStudents(() => []);
+        if (setEntries) setEntries(() => []);
+        if (setSettings) setSettings(() => null);
+        if (setMasterData) setMasterData(() => null);
     } catch (err) {
         console.error('Fehler beim Löschen aller Daten:', err);
         alert('Fehler beim Löschen aller Daten: ' + err.message);
