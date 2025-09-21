@@ -11,13 +11,24 @@ const SettingsModal = ({
     setEntries,
     setSelectedStudent
 }) => {
+    // =======================
+    // Form-State
+    // =======================
     const [formData, setFormData] = useState(settings || {
         theme: 'hell',
         fontSize: 16,
         inputFontSize: 16
     });
 
-    const [masterFormData, setMasterFormData] = useState(masterData || { schoolYears: [], schools: {} });
+    // Korrigierte Initialisierung von masterFormData
+    const [masterFormData, setMasterFormData] = useState({
+        schoolYears: masterData?.schoolYears || [],
+        schools: masterData?.schools || {},
+        subjects: masterData?.subjects || [],
+        activities: masterData?.activities || [],
+        notesTemplates: masterData?.notesTemplates || []
+    });
+
     const [showMasterDataModal, setShowMasterDataModal] = useState(false);
 
     const [customColors, setCustomColors] = useState({
@@ -27,6 +38,9 @@ const SettingsModal = ({
         windowBackground: '#f39c12'
     });
 
+    // =======================
+    // Handlers
+    // =======================
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave({ ...formData, customColors });
@@ -34,7 +48,17 @@ const SettingsModal = ({
 
     const handleMasterDataSubmit = (e) => {
         e.preventDefault();
-        onSaveMasterData(masterFormData);
+        // Nur Stammdaten-Teile überschreiben
+        if (onSaveMasterData) {
+            onSaveMasterData(prev => ({
+                ...prev,
+                schoolYears: masterFormData.schoolYears,
+                schools: masterFormData.schools,
+                subjects: masterFormData.subjects,
+                activities: masterFormData.activities,
+                notesTemplates: masterFormData.notesTemplates
+            }));
+        }
         setShowMasterDataModal(false);
     };
 
@@ -55,7 +79,9 @@ const SettingsModal = ({
         }, 300);
     };
 
-    /* --- Stammdaten-Handling --- */
+    // =======================
+    // Stammdaten-Handling
+    // =======================
     const addSchoolYear = () => {
         const newYear = prompt('Neues Schuljahr hinzufügen (Format: YYYY/YYYY):', '2025/2026');
         if (newYear && /^\d{4}\/\d{4}$/.test(newYear)) {
@@ -130,7 +156,9 @@ const SettingsModal = ({
         }));
     };
 
-    /* --- Neue Funktionen: Beispieldaten laden und alle Daten löschen --- */
+    // =======================
+    // Beispieldaten & Alle Daten löschen
+    // =======================
     const handleLoadSampleData = async () => {
         if (!window.confirm(
             'Wollen Sie wirklich die Beispieldaten laden? Das überschreibt alle Ihre vorhandenen Daten. Speichern Sie Ihre eigenen Daten vorher!'
@@ -139,27 +167,22 @@ const SettingsModal = ({
         try {
             const db = await setupDB();
 
-            // WICHTIG: loadSampleData in database.js erwartet (db, setMasterData, setStudents, setEntries)
-            // -> wir übergeben onSaveMasterData (Parent setter) damit die Hauptansicht aktualisiert wird
-            await loadSampleData(db, onSaveMasterData, setStudents, setEntries);
+            await loadSampleData(db, (data) => {
+                // masterData aus DB + vorhandene schoolYears/Schulen
+                onSaveMasterData({
+                    ...data,
+                    schoolYears: masterFormData.schoolYears,
+                    schools: masterFormData.schools
+                });
+            }, setStudents, setEntries);
 
-            // Lade die aktuellen Masterdaten aus DB und setze parent state (sicherheitshalber)
-            if (onSaveMasterData) {
-                const storedMaster = await db.get('masterData', 1);
-                if (storedMaster) onSaveMasterData(storedMaster);
-            }
+            // Sicherheitsupdate Parent-States
+            const allStudents = await db.getAll('students');
+            if (setStudents) setStudents(allStudents);
 
-            // Hole aktualisierte Schüler/Einträge und setze parent state (falls loadSampleData nicht getan hat)
-            if (setStudents) {
-                const allStudents = await db.getAll('students');
-                setStudents(allStudents);
-            }
-            if (setEntries) {
-                const allEntries = await db.getAll('entries');
-                setEntries(allEntries);
-            }
+            const allEntries = await db.getAll('entries');
+            if (setEntries) setEntries(allEntries);
 
-            // Schließe Modal
             onClose();
             alert('Beispieldaten erfolgreich geladen! Bitte laden Sie die Seite im Browser neu.');
         } catch (error) {
@@ -173,14 +196,14 @@ const SettingsModal = ({
 
         try {
             const db = await setupDB();
-            // clearAllData in database.js erwartet (db, setStudents, setEntries, setSelectedStudent)
-            await clearAllData(db, setStudents, setEntries, setSelectedStudent);
+            await clearAllData(db, setStudents, setEntries, setSettings, () => {
+                onSaveMasterData({ schoolYears: [], schools: [], subjects: [], activities: [], notesTemplates: [] });
+            });
 
-            // Sicherheitsupdate der Parent-States (falls clearAllData nicht gesetzt hat)
+            // Sicherheitsupdate Parent-States
             if (setStudents) setStudents([]);
             if (setEntries) setEntries([]);
             if (setSelectedStudent) setSelectedStudent(null);
-            if (onSaveMasterData) onSaveMasterData({ schoolYears: [], schools: {} });
 
             onClose();
         } catch (error) {
@@ -188,7 +211,10 @@ const SettingsModal = ({
             alert('Fehler beim Löschen aller Daten: ' + (error.message || error));
         }
     };
-        return (
+        // =======================
+    // JSX Return
+    // =======================
+    return (
         <>
             {/* Haupt-Einstellungen Modal */}
             <div className="modal-overlay">
