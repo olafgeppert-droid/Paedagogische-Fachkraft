@@ -129,7 +129,7 @@ export const undo = async (db, history, historyIndex, setHistoryIndex, setStuden
         if (prevState.masterData) await tx.objectStore('masterData').put(prevState.masterData);
         await tx.done;
 
-        setStudents(await db.getAll('students'));
+        if (setStudents) setStudents(await db.getAll('students'));
         setHistoryIndex(historyIndex - 1);
     } catch (err) {
         console.error('Fehler beim Undo:', err);
@@ -149,7 +149,7 @@ export const redo = async (db, history, historyIndex, setHistoryIndex, setStuden
         if (nextState.masterData) await tx.objectStore('masterData').put(nextState.masterData);
         await tx.done;
 
-        setStudents(await db.getAll('students'));
+        if (setStudents) setStudents(await db.getAll('students'));
         setHistoryIndex(historyIndex + 1);
     } catch (err) {
         console.error('Fehler beim Redo:', err);
@@ -195,10 +195,10 @@ export const importData = async (db, event, setSettings, setMasterData, setStude
             if (data.masterData) await tx.objectStore('masterData').put(data.masterData);
             await tx.done;
 
-            if (data.settings) setSettings(data.settings);
-            if (data.masterData) setMasterData(data.masterData);
-            setStudents(await db.getAll('students'));
-            setModal(null);
+            if (setSettings && data.settings) setSettings(data.settings);
+            if (setMasterData && data.masterData) setMasterData(data.masterData);
+            if (setStudents) setStudents(await db.getAll('students'));
+            if (setModal) setModal(null);
             alert('Daten erfolgreich importiert!');
         } catch (err) {
             console.error('Fehler beim Importieren:', err);
@@ -235,8 +235,11 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
 
         for (const entry of sampleEntries) await db.add('entries', entry);
 
-        setStudents(await db.getAll('students'));
-        setEntries(await db.getAll('entries'));
+        const allStudents = await db.getAll('students');
+        const allEntries = await db.getAll('entries');
+
+        if (setStudents) setStudents(allStudents);
+        if (setEntries) setEntries(allEntries);
 
         if (masterDataHandler) {
             const defaultMasterData = {
