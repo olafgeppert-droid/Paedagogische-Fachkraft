@@ -132,19 +132,60 @@ const SettingsModal = ({
 
     /* --- Neue Funktionen: Beispieldaten laden und alle Daten löschen --- */
     const handleLoadSampleData = async () => {
-        if (window.confirm(
+        if (!window.confirm(
             'Wollen Sie wirklich die Beispieldaten laden? Das überschreibt alle Ihre vorhandenen Daten. Speichern Sie Ihre eigenen Daten vorher!'
-        )) {
+        )) return;
+
+        try {
             const db = await setupDB();
-            await loadSampleData(db, setMasterFormData, setStudents, setEntries);
+
+            // WICHTIG: loadSampleData in database.js erwartet (db, setMasterData, setStudents, setEntries)
+            // -> wir übergeben onSaveMasterData (Parent setter) damit die Hauptansicht aktualisiert wird
+            await loadSampleData(db, onSaveMasterData, setStudents, setEntries);
+
+            // Lade die aktuellen Masterdaten aus DB und setze parent state (sicherheitshalber)
+            if (onSaveMasterData) {
+                const storedMaster = await db.get('masterData', 1);
+                if (storedMaster) onSaveMasterData(storedMaster);
+            }
+
+            // Hole aktualisierte Schüler/Einträge und setze parent state (falls loadSampleData nicht getan hat)
+            if (setStudents) {
+                const allStudents = await db.getAll('students');
+                setStudents(allStudents);
+            }
+            if (setEntries) {
+                const allEntries = await db.getAll('entries');
+                setEntries(allEntries);
+            }
+
+            // Schließe Modal
             onClose();
+            alert('Beispieldaten erfolgreich geladen!');
+        } catch (error) {
+            console.error('Fehler beim Laden der Beispieldaten:', error);
+            alert('Fehler beim Laden der Beispieldaten: ' + (error.message || error));
         }
     };
+        const handleClearAllData = async () => {
+        if (!window.confirm('Wollen Sie wirklich alle Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden!')) return;
 
-    const handleClearAllData = async () => {
-        const db = await setupDB();
-        await clearAllData(db, setStudents, setEntries, setSelectedStudent);
-        onClose();
+        try {
+            const db = await setupDB();
+            // clearAllData in database.js erwartet (db, setStudents, setEntries, setSelectedStudent)
+            await clearAllData(db, setStudents, setEntries, setSelectedStudent);
+
+            // Sicherheitsupdate der Parent-States (falls clearAllData nicht gesetzt hat)
+            if (setStudents) setStudents([]);
+            if (setEntries) setEntries([]);
+            if (setSelectedStudent) setSelectedStudent(null);
+            if (onSaveMasterData) onSaveMasterData({ schoolYears: [], schools: {} });
+
+            onClose();
+        } catch (error) {
+            console.error('Fehler beim Löschen aller Daten:', error);
+            alert('Fehler beim Löschen aller Daten: ' + (error.message || error));
+        }
     };
 
     return (
@@ -278,7 +319,7 @@ const SettingsModal = ({
                                     className="button button-secondary button-back-to-main"
                                     onClick={resetToDefault}
                                 >
-                                                                        🔄 Standard
+                                    🔄 Standard
                                 </button>
                                 <div className="action-group">
                                     <button type="button" className="button button-outline" onClick={onClose}>
