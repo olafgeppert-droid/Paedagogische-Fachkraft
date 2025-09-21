@@ -259,6 +259,7 @@ const App = () => {
     const handleClearData = async () => {
     if (!db) return;
     await clearAllData(db, setStudents, setEntries, setSettings, setMasterData);
+    // Force React to re-render with empty data
     setStudents([]);
     setEntries([]);
 };
