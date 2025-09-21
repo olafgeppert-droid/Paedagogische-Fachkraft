@@ -25,7 +25,8 @@ import {
     redo,
     loadSampleData,
     clearAllData,
-    filterStudents
+    filterStudents,
+    getStudents
 } from './database.js';
 
 // =======================
@@ -71,7 +72,7 @@ const App = () => {
     const [viewMode, setViewMode] = useState('student');
     const [filters, setFilters] = useState({ search: '', schoolYear: '', school: '', className: '' });
     const [settings, setSettings] = useState({ theme: 'hell', fontSize: 16, inputFontSize: 16, customColors: {} });
-    const [masterData, setMasterData] = useState({ schoolYears: [], schools: {} });
+    const [masterData, setMasterData] = useState({ subjects: [], activities: [], notesTemplates: [] });
     const [modal, setModal] = useState(null);
     const [navOpen, setNavOpen] = useState(false);
     const [history, setHistory] = useState([]);
@@ -79,17 +80,15 @@ const App = () => {
     const [editingEntry, setEditingEntry] = useState(null);
     const [searchModalOpen, setSearchModalOpen] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
-    const [appState, setAppState] = useState('database'); // ← NEU: 'database' | 'welcome'
+    const [appState, setAppState] = useState('database');
 
-// =======================
-// Force-Update für iPad/iOS
-// =======================
+    // Force Update für iPad/iOS
     const [, forceUpdate] = useState(0);
     const triggerRender = () => forceUpdate(prev => prev + 1);
 
-// =======================
-// Einstellungen / Farben anwenden
-// =======================
+    // =======================
+    // Einstellungen / Farben anwenden
+    // =======================
     const applyCustomColors = useCallback((colors) => {
         const root = document.documentElement;
         root.style.setProperty('--sidebar-bg', colors.navigation || '#fed7aa');
@@ -122,9 +121,9 @@ const App = () => {
         else resetCustomColors();
     }, [applyCustomColors, resetCustomColors]);
 
-// =======================
-// DB Initialisierung
-// =======================
+    // =======================
+    // DB Initialisierung
+    // =======================
     useEffect(() => {
         const initDB = async () => {
             try {
@@ -150,25 +149,25 @@ const App = () => {
         };
         initDB();
     }, [applySettings]);
-    // =======================
-// Einträge laden
-// =======================
-useEffect(() => {
-    const loadEntries = async () => {
-        if (!db) return;
-        try {
-            let entriesData = [];
-            if (viewMode === 'student' && selectedStudent) entriesData = await getEntriesByStudentId(db, selectedStudent.id);
-            else if (viewMode === 'day' && selectedDate) entriesData = await getEntriesByDate(db, selectedDate);
-            setEntries(entriesData || []);
-        } catch (error) {
-            console.error('Fehler beim Laden der Einträge:', error);
-        }
-    };
-    loadEntries();
-}, [db, selectedStudent, selectedDate, viewMode]);
 
-// =======================
+    // =======================
+    // Einträge laden
+    // =======================
+    useEffect(() => {
+        const loadEntries = async () => {
+            if (!db) return;
+            try {
+                let entriesData = [];
+                if (viewMode === 'student' && selectedStudent) entriesData = await getEntriesByStudentId(db, selectedStudent.id);
+                else if (viewMode === 'day' && selectedDate) entriesData = await getEntriesByDate(db, selectedDate);
+                setEntries(entriesData || []);
+            } catch (error) {
+                console.error('Fehler beim Laden der Einträge:', error);
+            }
+        };
+        loadEntries();
+    }, [db, selectedStudent, selectedDate, viewMode]);
+    // =======================
 // Filter & Suche
 // =======================
 const filteredStudents = useCallback(() => filterStudents(students, filters), [students, filters]);
@@ -269,7 +268,7 @@ const handleLoadSampleData = async () => {
     setSelectedStudent(null);
     setSelectedDate(new Date().toISOString().split('T')[0]);
     setViewMode('student');
-    setAppState('database'); // ← NEU: sofort in DB-Modus, kein Reload nötig
+    setAppState('database');
 };
 
 const handleClearData = async () => {
@@ -280,7 +279,7 @@ const handleClearData = async () => {
     setViewMode('student');
     setSettings({ theme: 'hell', fontSize: 16, inputFontSize: 16, customColors: {} });
     resetCustomColors();
-    setAppState('database'); // ← NEU: sofort in DB-Modus, kein Reload nötig
+    setAppState('database');
 };
 
 // =======================
