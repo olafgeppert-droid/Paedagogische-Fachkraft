@@ -258,19 +258,16 @@ const App = () => {
 
     // **Angepasste Versionen – kein Refresh nötig**
     const handleLoadSampleData = async () => { 
-        if (db) {
-            await loadSampleData(db, setMasterData, setStudents, setEntries);
-            // States werden direkt aktualisiert, kein reload nötig
-            setSelectedStudent(null);
-            setSelectedDate(new Date().toISOString().split('T')[0]);
-            setViewMode('student');
-        }
+        if (!db) return;
+        await loadSampleData(db, setMasterData, setStudents, setEntries);
+        setSelectedStudent(null);
+        setSelectedDate(new Date().toISOString().split('T')[0]);
+        setViewMode('student');
     };
 
     const handleClearData = async () => {
         if (!db) return;
         await clearAllData(db, setStudents, setEntries, setSettings, setMasterData);
-        // States zurücksetzen
         setSelectedStudent(null);
         setSelectedDate(new Date().toISOString().split('T')[0]);
         setViewMode('student');
