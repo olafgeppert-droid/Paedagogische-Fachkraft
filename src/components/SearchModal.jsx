@@ -1,64 +1,57 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-export default function SearchModal({ onClose, onSearch }) {
-  const [field, setField] = useState("all");
-  const [query, setQuery] = useState("");
+const SearchModal = ({ onClose, onSearch }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchType, setSearchType] = useState('all');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSearch({ field, query });
-    onClose();
-  };
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSearch({ term: searchTerm, type: searchType });
+        onClose();
+    };
 
-  return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <h2>Protokollsuche</h2>
-        <form onSubmit={handleSubmit}>
-          {/* Auswahlfeld */}
-          <label>
-            Suchfeld:
-            <select value={field} onChange={(e) => setField(e.target.value)}>
-              <option value="all">Alle Felder</option>
-              <option value="name">Name</option>
-              <option value="thema">Thema</option>
-              <option value="bewertung">Erfolgsbewertung</option>
-            </select>
-          </label>
+    return (
+        <div className="modal-overlay">
+            <div className="modal">
+                <h2>🔍 Protokoll suchen</h2>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label htmlFor="searchType">Suchkriterium:</label>
+                        <select
+                            id="searchType"
+                            value={searchType}
+                            onChange={(e) => setSearchType(e.target.value)}
+                        >
+                            <option value="all">Allgemein</option>
+                            <option value="name">Name</option>
+                            <option value="topic">Thema</option>
+                            <option value="rating">Erfolgsbewertung</option>
+                        </select>
+                    </div>
 
-          {/* Eingabefeld oder Dropdown je nach Auswahl */}
-          {field === "bewertung" ? (
-            <label>
-              Erfolgsbewertung:
-              <select value={query} onChange={(e) => setQuery(e.target.value)}>
-                <option value="">-- auswählen --</option>
-                <option value="positiv">Positiv</option>
-                <option value="neutral">Neutral</option>
-                <option value="negativ">Negativ</option>
-              </select>
-            </label>
-          ) : (
-            <label>
-              Suchbegriff:
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Begriff eingeben..."
-              />
-            </label>
-          )}
+                    <div className="form-group">
+                        <label htmlFor="searchTerm">Suchbegriff:</label>
+                        <input
+                            id="searchTerm"
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Begriff eingeben..."
+                        />
+                    </div>
 
-          <div className="modal-footer">
-            <button type="button" onClick={onClose}>
-              Abbrechen
-            </button>
-            <button type="submit" className="button button-primary">
-              Suchen
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
+                    <div className="modal-actions">
+                        <button type="submit" className="button">
+                            Suchen
+                        </button>
+                        <button type="button" className="button" onClick={onClose}>
+                            Abbrechen
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+export default SearchModal;
