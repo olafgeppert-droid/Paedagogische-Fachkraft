@@ -99,24 +99,23 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    padding: var(--toolbar-padding, 1rem 2rem);
+    padding: 1rem 2rem;
     background-color: var(--toolbar-bg, #f8fafc);
     border-bottom: 2px solid var(--border-color, #d1d5db);
     box-shadow: var(--shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
     position: sticky;
     top: var(--header-height, 70px);
     z-index: 900;
-    min-height: var(--toolbar-height, 110px);
-    height: auto;
+    min-height: auto; /* <- anpassen */
+    height: auto;     /* <- anpassen */
     overflow: visible;
 }
 
-/* Toolbar-Reihen */
 .toolbar-row {
     display: flex;
     gap: 0.75rem;
-    flex-wrap: wrap; /* Buttons umbrechen */
-    justify-content: flex-start;
+    flex-wrap: wrap;       /* <- vorher nowrap */
+    justify-content: center; /* <- vorher center oder flex-start prüfen */
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
@@ -125,13 +124,17 @@ body {
 
 /* Buttons in Toolbar */
 .toolbar-row .button {
-    min-width: 120px;
-    flex: 1 1 auto;
+    height: auto;          /* vorher: 44px */
+    min-width: 120px;      /* evtl. kleiner setzen */
+    max-width: none;       /* vorher: 220px */
+    flex: 1 1 auto;        /* grow + shrink + basis */
     font-size: 1rem;
-    padding: 0.625rem 1rem;
-    max-width: none;
-    font-weight: 600;
-    height: 42px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    border-radius: 10px;
 }
 
 /* === NAVIGATION === */
