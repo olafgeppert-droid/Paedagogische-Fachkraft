@@ -255,8 +255,7 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
         }
 
         const sampleEntries = [
-            { studentId: addedStudents[0].id, date// Fortsetzung von loadSampleData
-: '2025-09-01', activity: 'Mathematik: Addieren und Subtrahieren geübt', notes: 'Hat gut mitgemacht' },
+            { studentId: addedStudents[0].id, date: '2025-09-01', activity: 'Mathematik: Addieren und Subtrahieren geübt', notes: 'Hat gut mitgemacht' },
             { studentId: addedStudents[1].id, date: '2025-09-01', activity: 'Lesen: Kurze Texte verstehen', notes: 'Brauchte Hilfestellung' }
         ];
 
