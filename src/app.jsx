@@ -271,7 +271,7 @@ const App = () => {
     setViewMode('student');
 
     // Seite komplett neu aufrufen
-    window.location.href = 'https://olafgeppert-droid.github.io/Paedagogische-Fachkraft/';
+    window.location.replace('https://olafgeppert-droid.github.io/Paedagogische-Fachkraft/');
 };
 
 const handleClearData = async () => {
@@ -282,7 +282,7 @@ const handleClearData = async () => {
     setViewMode('student');
 
     // Seite komplett neu aufrufen
-    window.location.href = 'https://olafgeppert-droid.github.io/Paedagogische-Fachkraft/';
+    window.location.replace('https://olafgeppert-droid.github.io/Paedagogische-Fachkraft/');
 };
     
     // =======================
