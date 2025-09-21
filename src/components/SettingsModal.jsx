@@ -169,7 +169,7 @@ const SettingsModal = ({
     };
 
     const handleClearAllData = async () => {
-        if (!window.confirm('Wollen Sie wirklich alle Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden!')) return;
+        if (!window.confirm('Wollen Sie wirklich alle Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden! Laden Sie die Browser-Seite nach dem Löschen der Daten neu.')) return;
 
         try {
             const db = await setupDB();
