@@ -244,8 +244,7 @@ export const loadSampleData = async (db, setMasterData, setStudents, setEntries)
         await db.clear('entries');
 
         const sampleStudents = [
-            { name: 'Max Mustermann', schoolYear: '2025/2026', school: 'Ostschule, Grundschule Neustadt an der Weinstraße', className: '1a', gender: 'männlich', nationality: 'Deutschland
-                ', germanLevel: 2, notes: 'Sehr aufmerksamer Schüler' },
+            { name: 'Max Mustermann', schoolYear: '2025/2026', school: 'Ostschule, Grundschule Neustadt an der Weinstraße', className: '1a', gender: 'männlich', nationality: 'Deutschland', germanLevel: 2, notes: 'Sehr aufmerksamer Schüler' },
             { name: 'Anna Beispiel', schoolYear: '2025/2026', school: 'Heinz-Sielmann-Grundschule, Neustadt an der Weinstraße', className: '2b', gender: 'weiblich', nationality: 'Türkei', germanLevel: 1, notes: 'Braucht Unterstützung in Mathematik' }
         ];
 
