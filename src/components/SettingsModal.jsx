@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { loadSampleData, clearAllData } from '../database.js'; // Import für Beispieldaten und Löschen
+import { loadSampleData, clearAllData } from '../database'; // Import der Beispieldaten Funktionen
 
-const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose, db, setStudents, setEntries, setSelectedStudent }) => {
+const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose }) => {
     const [formData, setFormData] = useState(settings);
     const [masterFormData, setMasterFormData] = useState(masterData);
     const [showMasterDataModal, setShowMasterDataModal] = useState(false);
@@ -100,26 +100,26 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
         });
     };
 
-    /* --- Neue Funktionen: Beispieldaten / Alle Daten löschen --- */
-    const handleLoadSampleDataClick = async () => {
-        const confirmed = window.confirm(
-            "Wollen Sie wirklich die Beispieldaten laden? Das überschreibt alle Ihre vorhandenen Daten. Speichern Sie Ihre eigenen Daten vorher!"
-        );
-        if (confirmed && db) {
-            await loadSampleData(db, setMasterFormData, setStudents, setEntries);
-            setSelectedStudent(null);
-            onClose();
+    /* --- Neue Funktionen: Beispieldaten laden und alle Daten löschen --- */
+    const handleLoadSampleData = () => {
+        if (window.confirm(
+            'Wollen Sie wirklich die Beispieldaten laden? Das überschreibt alle Ihre vorhandenen Daten. Speichern Sie Ihre eigenen Daten vorher!'
+        )) {
+            const samples = loadSampleData();
+            onSaveMasterData(samples.masterData);
+            onSave(samples.settings);
+            setShowMasterDataModal(false);
         }
     };
 
-    const handleClearAllDataClick = async () => {
-        const confirmed = window.confirm(
-            "Wollen Sie wirklich alle Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden!"
-        );
-        if (confirmed && db) {
-            await clearAllData(db, setStudents, setEntries, setSelectedStudent);
-            setSelectedStudent(null);
-            onClose();
+    const handleClearAllData = () => {
+        if (window.confirm(
+            'Wollen Sie wirklich alle Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden!'
+        )) {
+            clearAllData();
+            onSaveMasterData({ schoolYears: [], schools: {} });
+            onSave(settings);
+            setShowMasterDataModal(false);
         }
     };
 
@@ -247,6 +247,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                             {/* Schriftgrößen Section */}
                             <div className="settings-section">
                                 <h3>📝 Schriftgrößen</h3>
+
                                 <div className="slider-group">
                                     <div className="slider-item">
                                         <label className="slider-label">
@@ -305,25 +306,16 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                         📋 Stammdaten verwalten
                                     </button>
                                 </div>
-                            </div>
 
-                            {/* Neue Section: Beispieldaten / Daten löschen */}
-                            <div className="settings-section">
-                                <h3>⚠️ Datenverwaltung</h3>
-                                <button
-                                    type="button"
-                                    className="button button-outline"
-                                    onClick={handleLoadSampleDataClick}
-                                >
-                                    📥 Beispieldaten laden
-                                </button>
-                                <button
-                                    type="button"
-                                    className="button button-danger"
-                                    onClick={handleClearAllDataClick}
-                                >
-                                    🗑️ Alle Daten löschen
-                                </button>
+                                {/* Neue Buttons: Abstand durch margin */}
+                                <div className="settings-action-buttons" style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
+                                    <button type="button" className="button button-warning" onClick={handleLoadSampleData}>
+                                        📂 Beispieldaten laden
+                                    </button>
+                                    <button type="button" className="button button-danger" onClick={handleClearAllData}>
+                                        🗑️ Alle Daten löschen
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Modal Actions */}
@@ -364,6 +356,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                 <div className="data-section">
                                     <h3>📅 Schuljahre</h3>
                                     <p className="section-description">Z.B. 2025/2026</p>
+                                    
                                     <div className="data-list">
                                         {masterFormData.schoolYears && masterFormData.schoolYears.map(year => (
                                             <div key={year} className="data-item">
@@ -389,9 +382,11 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                 {/* Schulen und Klassen Section */}
                                 <div className="data-section">
                                     <h3>🏫 Schulen und Klassen</h3>
+                                    
                                     <button type="button" className="button button-outline" onClick={addSchool}>
                                         ➕ Neue Schule hinzufügen
                                     </button>
+                                    
                                     <div className="schools-list">
                                         {masterFormData.schools && Object.entries(masterFormData.schools).map(([school, classes]) => (
                                             <div key={school} className="school-card">
@@ -406,6 +401,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                                         ❌
                                                     </button>
                                                 </div>
+                                                
                                                 <p className="classes-title">Klassen für "{school}"</p>
                                                 <div className="classes-list">
                                                     {classes && classes.map(className => (
@@ -435,8 +431,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                 </div>
 
                                 <div className="modal-actions">
-                                    <button type="button" className="button button-outline" onClick={() => setShowMasterDataModal
-                                        (false)}>
+                                    <button type="button" className="button button-outline" onClick={() => setShowMasterDataModal(false)}>
                                         ❌ Schließen
                                     </button>
                                     <button type="submit" className="button button-primary">
