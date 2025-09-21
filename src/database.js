@@ -292,7 +292,7 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
 // =======================
 export const clearAllData = async (db, setStudents, setEntries, setSelectedStudent) => {
     if (!db) return;
-    if (!confirm('Sind Sie sicher, dass Sie alle Daten löschen möchten? Dieser Vorgang kann nicht rückgängig gemacht werden.')) return;
+    //if (!confirm('Sind Sie sicher, dass Sie alle Daten löschen möchten? Dieser Vorgang kann nicht rückgängig gemacht werden.')) return;
 
     try {
         await db.clear('students');
