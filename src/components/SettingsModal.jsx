@@ -40,6 +40,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
         }, 300);
     };
 
+    /* --- Stammdaten-Handling --- */
     const addSchoolYear = () => {
         const newYear = prompt('Neues Schuljahr hinzufügen (Format: YYYY/YYYY):', '2025/2026');
         if (newYear && !masterFormData.schoolYears.includes(newYear)) {
@@ -99,6 +100,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
         });
     };
 
+    /* --- Neue Funktionen: Beispieldaten / Alle Daten löschen --- */
     const handleLoadSampleDataClick = async () => {
         const confirmed = window.confirm(
             "Wollen Sie wirklich die Beispieldaten laden? Das überschreibt alle Ihre vorhandenen Daten. Speichern Sie Ihre eigenen Daten vorher!"
@@ -123,6 +125,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
 
     return (
         <>
+            {/* Haupt-Einstellungen Modal */}
             <div className="modal-overlay">
                 <div className="modal settings-modal">
                     <div className="modal-header">
@@ -132,9 +135,179 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
 
                     <div className="modal-content">
                         <form onSubmit={handleSubmit}>
-                            {/* Farbschema, Schriftgrößen, Stammdaten wie gehabt */}
+                            {/* Theme Section */}
+                            <div className="settings-section">
+                                <h3>🎨 Farbschema</h3>
+                                <div className="form-group">
+                                    <div className="theme-grid">
+                                        <div 
+                                            className={`theme-card ${formData.theme === 'hell' ? 'active' : ''}`}
+                                            onClick={() => setFormData({ ...formData, theme: 'hell' })}
+                                        >
+                                            <div className="theme-preview light-theme-preview">
+                                                <div className="preview-header"></div>
+                                                <div className="preview-toolbar"></div>
+                                                <div className="preview-content"></div>
+                                            </div>
+                                            <div className="theme-info">
+                                                <span className="radio-checkmark">☀️</span>
+                                                <span>Standard (Hell)</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div 
+                                            className={`theme-card ${formData.theme === 'dunkel' ? 'active' : ''}`}
+                                            onClick={() => setFormData({ ...formData, theme: 'dunkel' })}
+                                        >
+                                            <div className="theme-preview dark-theme-preview">
+                                                <div className="preview-header"></div>
+                                                <div className="preview-toolbar"></div>
+                                                <div className="preview-content"></div>
+                                            </div>
+                                            <div className="theme-info">
+                                                <span className="radio-checkmark">🌙</span>
+                                                <span>Dunkel</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div 
+                                            className={`theme-card ${formData.theme === 'farbig' ? 'active' : ''}`}
+                                            onClick={() => setFormData({ ...formData, theme: 'farbig' })}
+                                        >
+                                            <div className="theme-preview colored-theme-preview">
+                                                <div className="preview-header"></div>
+                                                <div className="preview-toolbar"></div>
+                                                <div className="preview-content"></div>
+                                            </div>
+                                            <div className="theme-info">
+                                                <span className="radio-checkmark">🌈</span>
+                                                <span>Farbig</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                            {/* --- Neuer Bereich: Beispieldaten / Daten löschen --- */}
+                                {formData.theme === 'farbig' && (
+                                    <div className="color-customization">
+                                        <h4>🎨 Benutzerdefinierte Farben</h4>
+                                        <div className="color-grid">
+                                            <div className="color-item">
+                                                <label>Navigation</label>
+                                                <div className="color-input-group">
+                                                    <input
+                                                        type="color"
+                                                        value={customColors.navigation}
+                                                        onChange={(e) => setCustomColors({ ...customColors, navigation: e.target.value })}
+                                                        className="color-picker"
+                                                    />
+                                                    <span className="color-value">{customColors.navigation}</span>
+                                                </div>
+                                            </div>
+                                            <div className="color-item">
+                                                <label>Werkzeugleiste</label>
+                                                <div className="color-input-group">
+                                                    <input
+                                                        type="color"
+                                                        value={customColors.toolbar}
+                                                        onChange={(e) => setCustomColors({ ...customColors, toolbar: e.target.value })}
+                                                        className="color-picker"
+                                                    />
+                                                    <span className="color-value">{customColors.toolbar}</span>
+                                                </div>
+                                            </div>
+                                            <div className="color-item">
+                                                <label>Header</label>
+                                                <div className="color-input-group">
+                                                    <input
+                                                        type="color"
+                                                        value={customColors.header}
+                                                        onChange={(e) => setCustomColors({ ...customColors, header: e.target.value })}
+                                                        className="color-picker"
+                                                    />
+                                                    <span className="color-value">{customColors.header}</span>
+                                                </div>
+                                            </div>
+                                            <div className="color-item">
+                                                <label>Fenster-Hintergrund</label>
+                                                <div className="color-input-group">
+                                                    <input
+                                                        type="color"
+                                                        value={customColors.protocol}
+                                                        onChange={(e) => setCustomColors({ ...customColors, protocol: e.target.value })}
+                                                        className="color-picker"
+                                                    />
+                                                    <span className="color-value">{customColors.protocol}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Schriftgrößen Section */}
+                            <div className="settings-section">
+                                <h3>📝 Schriftgrößen</h3>
+                                <div className="slider-group">
+                                    <div className="slider-item">
+                                        <label className="slider-label">
+                                            <span className="label-text">Schriftgröße Labels</span>
+                                            <span className="label-size">{formData.fontSize}px</span>
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="12"
+                                            max="24"
+                                            value={formData.fontSize}
+                                            onChange={(e) => setFormData({ ...formData, fontSize: parseInt(e.target.value) })}
+                                            className="slider"
+                                        />
+                                        <div className="slider-scale">
+                                            <span style={{fontSize: '12px'}}>A</span>
+                                            <span style={{fontSize: '16px'}}>A</span>
+                                            <span style={{fontSize: '20px'}}>A</span>
+                                            <span style={{fontSize: '24px'}}>A</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="slider-item">
+                                        <label className="slider-label">
+                                            <span className="label-text">Schriftgröße Eingabefelder</span>
+                                            <span className="label-size">{formData.inputFontSize}px</span>
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="12"
+                                            max="24"
+                                            value={formData.inputFontSize}
+                                            onChange={(e) => setFormData({ ...formData, inputFontSize: parseInt(e.target.value) })}
+                                            className="slider"
+                                        />
+                                        <div className="slider-scale">
+                                            <span style={{fontSize: '12px'}}>A</span>
+                                            <span style={{fontSize: '16px'}}>A</span>
+                                            <span style={{fontSize: '20px'}}>A</span>
+                                            <span style={{fontSize: '24px'}}>A</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Stammdaten Section */}
+                            <div className="settings-section">
+                                <h3>📊 Stammdaten</h3>
+                                <div className="master-data-card">
+                                    <p>Verwalten Sie Schuljahre, Schulen und Klassen</p>
+                                    <button 
+                                        type="button" 
+                                        className="button button-primary"
+                                        onClick={() => setShowMasterDataModal(true)}
+                                    >
+                                        📋 Stammdaten verwalten
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Neue Section: Beispieldaten / Daten löschen */}
                             <div className="settings-section">
                                 <h3>⚠️ Datenverwaltung</h3>
                                 <button
@@ -153,6 +326,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                 </button>
                             </div>
 
+                            {/* Modal Actions */}
                             <div className="modal-actions">
                                 <button 
                                     type="button" 
@@ -175,7 +349,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                 </div>
             </div>
 
-            {/* Stammdaten Modal wie gehabt */}
+            {/* Stammdaten Modal */}
             {showMasterDataModal && (
                 <div className="modal-overlay">
                     <div className="modal masterdata-modal">
@@ -186,7 +360,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
 
                         <div className="modal-content">
                             <form onSubmit={handleMasterDataSubmit}>
-                                {/* Schuljahre, Schulen, Klassen bleiben unverändert */}
+                                {/* Schuljahre Section */}
                                 <div className="data-section">
                                     <h3>📅 Schuljahre</h3>
                                     <p className="section-description">Z.B. 2025/2026</p>
@@ -212,6 +386,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
 
                                 <div className="divider"></div>
 
+                                {/* Schulen und Klassen Section */}
                                 <div className="data-section">
                                     <h3>🏫 Schulen und Klassen</h3>
                                     <button type="button" className="button button-outline" onClick={addSchool}>
@@ -260,7 +435,8 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
                                 </div>
 
                                 <div className="modal-actions">
-                                    <button type="button" className="button button-outline" onClick={() => setShowMasterDataModal(false)}>
+                                    <button type="button" className="button button-outline" onClick={() => setShowMasterDataModal
+                                        (false)}>
                                         ❌ Schließen
                                     </button>
                                     <button type="submit" className="button button-primary">
