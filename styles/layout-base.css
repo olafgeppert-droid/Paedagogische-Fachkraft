@@ -401,6 +401,14 @@ p, li, span {
     [data-theme="farbig"].custom-colors-applied .nav {
         background-color: var(--sidebar-bg, #fed7aa) !important;
     }
+    .toolbar-row {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .toolbar-row .button {
+        flex: 1 1 45%;    /* 2 Buttons pro Zeile */
+        margin-bottom: 0.5rem;
+    }
 }
 
 /* === ENTRY CARDS SPEZIFISCHE STILE FÜR FARBSCHEMEN === */
