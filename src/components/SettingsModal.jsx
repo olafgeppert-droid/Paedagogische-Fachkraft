@@ -161,7 +161,7 @@ const SettingsModal = ({
 
             // Schließe Modal
             onClose();
-            alert('Beispieldaten erfolgreich geladen!');
+            alert('Beispieldaten erfolgreich geladen! Bitte laden Sie die Seite im Browser neu.');
         } catch (error) {
             console.error('Fehler beim Laden der Beispieldaten:', error);
             alert('Fehler beim Laden der Beispieldaten: ' + (error.message || error));
