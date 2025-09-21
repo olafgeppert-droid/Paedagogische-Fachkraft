@@ -265,20 +265,20 @@ const App = () => {
         <div className="app">
             <Header onMenuClick={() => setNavOpen(!navOpen)} />
             <Toolbar
-                selectedStudent={selectedStudent}
-                selectedDate={selectedDate}
-                onAddStudent={handleShowNewStudent}
-                onEditStudent={() => setModal('student')} // Schüler bearbeiten
-                onAddEntry={handleShowNewProtocol}
-                onEditEntry={handleOpenSearch} // Protokoll suchen
-                onPrint={() => window.print()}
-                onExport={handleExport}
-                onImport={handleImport}
-                onUndo={handleUndo}
-                onRedo={handleRedo}
-                canUndo={historyIndex > 0}
-                canRedo={historyIndex < history.length - 1}
-            />
+    selectedStudent={selectedStudent}
+    selectedDate={selectedDate}
+    onAddStudent={handleShowNewStudent}
+    onEditStudent={() => setModal('student')}
+    onAddEntry={handleShowNewProtocol}
+    onSearchProtocol={handleOpenSearch} // <--- neu hinzufügen
+    onPrint={() => window.print()}
+    onExport={handleExport}
+    onImport={handleImport}
+    onUndo={handleUndo}
+    onRedo={handleRedo}
+    canUndo={historyIndex > 0}
+    canRedo={historyIndex < history.length - 1}
+/>
             <Navigation
                 isOpen={navOpen}
                 students={filteredStudents()}
