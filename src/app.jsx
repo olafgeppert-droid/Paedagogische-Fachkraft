@@ -81,6 +81,12 @@ const App = () => {
     const [searchResults, setSearchResults] = useState([]);
 
     // =======================
+    // Force-Update für iPad/iOS
+    // =======================
+    const [, forceUpdate] = useState(0);
+    const triggerRender = () => forceUpdate(prev => prev + 1);
+
+    // =======================
     // Einstellungen / Farben anwenden
     // =======================
     const applyCustomColors = useCallback((colors) => {
@@ -143,7 +149,8 @@ const App = () => {
         };
         initDB();
     }, [applySettings]);
-        // =======================
+
+    // =======================
     // Einträge laden
     // =======================
     useEffect(() => {
@@ -256,13 +263,14 @@ const App = () => {
     const handleUndo = async () => { if (db) await undo(db, history, historyIndex, setHistoryIndex, setStudents); };
     const handleRedo = async () => { if (db) await redo(db, history, historyIndex, setHistoryIndex, setStudents); };
 
-    // **Angepasste Versionen – kein Refresh nötig**
+    // **Angepasste Versionen – kein Refresh nötig + Force-Update**
     const handleLoadSampleData = async () => { 
         if (!db) return;
         await loadSampleData(db, setMasterData, setStudents, setEntries);
         setSelectedStudent(null);
         setSelectedDate(new Date().toISOString().split('T')[0]);
         setViewMode('student');
+        triggerRender(); // <-- Force Update hinzugefügt
     };
 
     const handleClearData = async () => {
@@ -271,6 +279,7 @@ const App = () => {
         setSelectedStudent(null);
         setSelectedDate(new Date().toISOString().split('T')[0]);
         setViewMode('student');
+        triggerRender(); // <-- Force Update hinzugefügt
     };
 
     // =======================
