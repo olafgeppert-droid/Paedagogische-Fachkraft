@@ -28,7 +28,7 @@ import {
     filterStudents
 } from './database.js';
 
-// Hilfsfunktion zum Aufhellen von Farben
+// Hilfsfunktionen
 const lightenColor = (color, percent) => {
     const num = parseInt(color.replace('#', ''), 16);
     const amt = Math.round(2.55 * percent);
@@ -43,7 +43,6 @@ const lightenColor = (color, percent) => {
     ).toString(16).slice(1);
 };
 
-// Hilfsfunktion zum Abdunkeln von Farben
 const darkenColor = (color, percent) => {
     const num = parseInt(color.replace('#', ''), 16);
     const amt = Math.round(2.55 * percent);
@@ -76,10 +75,8 @@ const App = () => {
     const [searchModalOpen, setSearchModalOpen] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
 
-    // Funktion zum Anwenden benutzerdefinierter Farben
     const applyCustomColors = useCallback((colors) => {
         const root = document.documentElement;
-        
         root.style.setProperty('--sidebar-bg', colors.navigation || '#fed7aa');
         root.style.setProperty('--primary-color', colors.header || '#dc2626');
         root.style.setProperty('--secondary-color', colors.header ? darkenColor(colors.header, 20) : '#b91c1c');
@@ -87,11 +84,9 @@ const App = () => {
         root.style.setProperty('--background-color', colors.protocol || '#fef7ed');
         root.style.setProperty('--card-bg', colors.protocol ? lightenColor(colors.protocol, 10) : '#ffffff');
         root.style.setProperty('--modal-bg-custom', colors.protocol || '#ffffff');
-        
         document.documentElement.classList.add('custom-colors-applied');
     }, []);
 
-    // Funktion zum Zurücksetzen der benutzerdefinierten Farben
     const resetCustomColors = useCallback(() => {
         const root = document.documentElement;
         root.style.removeProperty('--sidebar-bg');
@@ -101,7 +96,6 @@ const App = () => {
         root.style.removeProperty('--background-color');
         root.style.removeProperty('--card-bg');
         root.style.removeProperty('--modal-bg-custom');
-        
         document.documentElement.classList.remove('custom-colors-applied');
     }, []);
 
@@ -109,12 +103,8 @@ const App = () => {
         document.documentElement.setAttribute('data-theme', settings.theme);
         document.documentElement.style.setProperty('--font-size', `${settings.fontSize}px`);
         document.documentElement.style.setProperty('--input-font-size', `${settings.inputFontSize}px`);
-        
-        if (settings.theme === 'farbig' && settings.customColors) {
-            applyCustomColors(settings.customColors);
-        } else {
-            resetCustomColors();
-        }
+        if (settings.theme === 'farbig' && settings.customColors) applyCustomColors(settings.customColors);
+        else resetCustomColors();
     }, [applyCustomColors, resetCustomColors]);
 
     useEffect(() => {
@@ -125,15 +115,8 @@ const App = () => {
 
                 const settingsData = await database.get('settings', 1);
                 if (settingsData) {
-                    const themeMapping = {
-                        'light': 'hell',
-                        'dark': 'dunkel', 
-                        'colored': 'farbig'
-                    };
-                    const convertedSettings = {
-                        ...settingsData,
-                        theme: themeMapping[settingsData.theme] || 'hell'
-                    };
+                    const themeMapping = { light: 'hell', dark: 'dunkel', colored: 'farbig' };
+                    const convertedSettings = { ...settingsData, theme: themeMapping[settingsData.theme] || 'hell' };
                     setSettings(convertedSettings);
                     applySettings(convertedSettings);
                 }
@@ -155,11 +138,8 @@ const App = () => {
             if (!db) return;
             try {
                 let entriesData = [];
-                if (viewMode === 'student' && selectedStudent) {
-                    entriesData = await getEntriesByStudentId(db, selectedStudent.id);
-                } else if (viewMode === 'day' && selectedDate) {
-                    entriesData = await getEntriesByDate(db, selectedDate);
-                }
+                if (viewMode === 'student' && selectedStudent) entriesData = await getEntriesByStudentId(db, selectedStudent.id);
+                else if (viewMode === 'day' && selectedDate) entriesData = await getEntriesByDate(db, selectedDate);
                 setEntries(entriesData);
             } catch (error) {
                 console.error('Fehler beim Laden der Einträge:', error);
@@ -169,8 +149,7 @@ const App = () => {
     }, [db, selectedStudent, selectedDate, viewMode]);
 
     const filteredStudents = useCallback(() => filterStudents(students, filters), [students, filters]);
-
-    const saveStudentHandler = async (studentData) => {
+        const saveStudentHandler = async (studentData) => {
         if (!db) return;
         try {
             await saveStateForUndo(db, history, historyIndex, setHistory, setHistoryIndex);
@@ -222,16 +201,8 @@ const App = () => {
     const saveSettingsHandler = async (newSettings) => {
         if (!db) return;
         try {
-            const themeMapping = {
-                'hell': 'light',
-                'dunkel': 'dark', 
-                'farbig': 'colored'
-            };
-            const settingsToSave = {
-                ...newSettings,
-                theme: themeMapping[newSettings.theme] || 'light'
-            };
-            
+            const themeMapping = { hell: 'light', dunkel: 'dark', farbig: 'colored' };
+            const settingsToSave = { ...newSettings, theme: themeMapping[newSettings.theme] || 'light' };
             await db.put('settings', { ...settingsToSave, id: 1 });
             setSettings(newSettings);
             applySettings(newSettings);
@@ -251,56 +222,20 @@ const App = () => {
         }
     };
 
-    const handleExport = async () => { 
-        if (db) await exportData(db); 
-    };
+    const handleExport = async () => { if (db) await exportData(db); };
+    const handleImport = async (event) => { if (db) await importData(db, event, setSettings, setMasterData, setStudents, setModal); };
+    const handleUndo = async () => { if (db) await undo(db, history, historyIndex, setHistoryIndex, setStudents); };
+    const handleRedo = async () => { if (db) await redo(db, history, historyIndex, setHistoryIndex, setStudents); };
+    const handleLoadSampleData = async () => { if (db) await loadSampleData(db, setMasterData, setStudents, setEntries); };
+    const handleClearData = async () => { if (db) await clearAllData(db, setStudents, setEntries, setSelectedStudent); };
 
-    const handleImport = async (event) => { 
-        if (db) await importData(db, event, setSettings, setMasterData, setStudents, setModal); 
-    };
-
-    const handleUndo = async () => { 
-        if (db) await undo(db, history, historyIndex, setHistoryIndex, setStudents); 
-    };
-
-    const handleRedo = async () => { 
-        if (db) await redo(db, history, historyIndex, setHistoryIndex, setStudents); 
-    };
-
-    const handleLoadSampleData = async () => { 
-        if (db) await loadSampleData(db, setMasterData, setStudents, setEntries); 
-    };
-
-    const handleClearData = async () => { 
-        if (db) await clearAllData(db, setStudents, setEntries, setSelectedStudent); 
-    };
-
-    const handleShowNewStudent = () => {
-        setSelectedStudent(null);
-        setModal('student');
-    };
-
-    const handleShowNewProtocol = () => {
-        setEditingEntry(null);
-        setModal('entry');
-    };
-
-    const handleEditProtocol = (entry) => {
-        setEditingEntry(entry);
-        setModal('entry');
-    };
+    const handleShowNewStudent = () => { setSelectedStudent(null); setModal('student'); };
+    const handleShowNewProtocol = () => { setEditingEntry(null); setModal('entry'); };
+    const handleEditProtocol = (entry) => { setEditingEntry(entry); setModal('entry'); };
 
     const findEntryToEdit = () => {
-        if (!selectedStudent || !selectedDate || entries.length === 0) {
-            return null;
-        }
-        
-        const entryToEdit = entries.find(entry => 
-            entry.studentId === selectedStudent.id && 
-            entry.date === selectedDate
-        );
-        
-        return entryToEdit || null;
+        if (!selectedStudent || !selectedDate || entries.length === 0) return null;
+        return entries.find(entry => entry.studentId === selectedStudent.id && entry.date === selectedDate) || null;
     };
 
     const handleOpenSearch = () => setSearchModalOpen(true);
@@ -310,19 +245,11 @@ const App = () => {
         if (!db) return;
         const filtered = entries.filter(entry => {
             let match = true;
-            if (criteria.name) {
-                match = match && entry.studentName.toLowerCase().includes(criteria.name.toLowerCase());
-            }
-            if (criteria.subject) {
-                match = match && entry.subject.toLowerCase().includes(criteria.subject.toLowerCase());
-            }
-            if (criteria.rating) {
-                match = match && entry.rating.toLowerCase() === criteria.rating.toLowerCase();
-            }
+            if (criteria.name) match = match && entry.studentName.toLowerCase().includes(criteria.name.toLowerCase());
+            if (criteria.subject) match = match && entry.subject.toLowerCase().includes(criteria.subject.toLowerCase());
+            if (criteria.rating) match = match && entry.rating.toLowerCase() === criteria.rating.toLowerCase();
             if (criteria.general) {
-                const generalMatch = Object.values(entry).some(val =>
-                    String(val).toLowerCase().includes(criteria.general.toLowerCase())
-                );
+                const generalMatch = Object.values(entry).some(val => String(val).toLowerCase().includes(criteria.general.toLowerCase()));
                 match = match && generalMatch;
             }
             return match;
@@ -341,9 +268,9 @@ const App = () => {
                 selectedStudent={selectedStudent}
                 selectedDate={selectedDate}
                 onAddStudent={handleShowNewStudent}
-                onEditStudent={() => setModal('student')}
+                onEditStudent={() => setModal('student')} // Schüler bearbeiten
                 onAddEntry={handleShowNewProtocol}
-                onEditEntry={handleOpenSearch}  // Neuer Button: Protokoll suchen
+                onEditEntry={handleOpenSearch} // Protokoll suchen
                 onPrint={() => window.print()}
                 onExport={handleExport}
                 onImport={handleImport}
@@ -359,79 +286,28 @@ const App = () => {
                 selectedDate={selectedDate}
                 filters={filters}
                 masterData={masterData}
-                onStudentSelect={(student) => { 
-                    setSelectedStudent(student); 
-                    setViewMode('student'); 
-                }}
-                onDateSelect={(date) => { 
-                    setSelectedDate(date); 
-                    setViewMode('day'); 
-                }}
+                onStudentSelect={(student) => { setSelectedStudent(student); setViewMode('student'); }}
+                onDateSelect={(date) => { setSelectedDate(date); setViewMode('day'); }}
                 onFilterChange={setFilters}
                 onShowStats={() => setModal('statistics')}
                 onShowSettings={() => setModal('settings')}
                 onShowHelp={() => setModal('help')}
             />
-            <MainContent 
-                viewMode={viewMode} 
-                selectedStudent={selectedStudent} 
-                selectedDate={selectedDate} 
-                entries={viewMode === 'search' ? searchResults : entries} 
+            <MainContent
+                viewMode={viewMode}
+                selectedStudent={selectedStudent}
+                selectedDate={selectedDate}
+                entries={viewMode === 'search' ? searchResults : entries}
                 onEditEntry={handleEditProtocol}
             />
 
-            {modal === 'student' && (
-                <StudentModal 
-                    student={selectedStudent} 
-                    masterData={masterData} 
-                    onSave={saveStudentHandler} 
-                    onDelete={deleteStudentHandler} 
-                    onClose={() => setModal(null)} 
-                />
-            )}
-            {modal === 'entry' && (
-                <EntryModal 
-                    entry={editingEntry}
-                    student={selectedStudent} 
-                    students={students} 
-                    masterData={masterData} 
-                    onSave={saveEntryHandler} 
-                    onClose={() => {
-                        setModal(null);
-                        setEditingEntry(null);
-                    }} 
-                />
-            )}
-            {modal === 'settings' && (
-                <SettingsModal 
-                    settings={settings} 
-                    masterData={masterData} 
-                    onSave={saveSettingsHandler} 
-                    onSaveMasterData={saveMasterDataHandler} 
-                    onClose={() => setModal(null)} 
-                />
-            )}
-            {modal === 'statistics' && (
-                <StatisticsModal 
-                    students={students} 
-                    entries={entries} 
-                    onClose={() => setModal(null)} 
-                />
-            )}
-            {modal === 'help' && (
-                <HelpModal 
-                    onClose={() => setModal(null)} 
-                />
-            )}
+            {modal === 'student' && <StudentModal student={selectedStudent} masterData={masterData} onSave={saveStudentHandler} onDelete={deleteStudentHandler} onClose={() => setModal(null)} />}
+            {modal === 'entry' && <EntryModal entry={editingEntry} student={selectedStudent} students={students} masterData={masterData} onSave={saveEntryHandler} onClose={() => { setModal(null); setEditingEntry(null); }} />}
+            {modal === 'settings' && <SettingsModal settings={settings} masterData={masterData} onSave={saveSettingsHandler} onSaveMasterData={saveMasterDataHandler} onClose={() => setModal(null)} />}
+            {modal === 'statistics' && <StatisticsModal students={students} entries={entries} onClose={() => setModal(null)} />}
+            {modal === 'help' && <HelpModal onClose={() => setModal(null)} />}
 
-            {searchModalOpen && (
-                <SearchModal 
-                    onClose={handleCloseSearch} 
-                    onSearch={handleSearch} 
-                    masterData={masterData} 
-                    students={students}
-                />
-            )}
+            {searchModalOpen && <SearchModal onClose={handleCloseSearch} onSearch={handleSearch} masterData={masterData} students={students} />}
         </div>
     );
 };
