@@ -255,30 +255,29 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
         }
 
         const sampleEntries = [
-            { studentId: addedStudents[0].id, date: new Date().toISOString().split('T')[0], subject: 'Mathematik', observations: 'Max hat heute sehr gut mitgearbeitet und alle Aufgaben gelöst.', measures: 'Positive Verstärkung durch Lob', erfolg: 'Max war stolz auf seine Leistung und motiviert für weitere Aufgaben.', erfolgRating: 'positiv' },
-            { studentId: addedStudents[1].id, date: new Date().toISOString().split('T')[0], subject: 'Deutsch', observations: 'Anna hatte Schwierigkeiten mit der Rechtschreibung.', measures: 'Individuelle Förderung angeboten', erfolg: 'Anna hat die Hilfe angenommen und Fortschritte gezeigt.', erfolgRating: 'positiv' }
+            { studentId: addedStudents[0].id, date// Fortsetzung von loadSampleData
+: '2025-09-01', activity: 'Mathematik: Addieren und Subtrahieren geübt', notes: 'Hat gut mitgemacht' },
+            { studentId: addedStudents[1].id, date: '2025-09-01', activity: 'Lesen: Kurze Texte verstehen', notes: 'Brauchte Hilfestellung' }
         ];
 
-        for (const entry of sampleEntries) await db.add('entries', entry);
-
-        const sampleMasterData = {
-            schoolYears: ['2025/2026','2026/2027','2027/2028'],
-            schools: {
-                'Ostschule, Grundschule Neustadt an der Weinstraße': ['1a','1b','1c','1d','1e','2a','2b','2c','2d','2e','3a','3b','3c','3d','3e','4a','4b','4c','4d','4e'],
-                'Heinz-Sielmann-Grundschule, Neustadt an der Weinstraße': ['1a','1b','2a','2b','3a','3b','4a','4b']
-            }
-        };
-        await db.put('masterData', { ...sampleMasterData, id: 1 });
-
-        // Flexibel: falls React-State-Setter übergeben oder Save-Funktion
-        if (typeof masterDataHandler === 'function') {
-            masterDataHandler(sampleMasterData);
+        for (const entry of sampleEntries) {
+            await db.add('entries', entry);
         }
 
         const allStudents = await db.getAll('students');
-        if (setStudents) setStudents(allStudents);
         const allEntries = await db.getAll('entries');
-        if (setEntries) setEntries(allEntries);
+        setStudents(allStudents);
+        setEntries(allEntries);
+
+        if (masterDataHandler) {
+            const defaultMasterData = {
+                subjects: ['Mathematik', 'Deutsch', 'Sachkunde', 'Sport'],
+                activities: ['Hausaufgaben', 'Klassenarbeit', 'Projektarbeit'],
+                notesTemplates: ['Gut gemacht', 'Weitere Unterstützung nötig', 'Sehr aufmerksam']
+            };
+            await db.put('masterData', { ...defaultMasterData, id: 1 });
+            masterDataHandler(defaultMasterData);
+        }
 
         alert('Beispieldaten erfolgreich geladen!');
     } catch (error) {
@@ -290,35 +289,25 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
 // =======================
 // Alle Daten löschen
 // =======================
-export const clearAllData = async (db, setStudents, setEntries, setSelectedStudent) => {
+export const clearAllData = async (db, setStudents, setEntries, setSettings, setMasterData) => {
     if (!db) return;
-    //if (!confirm('Sind Sie sicher, dass Sie alle Daten löschen möchten? Dieser Vorgang kann nicht rückgängig gemacht werden.')) return;
-
     try {
-        await db.clear('students');
-        await db.clear('entries');
-        await db.clear('settings');
-        await db.clear('masterData');
+        if (confirm('Möchten Sie wirklich alle Daten löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.')) {
+            const tx = db.transaction(['students','entries','settings','masterData'], 'readwrite');
+            await tx.objectStore('students').clear();
+            await tx.objectStore('entries').clear();
+            await tx.objectStore('settings').clear();
+            await tx.objectStore('masterData').clear();
+            await tx.done;
 
-        if (typeof setStudents === 'function') setStudents([]);
-        if (typeof setEntries === 'function') setEntries([]);
-        if (typeof setSelectedStudent === 'function') setSelectedStudent(null);
-
-        alert('Alle Daten wurden gelöscht!');
+            setStudents([]);
+            setEntries([]);
+            setSettings(null);
+            setMasterData(null);
+            alert('Alle Daten wurden erfolgreich gelöscht.');
+        }
     } catch (error) {
-        console.error('Fehler beim Löschen der Daten:', error);
-        alert('Fehler beim Löschen der Daten: ' + error.message);
+        console.error('Fehler beim Löschen aller Daten:', error);
+        alert('Fehler beim Löschen aller Daten: ' + error.message);
     }
-};
-
-// =======================
-// Filter-Funktion für Navigation
-// =======================
-export const filterStudents = (students, filters) => {
-    return students.filter(s => {
-        return (!filters.search || s.name.toLowerCase().includes(filters.search.toLowerCase())) &&
-               (!filters.schoolYear || s.schoolYear === filters.schoolYear) &&
-               (!filters.school || s.school === filters.school) &&
-               (!filters.className || s.className === filters.className);
-    });
 };
