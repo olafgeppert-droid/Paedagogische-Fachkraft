@@ -276,13 +276,23 @@ const App = () => {
 };
 
     const handleClearData = async () => {
-        if (!db) return;
-        await clearAllData(db, setStudents, setEntries, setSettings, setMasterData);
-        setSelectedStudent(null);
-        setSelectedDate(new Date().toISOString().split('T')[0]);
-        setViewMode('student');
-        triggerRender(); // <-- Force Update hinzugefügt
-    };
+    if (!db) return;
+    await clearAllData(db, setStudents, setEntries, setSettings, setMasterData);
+    setSelectedStudent(null);
+    setSelectedDate(new Date().toISOString().split('T')[0]);
+    setViewMode('student');
+    
+    // Force-Update und Safari-Hack
+    triggerRender();
+    safariRenderHack();
+    
+    // Falls iOS, Seite neu laden
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        setTimeout(() => {
+            window.location.reload();
+        }, 100);
+    }
+};
 
     // =======================
     // Modale & Protokolle
