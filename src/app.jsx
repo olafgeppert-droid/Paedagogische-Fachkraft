@@ -73,6 +73,8 @@ const App = () => {
     const [history, setHistory] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
     const [editingEntry, setEditingEntry] = useState(null);
+    const [searchModalOpen, setSearchModalOpen] = useState(false);
+    const [searchResults, setSearchResults] = useState([]);
 
     // Funktion zum Anwenden benutzerdefinierter Farben
     const applyCustomColors = useCallback((colors) => {
@@ -123,7 +125,6 @@ const App = () => {
 
                 const settingsData = await database.get('settings', 1);
                 if (settingsData) {
-                    // Konvertiere alte Theme-Namen zu neuen
                     const themeMapping = {
                         'light': 'hell',
                         'dark': 'dunkel', 
@@ -168,191 +169,267 @@ const App = () => {
     }, [db, selectedStudent, selectedDate, viewMode]);
 
     const filteredStudents = useCallback(() => filterStudents(students, filters), [students, filters]);
-        const handleAddStudent = async (student) => {
+
+    const saveStudentHandler = async (studentData) => {
+        if (!db) return;
         try {
-            const id = await addStudent(db, student);
-            const newStudent = { ...student, id };
-            setStudents([...students, newStudent]);
+            await saveStateForUndo(db, history, historyIndex, setHistory, setHistoryIndex);
+            if (studentData.id) {
+                await updateStudent(db, studentData);
+                setStudents(students.map(s => s.id === studentData.id ? studentData : s));
+            } else {
+                const newStudent = await addStudent(db, studentData);
+                setStudents([...students, newStudent]);
+            }
+            setModal(null);
         } catch (error) {
-            console.error('Fehler beim Hinzufügen des Schülers:', error);
+            console.error('Fehler beim Speichern des Schülers:', error);
         }
     };
 
-    const handleUpdateStudent = async (student) => {
+    const deleteStudentHandler = async (studentId) => {
+        if (!db) return;
         try {
-            await updateStudent(db, student);
-            setStudents(students.map(s => (s.id === student.id ? student : s)));
-        } catch (error) {
-            console.error('Fehler beim Aktualisieren des Schülers:', error);
-        }
-    };
-
-    const handleDeleteStudent = async (id) => {
-        try {
-            await deleteStudent(db, id);
-            setStudents(students.filter(s => s.id !== id));
-            if (selectedStudent?.id === id) setSelectedStudent(null);
+            await saveStateForUndo(db, history, historyIndex, setHistory, setHistoryIndex);
+            const success = await deleteStudent(db, studentId);
+            if (success) {
+                setStudents(students.filter(s => s.id !== studentId));
+                if (selectedStudent && selectedStudent.id === studentId) setSelectedStudent(null);
+            }
         } catch (error) {
             console.error('Fehler beim Löschen des Schülers:', error);
         }
     };
 
-    const handleAddEntry = async (entry) => {
+    const saveEntryHandler = async (entryData) => {
+        if (!db) return;
         try {
-            const id = await addEntry(db, entry);
-            const newEntry = { ...entry, id };
-            setEntries([...entries, newEntry]);
-        } catch (error) {
-            console.error('Fehler beim Hinzufügen des Eintrags:', error);
-        }
-    };
-
-    const handleUpdateEntry = async (entry) => {
-        try {
-            await updateEntry(db, entry);
-            setEntries(entries.map(e => (e.id === entry.id ? entry : e)));
-        } catch (error) {
-            console.error('Fehler beim Aktualisieren des Eintrags:', error);
-        }
-    };
-
-    const handleUndo = async () => {
-        if (!db) return;
-        const state = await undo(db);
-        if (state) {
-            setStudents(state.students || []);
-            setEntries(state.entries || []);
-        }
-    };
-
-    const handleRedo = async () => {
-        if (!db) return;
-        const state = await redo(db);
-        if (state) {
-            setStudents(state.students || []);
-            setEntries(state.entries || []);
-        }
-    };
-
-    const handleExport = async () => {
-        if (!db) return;
-        const data = await exportData(db);
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'data.json';
-        a.click();
-        URL.revokeObjectURL(url);
-    };
-
-    const handleImport = async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            try {
-                const data = JSON.parse(e.target.result);
-                await importData(db, data);
-                setStudents(await db.getAll('students'));
-                setEntries([]);
-            } catch (error) {
-                console.error('Fehler beim Importieren:', error);
+            await saveStateForUndo(db, history, historyIndex, setHistory, setHistoryIndex);
+            if (entryData.id) {
+                await updateEntry(db, entryData);
+                setEntries(entries.map(e => e.id === entryData.id ? entryData : e));
+            } else {
+                const newEntry = await addEntry(db, entryData);
+                setEntries([...entries, newEntry]);
             }
-        };
-        reader.readAsText(file);
+            setModal(null);
+            setEditingEntry(null);
+        } catch (error) {
+            console.error('Fehler beim Speichern des Eintrags:', error);
+        }
     };
 
-    const handleSearch = (searchCriteria) => {
-        // Hier greifst du später auf DB zu, um nach Kriterien zu suchen
-        console.log("Suche gestartet mit:", searchCriteria);
-        // Beispiel: entries filtern nach Bewertung, Name usw.
+    const saveSettingsHandler = async (newSettings) => {
+        if (!db) return;
+        try {
+            const themeMapping = {
+                'hell': 'light',
+                'dunkel': 'dark', 
+                'farbig': 'colored'
+            };
+            const settingsToSave = {
+                ...newSettings,
+                theme: themeMapping[newSettings.theme] || 'light'
+            };
+            
+            await db.put('settings', { ...settingsToSave, id: 1 });
+            setSettings(newSettings);
+            applySettings(newSettings);
+            setModal(null);
+        } catch (error) {
+            console.error('Fehler beim Speichern der Einstellungen:', error);
+        }
     };
+
+    const saveMasterDataHandler = async (newMasterData) => {
+        if (!db) return;
+        try {
+            await db.put('masterData', { ...newMasterData, id: 1 });
+            setMasterData(newMasterData);
+        } catch (error) {
+            console.error('Fehler beim Speichern der Master-Daten:', error);
+        }
+    };
+
+    const handleExport = async () => { 
+        if (db) await exportData(db); 
+    };
+
+    const handleImport = async (event) => { 
+        if (db) await importData(db, event, setSettings, setMasterData, setStudents, setModal); 
+    };
+
+    const handleUndo = async () => { 
+        if (db) await undo(db, history, historyIndex, setHistoryIndex, setStudents); 
+    };
+
+    const handleRedo = async () => { 
+        if (db) await redo(db, history, historyIndex, setHistoryIndex, setStudents); 
+    };
+
+    const handleLoadSampleData = async () => { 
+        if (db) await loadSampleData(db, setMasterData, setStudents, setEntries); 
+    };
+
+    const handleClearData = async () => { 
+        if (db) await clearAllData(db, setStudents, setEntries, setSelectedStudent); 
+    };
+
+    const handleShowNewStudent = () => {
+        setSelectedStudent(null);
+        setModal('student');
+    };
+
+    const handleShowNewProtocol = () => {
+        setEditingEntry(null);
+        setModal('entry');
+    };
+
+    const handleEditProtocol = (entry) => {
+        setEditingEntry(entry);
+        setModal('entry');
+    };
+
+    const findEntryToEdit = () => {
+        if (!selectedStudent || !selectedDate || entries.length === 0) {
+            return null;
+        }
+        
+        const entryToEdit = entries.find(entry => 
+            entry.studentId === selectedStudent.id && 
+            entry.date === selectedDate
+        );
+        
+        return entryToEdit || null;
+    };
+
+    const handleOpenSearch = () => setSearchModalOpen(true);
+    const handleCloseSearch = () => setSearchModalOpen(false);
+
+    const handleSearch = (criteria) => {
+        if (!db) return;
+        const filtered = entries.filter(entry => {
+            let match = true;
+            if (criteria.name) {
+                match = match && entry.studentName.toLowerCase().includes(criteria.name.toLowerCase());
+            }
+            if (criteria.subject) {
+                match = match && entry.subject.toLowerCase().includes(criteria.subject.toLowerCase());
+            }
+            if (criteria.rating) {
+                match = match && entry.rating.toLowerCase() === criteria.rating.toLowerCase();
+            }
+            if (criteria.general) {
+                const generalMatch = Object.values(entry).some(val =>
+                    String(val).toLowerCase().includes(criteria.general.toLowerCase())
+                );
+                match = match && generalMatch;
+            }
+            return match;
+        });
+        setSearchResults(filtered);
+        setViewMode('search');
+        handleCloseSearch();
+    };
+
+    if (!db) return <div>Datenbank wird initialisiert...</div>;
 
     return (
         <div className="app">
-            <Header />
+            <Header onMenuClick={() => setNavOpen(!navOpen)} />
             <Toolbar
-                onAddStudent={() => setModal('student')}
-                onAddEntry={() => setModal('entry')}
-                onSettings={() => setModal('settings')}
-                onStatistics={() => setModal('statistics')}
-                onHelp={() => setModal('help')}
+                selectedStudent={selectedStudent}
+                selectedDate={selectedDate}
+                onAddStudent={handleShowNewStudent}
+                onEditStudent={() => setModal('student')}
+                onAddEntry={handleShowNewProtocol}
+                onEditEntry={handleOpenSearch}  // Neuer Button: Protokoll suchen
+                onPrint={() => window.print()}
+                onExport={handleExport}
+                onImport={handleImport}
                 onUndo={handleUndo}
                 onRedo={handleRedo}
-                onExport={handleExport}
-                onImport={() => document.getElementById('importFile').click()}
-                onSearch={() => setModal('search')}
+                canUndo={historyIndex > 0}
+                canRedo={historyIndex < history.length - 1}
             />
-            <input
-                type="file"
-                id="importFile"
-                accept="application/json"
-                style={{ display: 'none' }}
-                onChange={handleImport}
+            <Navigation
+                isOpen={navOpen}
+                students={filteredStudents()}
+                selectedStudent={selectedStudent}
+                selectedDate={selectedDate}
+                filters={filters}
+                masterData={masterData}
+                onStudentSelect={(student) => { 
+                    setSelectedStudent(student); 
+                    setViewMode('student'); 
+                }}
+                onDateSelect={(date) => { 
+                    setSelectedDate(date); 
+                    setViewMode('day'); 
+                }}
+                onFilterChange={setFilters}
+                onShowStats={() => setModal('statistics')}
+                onShowSettings={() => setModal('settings')}
+                onShowHelp={() => setModal('help')}
             />
-            <div className="main-container">
-                <Navigation
-                    students={filteredStudents()}
-                    onSelectStudent={setSelectedStudent}
-                    onSelectDate={setSelectedDate}
-                    selectedDate={selectedDate}
-                    selectedStudent={selectedStudent}
-                    viewMode={viewMode}
-                    setViewMode={setViewMode}
-                    filters={filters}
-                    setFilters={setFilters}
-                />
-                <MainContent
-                    students={students}
-                    entries={entries}
-                    selectedStudent={selectedStudent}
-                    selectedDate={selectedDate}
-                    viewMode={viewMode}
-                    onEditEntry={(entry) => { setEditingEntry(entry); setModal('entry'); }}
-                    filters={filters}
-                />
-            </div>
+            <MainContent 
+                viewMode={viewMode} 
+                selectedStudent={selectedStudent} 
+                selectedDate={selectedDate} 
+                entries={viewMode === 'search' ? searchResults : entries} 
+                onEditEntry={handleEditProtocol}
+            />
 
             {modal === 'student' && (
-                <StudentModal
-                    onClose={() => setModal(null)}
-                    onSave={handleAddStudent}
-                    masterData={masterData}
+                <StudentModal 
+                    student={selectedStudent} 
+                    masterData={masterData} 
+                    onSave={saveStudentHandler} 
+                    onDelete={deleteStudentHandler} 
+                    onClose={() => setModal(null)} 
                 />
             )}
             {modal === 'entry' && (
-                <EntryModal
-                    onClose={() => { setModal(null); setEditingEntry(null); }}
-                    onSave={handleAddEntry}
-                    editingEntry={editingEntry}
+                <EntryModal 
+                    entry={editingEntry}
+                    student={selectedStudent} 
+                    students={students} 
+                    masterData={masterData} 
+                    onSave={saveEntryHandler} 
+                    onClose={() => {
+                        setModal(null);
+                        setEditingEntry(null);
+                    }} 
                 />
             )}
             {modal === 'settings' && (
-                <SettingsModal
-                    onClose={() => setModal(null)}
-                    settings={settings}
-                    setSettings={setSettings}
-                    applySettings={applySettings}
-                    masterData={masterData}
-                    setMasterData={setMasterData}
-                    db={db}
+                <SettingsModal 
+                    settings={settings} 
+                    masterData={masterData} 
+                    onSave={saveSettingsHandler} 
+                    onSaveMasterData={saveMasterDataHandler} 
+                    onClose={() => setModal(null)} 
                 />
             )}
             {modal === 'statistics' && (
-                <StatisticsModal
-                    onClose={() => setModal(null)}
-                    students={students}
-                    entries={entries}
+                <StatisticsModal 
+                    students={students} 
+                    entries={entries} 
+                    onClose={() => setModal(null)} 
                 />
             )}
             {modal === 'help' && (
-                <HelpModal onClose={() => setModal(null)} />
+                <HelpModal 
+                    onClose={() => setModal(null)} 
+                />
             )}
-            {modal === 'search' && (
-                <SearchModal
-                    onClose={() => setModal(null)}
-                    onSearch={handleSearch}
+
+            {searchModalOpen && (
+                <SearchModal 
+                    onClose={handleCloseSearch} 
+                    onSearch={handleSearch} 
+                    masterData={masterData} 
+                    students={students}
                 />
             )}
         </div>
