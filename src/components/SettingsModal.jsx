@@ -46,7 +46,7 @@ const SettingsModal = ({ settings, masterData, onSave, onSaveMasterData, onClose
 
     /* --- Stammdaten-Handling --- */
     const addSchoolYear = () => {
-        const newYear = prompt('Neues Schuljahr hinzufügen (Format: YYYY/YYYY):', '2024/2025');
+        const newYear = prompt('Neues Schuljahr hinzufügen (Format: YYYY/YYYY):', '2025/2026');
         if (newYear && !masterFormData.schoolYears.includes(newYear)) {
             setMasterFormData({
                 ...masterFormData,
