@@ -255,17 +255,26 @@ const App = () => {
     const handleImport = async (event) => { if (db) await importData(db, event, setSettings, setMasterData, setStudents, setModal); };
     const handleUndo = async () => { if (db) await undo(db, history, historyIndex, setHistoryIndex, setStudents); };
     const handleRedo = async () => { if (db) await redo(db, history, historyIndex, setHistoryIndex, setStudents); };
+
+    // **Angepasste Versionen – kein Refresh nötig**
     const handleLoadSampleData = async () => { 
-    if (db) {
-        await loadSampleData(db, setMasterData, setStudents, setEntries);
-        window.location.reload(); // Seite neu laden nach dem Laden der Beispieldaten
-    }
-};
+        if (db) {
+            await loadSampleData(db, setMasterData, setStudents, setEntries);
+            // States werden direkt aktualisiert, kein reload nötig
+            setSelectedStudent(null);
+            setSelectedDate(new Date().toISOString().split('T')[0]);
+            setViewMode('student');
+        }
+    };
+
     const handleClearData = async () => {
-    if (!db) return;
-    await clearAllData(db, setStudents, setEntries, setSettings, setMasterData);
-    window.location.reload(); // Seite neu laden
-};
+        if (!db) return;
+        await clearAllData(db, setStudents, setEntries, setSettings, setMasterData);
+        // States zurücksetzen
+        setSelectedStudent(null);
+        setSelectedDate(new Date().toISOString().split('T')[0]);
+        setViewMode('student');
+    };
 
     // =======================
     // Modale & Protokolle
