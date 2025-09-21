@@ -1,5 +1,4 @@
 // src/database.js
-// IDB über das npm-paket importieren (stabiler als window.idb/CDN)
 import { openDB } from 'idb';
 
 // =======================
@@ -245,7 +244,8 @@ export const loadSampleData = async (db, setMasterData, setStudents, setEntries)
         await db.clear('entries');
 
         const sampleStudents = [
-            { name: 'Max Mustermann', schoolYear: '2025/2026', school: 'Ostschule, Grundschule Neustadt an der Weinstraße', className: '1a', gender: 'männlich', nationality: 'Deutschland', germanLevel: 2, notes: 'Sehr aufmerksamer Schüler' },
+            { name: 'Max Mustermann', schoolYear: '2025/2026', school: 'Ostschule, Grundschule Neustadt an der Weinstraße', className: '1a', gender: 'männlich', nationality: 'Deutschland
+                ', germanLevel: 2, notes: 'Sehr aufmerksamer Schüler' },
             { name: 'Anna Beispiel', schoolYear: '2025/2026', school: 'Heinz-Sielmann-Grundschule, Neustadt an der Weinstraße', className: '2b', gender: 'weiblich', nationality: 'Türkei', germanLevel: 1, notes: 'Braucht Unterstützung in Mathematik' }
         ];
 
@@ -280,6 +280,7 @@ export const loadSampleData = async (db, setMasterData, setStudents, setEntries)
         alert('Beispieldaten erfolgreich geladen!');
     } catch (error) {
         console.error('Fehler beim Laden der Beispieldaten:', error);
+        alert('Fehler beim Laden der Beispieldaten: ' + error.message);
     }
 };
 
@@ -295,10 +296,13 @@ export const clearAllData = async (db, setStudents, setEntries, setSelectedStude
         await db.clear('entries');
         setStudents([]);
         setEntries([]);
-        setSelectedStudent(null);
+        if (setSelectedStudent) setSelectedStudent(null);
+        await db.clear('settings');
+        await db.clear('masterData');
         alert('Alle Daten wurden gelöscht!');
     } catch (error) {
         console.error('Fehler beim Löschen der Daten:', error);
+        alert('Fehler beim Löschen der Daten: ' + error.message);
     }
 };
 
