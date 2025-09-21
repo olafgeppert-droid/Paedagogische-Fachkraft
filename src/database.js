@@ -44,7 +44,8 @@ export const updateStudent = (db, studentData) => db.put('students', studentData
 export const deleteStudent = async (db, studentId) => {
     try {
         const tx = db.transaction(['students','entries'], 'readwrite');
-        const index = tx.objectStore('entries').index('studentId');
+        const entryStore = tx.objectStore('entries');
+        const index = entryStore.index('studentId');
         let cursor = await index.openCursor(IDBKeyRange.only(studentId));
         while (cursor) {
             await cursor.delete();
@@ -82,12 +83,12 @@ export const getMasterData = (db) => db.get('masterData', 1);
 export const saveMasterData = (db, masterData) => db.put('masterData', { ...masterData, id: 1 });
 
 // =======================
-// Filter-Funktion (neu hinzugefügt, Build-Fehler behoben)
+// Filter-Funktion (Build-Fehler behoben)
 // =======================
 export const filterStudents = (students, criteria = {}) => {
     return students.filter(s => {
         for (const key in criteria) {
-            if (criteria[key] && s[key] !== criteria[key]) return false;
+            if (criteria[key] && criteria[key] !== '' && String(s[key]) !== String(criteria[key])) return false;
         }
         return true;
     });
