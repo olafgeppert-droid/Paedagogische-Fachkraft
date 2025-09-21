@@ -133,7 +133,7 @@ const SettingsModal = ({
     /* --- Neue Funktionen: Beispieldaten laden und alle Daten löschen --- */
     const handleLoadSampleData = async () => {
         if (!window.confirm(
-            'Wollen Sie wirklich die Beispieldaten laden? Das überschreibt alle Ihre vorhandenen Daten. Speichern Sie Ihre eigenen Daten vorher! Nach dem Löschen laden Sie die Seite im Browser neu.'
+            'Wollen Sie wirklich die Beispieldaten laden? Das überschreibt alle Ihre vorhandenen Daten. Speichern Sie Ihre eigenen Daten vorher!'
         )) return;
 
         try {
