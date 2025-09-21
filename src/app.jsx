@@ -263,34 +263,32 @@ const App = () => {
     const handleUndo = async () => { if (db) await undo(db, history, historyIndex, setHistoryIndex, setStudents); };
     const handleRedo = async () => { if (db) await redo(db, history, historyIndex, setHistoryIndex, setStudents); };
 
-    // **Angepasste Versionen – kein Refresh nötig + Force-Update**
-    const handleLoadSampleData = async () => { 
+    const [contentKey, setContentKey] = useState(0);
+
+const handleLoadSampleData = async () => {
     if (!db) return;
     await loadSampleData(db, setMasterData, setStudents, setEntries);
     setSelectedStudent(null);
     setSelectedDate(new Date().toISOString().split('T')[0]);
     setViewMode('student');
-
-    // Für iPad/Safari erzwingen
-    window.location.reload();
+    setContentKey(prev => prev + 1);
+    safariRenderHack(); // CSS-Hack für Safari
+    // Optional: Nur für iOS Safari neu laden
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent)) {
+        window.location.reload();
+    }
 };
 
-    const handleClearData = async () => {
+const handleClearData = async () => {
     if (!db) return;
     await clearAllData(db, setStudents, setEntries, setSettings, setMasterData);
     setSelectedStudent(null);
     setSelectedDate(new Date().toISOString().split('T')[0]);
     setViewMode('student');
-    
-    // Force-Update und Safari-Hack
-    triggerRender();
-    safariRenderHack();
-    
-    // Falls iOS, Seite neu laden
-    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-        setTimeout(() => {
-            window.location.reload();
-        }, 100);
+    setContentKey(prev => prev + 1);
+    safariRenderHack(); // CSS-Hack für Safari
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent)) {
+        window.location.reload();
     }
 };
 
