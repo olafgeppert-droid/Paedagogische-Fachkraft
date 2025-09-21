@@ -245,8 +245,8 @@ export const loadSampleData = async (db, setMasterData, setStudents, setEntries)
         await db.clear('entries');
 
         const sampleStudents = [
-            { name: 'Max Mustermann', schoolYear: '2023/2024', school: 'Grundschule Musterstadt', className: '3a', gender: 'männlich', nationality: 'deutsch', germanLevel: 2, notes: 'Sehr aufmerksamer Schüler' },
-            { name: 'Anna Beispiel', schoolYear: '2023/2024', school: 'Grundschule Musterstadt', className: '3b', gender: 'weiblich', nationality: 'deutsch', germanLevel: 1, notes: 'Braucht Unterstützung in Mathematik' }
+            { name: 'Max Mustermann', schoolYear: '2025/2026', school: 'Ostschule, Grundschule Neustadt an der Weinstraße', className: '1a', gender: 'männlich', nationality: 'Deutschland', germanLevel: 2, notes: 'Sehr aufmerksamer Schüler' },
+            { name: 'Anna Beispiel', schoolYear: '2025/2026', school: 'Heinz-Sielmann-Grundschule, Neustadt an der Weinstraße', className: '2b', gender: 'weiblich', nationality: 'Türkei', germanLevel: 1, notes: 'Braucht Unterstützung in Mathematik' }
         ];
 
         const addedStudents = [];
@@ -263,10 +263,10 @@ export const loadSampleData = async (db, setMasterData, setStudents, setEntries)
         for (const entry of sampleEntries) await db.add('entries', entry);
 
         const sampleMasterData = {
-            schoolYears: ['2022/2023','2023/2024','2024/2025'],
+            schoolYears: ['2025/2026','2026/2027','2027/2028'],
             schools: {
-                'Grundschule Musterstadt': ['1a','1b','2a','2b','3a','3b','4a','4b'],
-                'Mittelschule Beispieldorf': ['5a','5b','6a','6b','7a','7b','8a','8b','9a','9b']
+                'Ostschule, Grundschule Neustadt an der Weinstraße': ['1a','1b','1c','1d','1e','2a','2b','2c','2d','2e','3a','3b','3c','3d','3e','4a','4b','4c','4d','4e'],
+                'Heinz-Sielmann-Grundschule, Neustadt an der Weinstraße': ['1a','1b','2a','2b','3a','3b','4a','4b']
             }
         };
         await db.put('masterData', { ...sampleMasterData, id: 1 });
