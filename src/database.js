@@ -297,11 +297,13 @@ export const clearAllData = async (db, setStudents, setEntries, setSelectedStude
     try {
         await db.clear('students');
         await db.clear('entries');
-        setStudents([]);
-        setEntries([]);
-        if (setSelectedStudent) setSelectedStudent(null);
         await db.clear('settings');
         await db.clear('masterData');
+
+        if (typeof setStudents === 'function') setStudents([]);
+        if (typeof setEntries === 'function') setEntries([]);
+        if (typeof setSelectedStudent === 'function') setSelectedStudent(null);
+
         alert('Alle Daten wurden gelöscht!');
     } catch (error) {
         console.error('Fehler beim Löschen der Daten:', error);
