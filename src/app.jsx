@@ -25,10 +25,13 @@ import {
     redo,
     loadSampleData,
     clearAllData,
+    // Wichtig: filterStudents existiert jetzt in database.js
     filterStudents
 } from './database.js';
 
-// Hilfsfunktionen
+// =======================
+// Hilfsfunktionen für Farben
+// =======================
 const lightenColor = (color, percent) => {
     const num = parseInt(color.replace('#', ''), 16);
     const amt = Math.round(2.55 * percent);
@@ -57,6 +60,9 @@ const darkenColor = (color, percent) => {
     ).toString(16).slice(1);
 };
 
+// =======================
+// Hauptkomponente App
+// =======================
 const App = () => {
     const [db, setDb] = useState(null);
     const [students, setStudents] = useState([]);
@@ -75,6 +81,9 @@ const App = () => {
     const [searchModalOpen, setSearchModalOpen] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
 
+    // =======================
+    // Einstellungen / Farben anwenden
+    // =======================
     const applyCustomColors = useCallback((colors) => {
         const root = document.documentElement;
         root.style.setProperty('--sidebar-bg', colors.navigation || '#fed7aa');
@@ -107,6 +116,9 @@ const App = () => {
         else resetCustomColors();
     }, [applyCustomColors, resetCustomColors]);
 
+    // =======================
+    // DB Initialisierung
+    // =======================
     useEffect(() => {
         const initDB = async () => {
             try {
@@ -133,6 +145,9 @@ const App = () => {
         initDB();
     }, [applySettings]);
 
+    // =======================
+    // Einträge laden
+    // =======================
     useEffect(() => {
         const loadEntries = async () => {
             if (!db) return;
@@ -148,8 +163,14 @@ const App = () => {
         loadEntries();
     }, [db, selectedStudent, selectedDate, viewMode]);
 
+    // =======================
+    // Filter & Suche
+    // =======================
     const filteredStudents = useCallback(() => filterStudents(students, filters), [students, filters]);
-        const saveStudentHandler = async (studentData) => {
+        // =======================
+    // Schüler-Handler
+    // =======================
+    const saveStudentHandler = async (studentData) => {
         if (!db) return;
         try {
             await saveStateForUndo(db, history, historyIndex, setHistory, setHistoryIndex);
@@ -180,6 +201,9 @@ const App = () => {
         }
     };
 
+    // =======================
+    // Eintrag-Handler
+    // =======================
     const saveEntryHandler = async (entryData) => {
         if (!db) return;
         try {
@@ -198,6 +222,9 @@ const App = () => {
         }
     };
 
+    // =======================
+    // Einstellungen & MasterData
+    // =======================
     const saveSettingsHandler = async (newSettings) => {
         if (!db) return;
         try {
@@ -222,6 +249,9 @@ const App = () => {
         }
     };
 
+    // =======================
+    // Undo/Redo, Import/Export, Beispieldaten, Löschen
+    // =======================
     const handleExport = async () => { if (db) await exportData(db); };
     const handleImport = async (event) => { if (db) await importData(db, event, setSettings, setMasterData, setStudents, setModal); };
     const handleUndo = async () => { if (db) await undo(db, history, historyIndex, setHistoryIndex, setStudents); };
@@ -229,6 +259,9 @@ const App = () => {
     const handleLoadSampleData = async () => { if (db) await loadSampleData(db, setMasterData, setStudents, setEntries); };
     const handleClearData = async () => { if (db) await clearAllData(db, setStudents, setEntries, setSelectedStudent); };
 
+    // =======================
+    // Modale & Protokolle
+    // =======================
     const handleShowNewStudent = () => { setSelectedStudent(null); setModal('student'); };
     const handleShowNewProtocol = () => { setEditingEntry(null); setModal('entry'); };
     const handleEditProtocol = (entry) => { setEditingEntry(entry); setModal('entry'); };
@@ -238,6 +271,9 @@ const App = () => {
         return entries.find(entry => entry.studentId === selectedStudent.id && entry.date === selectedDate) || null;
     };
 
+    // =======================
+    // Suche
+    // =======================
     const handleOpenSearch = () => setSearchModalOpen(true);
     const handleCloseSearch = () => setSearchModalOpen(false);
 
@@ -261,24 +297,27 @@ const App = () => {
 
     if (!db) return <div>Datenbank wird initialisiert...</div>;
 
+    // =======================
+    // JSX Return
+    // =======================
     return (
         <div className="app">
             <Header onMenuClick={() => setNavOpen(!navOpen)} />
             <Toolbar
-    selectedStudent={selectedStudent}
-    selectedDate={selectedDate}
-    onAddStudent={handleShowNewStudent}
-    onEditStudent={() => setModal('student')}
-    onAddEntry={handleShowNewProtocol}
-    onSearchProtocol={handleOpenSearch} // <--- neu hinzufügen
-    onPrint={() => window.print()}
-    onExport={handleExport}
-    onImport={handleImport}
-    onUndo={handleUndo}
-    onRedo={handleRedo}
-    canUndo={historyIndex > 0}
-    canRedo={historyIndex < history.length - 1}
-/>
+                selectedStudent={selectedStudent}
+                selectedDate={selectedDate}
+                onAddStudent={handleShowNewStudent}
+                onEditStudent={() => setModal('student')}
+                onAddEntry={handleShowNewProtocol}
+                onSearchProtocol={handleOpenSearch}
+                onPrint={() => window.print()}
+                onExport={handleExport}
+                onImport={handleImport}
+                onUndo={handleUndo}
+                onRedo={handleRedo}
+                canUndo={historyIndex > 0}
+                canRedo={historyIndex < history.length - 1}
+            />
             <Navigation
                 isOpen={navOpen}
                 students={filteredStudents()}
