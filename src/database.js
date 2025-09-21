@@ -95,7 +95,7 @@ export const filterStudents = (students, criteria = {}) => {
 };
 
 // =======================
-// Undo/Redo-Funktionen
+// Undo/Redo-Funktionen inkl. Protokolle
 // =======================
 export const saveStateForUndo = async (db, history, historyIndex, setHistory, setHistoryIndex) => {
     try {
@@ -105,7 +105,7 @@ export const saveStateForUndo = async (db, history, historyIndex, setHistory, se
             db.get('settings', 1),
             db.get('masterData', 1)
         ]);
-        const currentState = { students, entries, settings, masterData, timestamp: new Date().toISOString() };
+        const currentState = { students, entries, protocols: entries.filter(e => e.thema), settings, masterData, timestamp: new Date().toISOString() };
         const newHistory = history.slice(0, historyIndex + 1);
         newHistory.push(currentState);
         if (newHistory.length > 50) newHistory.shift();
@@ -117,40 +117,44 @@ export const saveStateForUndo = async (db, history, historyIndex, setHistory, se
     }
 };
 
-export const undo = async (db, history, historyIndex, setHistoryIndex, setStudents) => {
+export const undo = async (db, history, historyIndex, setHistoryIndex, setStudents, setEntries, setProtocols, setSettings, setMasterData) => {
     if (historyIndex <= 0 || !db) return;
     try {
         const prevState = history[historyIndex - 1];
         const tx = db.transaction(['students','entries','settings','masterData'], 'readwrite');
         await tx.objectStore('students').clear();
         await tx.objectStore('entries').clear();
-        for (const s of prevState.students) await tx.objectStore('students').add(s);
-        for (const e of prevState.entries) await tx.objectStore('entries').add(e);
-        if (prevState.settings) await tx.objectStore('settings').put(prevState.settings);
-        if (prevState.masterData) await tx.objectStore('masterData').put(prevState.masterData);
+        for (const s of prevState.students) await tx.objectStore('students').put(s);
+        for (const e of prevState.entries) await tx.objectStore('entries').put(e);
         await tx.done;
 
         if (setStudents) setStudents(await db.getAll('students'));
+        if (setEntries) setEntries(await db.getAll('entries'));
+        if (setProtocols) setProtocols(prevState.protocols || []);
+        if (setSettings) setSettings(prevState.settings || {});
+        if (setMasterData) setMasterData(prevState.masterData || {});
         setHistoryIndex(historyIndex - 1);
     } catch (err) {
         console.error('Fehler beim Undo:', err);
     }
 };
 
-export const redo = async (db, history, historyIndex, setHistoryIndex, setStudents) => {
+export const redo = async (db, history, historyIndex, setHistoryIndex, setStudents, setEntries, setProtocols, setSettings, setMasterData) => {
     if (historyIndex >= history.length - 1 || !db) return;
     try {
         const nextState = history[historyIndex + 1];
         const tx = db.transaction(['students','entries','settings','masterData'], 'readwrite');
         await tx.objectStore('students').clear();
         await tx.objectStore('entries').clear();
-        for (const s of nextState.students) await tx.objectStore('students').add(s);
-        for (const e of nextState.entries) await tx.objectStore('entries').add(e);
-        if (nextState.settings) await tx.objectStore('settings').put(nextState.settings);
-        if (nextState.masterData) await tx.objectStore('masterData').put(nextState.masterData);
+        for (const s of nextState.students) await tx.objectStore('students').put(s);
+        for (const e of nextState.entries) await tx.objectStore('entries').put(e);
         await tx.done;
 
         if (setStudents) setStudents(await db.getAll('students'));
+        if (setEntries) setEntries(await db.getAll('entries'));
+        if (setProtocols) setProtocols(nextState.protocols || []);
+        if (setSettings) setSettings(nextState.settings || {});
+        if (setMasterData) setMasterData(nextState.masterData || {});
         setHistoryIndex(historyIndex + 1);
     } catch (err) {
         console.error('Fehler beim Redo:', err);
@@ -190,8 +194,8 @@ export const importData = async (db, event, setSettings, setMasterData, setStude
             const tx = db.transaction(['students','entries','settings','masterData'], 'readwrite');
             await tx.objectStore('students').clear();
             await tx.objectStore('entries').clear();
-            for (const s of data.students) await tx.objectStore('students').add(s);
-            for (const e of data.entries) await tx.objectStore('entries').add(e);
+            for (const s of data.students) await tx.objectStore('students').put(s);
+            for (const e of data.entries) await tx.objectStore('entries').put(e);
             if (data.settings) await tx.objectStore('settings').put(data.settings);
             if (data.masterData) await tx.objectStore('masterData').put(data.masterData);
             await tx.done;
@@ -212,42 +216,30 @@ export const importData = async (db, event, setSettings, setMasterData, setStude
 // =======================
 // Beispieldaten mit Protokollen
 // =======================
-export const loadSampleData = async (db, masterDataHandler, setStudents, setEntries) => {
+export const loadSampleData = async (db, masterDataHandler, setStudents, setEntries, setProtocols) => {
     if (!db) return;
     try {
         const tx = db.transaction(['students','entries','masterData'], 'readwrite');
         await tx.objectStore('students').clear();
         await tx.objectStore('entries').clear();
 
-        // Schüler-Daten
         const sampleStudents = [
             { id: 1, name: 'Kevin Mustermann', schoolYear: '2025/2026', school: 'Ostschule, Grundschule Neustadt', className: '1a', gender: 'männlich', nationality: 'Deutschland', germanLevel: 2, notes: 'Sehr aufmerksamer Schüler' },
             { id: 2, name: 'Anna Beispiel', schoolYear: '2025/2026', school: 'Heinz-Sielmann-Grundschule, Neustadt', className: '2b', gender: 'weiblich', nationality: 'Türkei', germanLevel: 1, notes: 'Braucht Unterstützung in Mathematik' },
             { id: 3, name: 'Lukas Schmidt', schoolYear: '2025/2026', school: 'Ostschule, Grundschule Neustadt', className: '1b', gender: 'männlich', nationality: 'Deutschland', germanLevel: 3, notes: 'Sehr sozial' }
         ];
+        for (const student of sampleStudents) await tx.objectStore('students').put(student);
 
-        for (const student of sampleStudents) {
-            await tx.objectStore('students').put(student);
-        }
-
-        // Einträge & Protokolle
         const sampleEntries = [
-            // normale Einträge
             { id: 1, studentId: 1, date: '2025-09-01', activity: 'Mathematik: Addieren und Subtrahieren geübt', notes: 'Hat gut mitgemacht' },
             { id: 2, studentId: 2, date: '2025-09-01', activity: 'Lesen: Kurze Texte verstehen', notes: 'Brauchte Hilfestellung' },
             { id: 3, studentId: 3, date: '2025-09-02', activity: 'Sachkunde: Pflanzen und Tiere', notes: 'Sehr interessiert' },
-
-            // Protokolle
             { id: 4, studentId: 1, date: '2025-09-03', thema: 'Konflikt im Pausenhof', beobachtung: 'Schüler geriet in Streit', maßnahme: 'Konfliktgespräch mit Lehrkraft', erfolg: 'Schüler beruhigt', bewertung: 'positiv' },
             { id: 5, studentId: 2, date: '2025-09-04', thema: 'Mathematikverständnis', beobachtung: 'Schwierigkeiten beim Einmaleins', maßnahme: 'Einzelübungen mit Lehrkraft', erfolg: 'Leichte Verbesserung', bewertung: 'neutral' },
             { id: 6, studentId: 3, date: '2025-09-05', thema: 'Soziales Verhalten', beobachtung: 'Teilt Spielmaterial gut', maßnahme: 'Lob und Anerkennung', erfolg: 'Motivation gestärkt', bewertung: 'sehr positiv' }
         ];
+        for (const entry of sampleEntries) await tx.objectStore('entries').put(entry);
 
-        for (const entry of sampleEntries) {
-            await tx.objectStore('entries').put(entry);
-        }
-
-        // MasterData
         const defaultMasterData = {
             subjects: ['Mathematik', 'Deutsch', 'Sachkunde', 'Sport'],
             activities: ['Hausaufgaben', 'Klassenarbeit', 'Projektarbeit', 'Freiarbeit'],
@@ -259,6 +251,7 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
 
         if (setStudents) setStudents(await db.getAll('students'));
         if (setEntries) setEntries(await db.getAll('entries'));
+        if (setProtocols) setProtocols(sampleEntries.filter(e => e.thema));
         if (masterDataHandler) masterDataHandler(defaultMasterData);
     } catch (err) {
         console.error('Fehler beim Laden der Beispieldaten:', err);
@@ -282,7 +275,7 @@ export const clearAllData = async (db, setStudents, setEntries, setSettings, set
         if (setStudents) setStudents([]);
         if (setEntries) setEntries([]);
         if (setSettings) setSettings({ theme: 'hell', fontSize: 16, inputFontSize: 16, customColors: {} });
-        if (setMasterData) setMasterData({ subjects: [], activities: [], notesTemplates: [] });
+        if (setMasterData) setMasterData({ subjects: [], activities: [], notesTemplates: [], protocolTemplates: [] });
     } catch (err) {
         console.error('Fehler beim Löschen aller Daten:', err);
         alert('Fehler beim Löschen aller Daten: ' + err.message);
