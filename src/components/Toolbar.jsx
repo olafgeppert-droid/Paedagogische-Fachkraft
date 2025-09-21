@@ -4,8 +4,9 @@ const Toolbar = ({
     selectedStudent, 
     selectedDate, 
     onAddStudent, 
-    onEditStudent,  // jetzt öffnet das SearchModal
+    onEditStudent,      // Schüler bearbeiten
     onAddEntry, 
+    onSearchProtocol,   // Protokoll suchen
     onPrint,
     onExport,
     onImport,
@@ -29,6 +30,15 @@ const Toolbar = ({
                 <button
                     className="button"
                     onClick={onEditStudent}
+                    title="Ausgewählten Schüler bearbeiten"
+                    disabled={!selectedStudent}
+                >
+                    ✏️ Schüler bearbeiten
+                </button>
+                
+                <button
+                    className="button"
+                    onClick={onSearchProtocol}
                     title="Protokoll suchen"
                     disabled={!selectedStudent && !selectedDate}
                 >
