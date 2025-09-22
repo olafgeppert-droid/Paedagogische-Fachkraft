@@ -280,8 +280,7 @@ export const clearAllData = async (db, setStudents, setEntries, setSettings, set
         await tx.done;
 
         if (setStudents) setStudents([]);
-        if (setEntries) setEntries([]);
-        if (setSettings) setSettings({ theme: 'hell', fontSize: 16, inputFontSize: 16, customColors: {} });
+        if (setEntries) setEntries([]);        
         if (setMasterData) setMasterData({ subjects: [], activities: [], notesTemplates: [] });
     } catch (err) {
         console.error('Fehler beim Löschen aller Daten:', err);
