@@ -20,6 +20,10 @@ const SearchModal = ({ onClose, onSearch }) => {
                     <button onClick={onClose} style={closeButtonStyle}>×</button>
                 </header>
 
+                <p style={hintStyle}>
+                    Für exakte Suche setzen Sie den Suchbegriff in Anführungszeichen, z. B. „Mathematik: Addieren“ findet nur Einträge mit exakt diesem Eintrag.
+                </p>
+
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div style={formGroupStyle}>
                         <label htmlFor="searchType">Suchkriterium:</label>
@@ -100,5 +104,6 @@ const inputStyle = { padding: '0.5rem', fontSize: '1rem', borderRadius: '6px', b
 const selectStyle = { padding: '0.5rem', fontSize: '1rem', borderRadius: '6px', border: '1px solid #ccc' };
 const buttonSecondaryStyle = { padding: '0.5rem 1rem', background: '#ccc', borderRadius: '6px', border: 'none', cursor: 'pointer' };
 const buttonSuccessStyle = { padding: '0.5rem 1rem', background: '#4caf50', color: '#fff', borderRadius: '6px', border: 'none', cursor: 'pointer' };
+const hintStyle = { fontSize: '0.875rem', color: '#555', marginBottom: '0.5rem' };
 
 export default SearchModal;
