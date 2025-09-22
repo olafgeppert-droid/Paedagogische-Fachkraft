@@ -39,7 +39,7 @@ const EntryModal = ({ entry, student, students, masterData, onSave, onClose }) =
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Kind *</label>
+                        <label className="form-label">Schüler *</label>
                         <select
                             className="form-select"
                             value={formData.studentId}
