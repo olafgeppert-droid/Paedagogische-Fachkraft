@@ -13,25 +13,22 @@ import SearchModal from './components/SearchModal.jsx';
 import {
     setupDB,
     getEntriesByStudentId,
-    getEntriesByDate,
     addStudent,
     updateStudent,
     deleteStudent,
     addEntry,
     updateEntry,
-    saveStateForUndo,
     exportData,
     importData,
     undo,
     redo,
     loadSampleData,
     clearAllData,
-    filterStudents,
     getStudents
 } from './database.js';
 
 // =======================
-// Hilfsfunktionen für Farben
+// Farb-Hilfsfunktionen
 // =======================
 const lightenColor = (color, percent) => {
     const num = parseInt(color.replace('#', ''), 16);
@@ -41,9 +38,9 @@ const lightenColor = (color, percent) => {
     const B = (num & 0x0000FF) + amt;
     return '#' + (
         0x1000000 +
-        (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
-        (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
-        (B < 255 ? B < 1 ? 0 : B : 255)
+        (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+        (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+        (B < 255 ? (B < 1 ? 0 : B) : 255)
     ).toString(16).slice(1);
 };
 
@@ -71,23 +68,19 @@ const App = () => {
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [viewMode, setViewMode] = useState('student');
-    const [filters, setFilters] = useState({ search: '', schoolYear: '', school: '', className: '' });
     const [settings, setSettings] = useState({ theme: 'hell', fontSize: 16, inputFontSize: 16, customColors: {} });
     const [masterData, setMasterData] = useState({ schoolYears: [], schools: {}, subjects: [], activities: [], notesTemplates: [] });
     const [modal, setModal] = useState(null);
     const [navOpen, setNavOpen] = useState(false);
-    const [history, setHistory] = useState([]);
-    const [historyIndex, setHistoryIndex] = useState(-1);
     const [editingEntry, setEditingEntry] = useState(null);
     const [searchModalOpen, setSearchModalOpen] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
-    const [appState, setAppState] = useState('database');
 
     const [, forceUpdate] = useState(0);
     const triggerRender = () => forceUpdate(prev => prev + 1);
 
     // =======================
-    // Einstellungen / Farben anwenden
+    // Farb- und Theme-Einstellungen
     // =======================
     const applyCustomColors = useCallback((colors) => {
         const root = document.documentElement;
@@ -154,95 +147,14 @@ const App = () => {
                     }));
                     setEntries(entriesWithNames || []);
                 }
-
             } catch (error) {
-                console.error('Datenbank-Initialisierungsfehler:', error);
+                console.error('DB-Initialisierung fehlgeschlagen:', error);
             }
         };
         initDB();
     }, [applySettings]);
 
     // =======================
-    // Suche Modal Funktionen
-    // =======================
-    const handleOpenSearch = () => setSearchModalOpen(true);
-    const handleCloseSearch = () => setSearchModalOpen(false);
-
-    const handleSearch = async (criteria) => {
-        if (!db) return;
-        if (!criteria) return;
-
-        let searchTerm = '';
-        let searchType = 'all';
-        if (typeof criteria === 'string') {
-            searchTerm = criteria.trim();
-        } else {
-            searchTerm = (criteria.value ?? '').toString().trim();
-            searchType = (criteria.type ?? 'all').toLowerCase();
-        }
-
-        const isExact = /^".*"$/.test(searchTerm);
-        if (isExact) searchTerm = searchTerm.slice(1, -1).toLowerCase();
-        else searchTerm = searchTerm.toLowerCase();
-
-        try {
-            const allEntries = await db.getAll('entries');
-            let results = allEntries.filter(e => {
-                // KONSISTENTE FELDNAMEN - nur 'topic' und 'bewertung' verwenden
-                const topicField = (e.topic || e.activity || '').toString().toLowerCase();
-                const ratingField = (e.bewertung || '').toString().toLowerCase().trim();
-
-                switch (searchType) {
-                    case 'topic':
-                    case 'thema':
-                        return isExact ? topicField === searchTerm : topicField.includes(searchTerm);
-                    
-                    case 'rating':
-                    case 'bewertung':
-                        // Vereinfachte Suche: nur drei Zustände + leer
-                        if (searchTerm === '' || searchTerm === 'leer') {
-                            return ratingField === '';
-                        }
-                        return ratingField === searchTerm;
-                    
-                    case 'name':
-                        const studentForNameSearch = students.find(s => s.id === e.studentId);
-                        return studentForNameSearch && studentForNameSearch.name.toLowerCase().includes(searchTerm);
-                    
-                    case 'all':
-                    default:
-                        const searchableFields = [
-                            e.topic, e.activity, e.bewertung, e.notes, 
-                            e.thema // Rückwärtskompatibilität
-                        ].filter(field => field != null).map(field => field.toString().toLowerCase());
-                        
-                        const studentForAllSearch = students.find(s => s.id === e.studentId);
-                        if (studentForAllSearch && studentForAllSearch.name.toLowerCase().includes(searchTerm)) {
-                            return true;
-                        }
-                        
-                        return searchableFields.some(fieldValue => 
-                            isExact ? fieldValue === searchTerm : fieldValue.includes(searchTerm)
-                        );
-                }
-            });
-
-            results = results.map(e => ({
-                ...e,
-                studentName: students.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}`
-            }));
-
-            setSearchResults(results);
-            setViewMode('search');
-            setSearchModalOpen(false);
-        } catch (err) {
-            console.error('Fehler bei der Suche:', err);
-            setSearchResults([]);
-            setViewMode('search');
-            setSearchModalOpen(false);
-        }
-    };
-        // =======================
     // Einträge laden
     // =======================
     const loadEntries = useCallback(async () => {
@@ -262,7 +174,7 @@ const App = () => {
     useEffect(() => { loadEntries(); }, [loadEntries]);
 
     // =======================
-    // Studentenfunktionen
+    // Studenten-Funktionen
     // =======================
     const handleAddStudent = async (student) => {
         if (!db) return;
@@ -272,9 +184,7 @@ const App = () => {
             setStudents(updatedStudents);
             const newStudent = updatedStudents.find(s => s.id === id);
             setSelectedStudent(newStudent);
-        } catch (err) {
-            console.error('Fehler beim Hinzufügen eines Studenten:', err);
-        }
+        } catch (err) { console.error(err); }
     };
 
     const handleUpdateStudent = async (student) => {
@@ -285,9 +195,7 @@ const App = () => {
             setStudents(updatedStudents);
             const updatedStudent = updatedStudents.find(s => s.id === student.id);
             setSelectedStudent(updatedStudent);
-        } catch (err) {
-            console.error('Fehler beim Aktualisieren eines Studenten:', err);
-        }
+        } catch (err) { console.error(err); }
     };
 
     const handleDeleteStudent = async (id) => {
@@ -296,28 +204,20 @@ const App = () => {
             await deleteStudent(db, id);
             const updatedStudents = await getStudents(db);
             setStudents(updatedStudents);
-            if (updatedStudents.length > 0) {
-                setSelectedStudent(updatedStudents[0]);
-            } else {
-                setSelectedStudent(null);
-                setEntries([]);
-            }
-        } catch (err) {
-            console.error('Fehler beim Löschen eines Studenten:', err);
-        }
+            setSelectedStudent(updatedStudents.length > 0 ? updatedStudents[0] : null);
+            if (updatedStudents.length === 0) setEntries([]);
+        } catch (err) { console.error(err); }
     };
 
     // =======================
-    // Eintragsfunktionen
+    // Eintrags-Funktionen
     // =======================
     const handleAddEntry = async (entry) => {
         if (!db || !selectedStudent) return;
         try {
             await addEntry(db, { ...entry, studentId: selectedStudent.id, date: selectedDate });
             await loadEntries();
-        } catch (err) {
-            console.error('Fehler beim Hinzufügen eines Eintrags:', err);
-        }
+        } catch (err) { console.error(err); }
     };
 
     const handleUpdateEntry = async (entry) => {
@@ -325,73 +225,35 @@ const App = () => {
         try {
             await updateEntry(db, entry);
             await loadEntries();
-        } catch (err) {
-            console.error('Fehler beim Aktualisieren eines Eintrags:', err);
-        }
+        } catch (err) { console.error(err); }
     };
 
     // =======================
-    // Toolbar Aktionen
+    // Toolbar-Aktionen
     // =======================
-    const handleExport = async () => {
-        if (!db) return;
-        try {
-            await exportData(db);
-        } catch (err) {
-            console.error('Fehler beim Export:', err);
-        }
-    };
-
+    const handleExport = async () => { if (db) try { await exportData(db); } catch (err) { console.error(err); } };
     const handleImport = async (file) => {
         if (!db) return;
         try {
             await importData(db, file);
             const updatedStudents = await getStudents(db);
             setStudents(updatedStudents);
-            if (updatedStudents.length > 0) {
-                setSelectedStudent(updatedStudents[0]);
-            }
+            setSelectedStudent(updatedStudents.length > 0 ? updatedStudents[0] : null);
             await loadEntries();
-        } catch (err) {
-            console.error('Fehler beim Import:', err);
-        }
+        } catch (err) { console.error(err); }
     };
-
-    const handleUndo = async () => {
-        if (!db) return;
-        try {
-            await undo(db);
-            await loadEntries();
-        } catch (err) {
-            console.error('Fehler bei Rückgängig:', err);
-        }
-    };
-
-    const handleRedo = async () => {
-        if (!db) return;
-        try {
-            await redo(db);
-            await loadEntries();
-        } catch (err) {
-            console.error('Fehler bei Wiederholen:', err);
-        }
-    };
-
+    const handleUndo = async () => { if (db) try { await undo(db); await loadEntries(); } catch (err) { console.error(err); } };
+    const handleRedo = async () => { if (db) try { await redo(db); await loadEntries(); } catch (err) { console.error(err); } };
     const handleLoadSampleData = async () => {
         if (!db) return;
         try {
             await loadSampleData(db);
             const updatedStudents = await getStudents(db);
             setStudents(updatedStudents);
-            if (updatedStudents.length > 0) {
-                setSelectedStudent(updatedStudents[0]);
-            }
+            setSelectedStudent(updatedStudents.length > 0 ? updatedStudents[0] : null);
             await loadEntries();
-        } catch (err) {
-            console.error('Fehler beim Laden der Beispieldaten:', err);
-        }
+        } catch (err) { console.error(err); }
     };
-
     const handleClearAllData = async () => {
         if (!db) return;
         if (!window.confirm("⚠️ Alle Daten wirklich löschen?")) return;
@@ -400,9 +262,54 @@ const App = () => {
             setStudents([]);
             setEntries([]);
             setSelectedStudent(null);
-        } catch (err) {
-            console.error('Fehler beim Löschen aller Daten:', err);
-        }
+        } catch (err) { console.error(err); }
+    };
+
+    // =======================
+    // Search Modal
+    // =======================
+    const handleOpenSearch = () => setSearchModalOpen(true);
+    const handleCloseSearch = () => setSearchModalOpen(false);
+    const handleSearch = async (criteria) => {
+        if (!db || !criteria) return;
+        let searchTerm = '';
+        let searchType = 'all';
+        if (typeof criteria === 'string') searchTerm = criteria.trim();
+        else { searchTerm = (criteria.value ?? '').toString().trim(); searchType = (criteria.type ?? 'all').toLowerCase(); }
+
+        const isExact = /^".*"$/.test(searchTerm);
+        if (isExact) searchTerm = searchTerm.slice(1, -1).toLowerCase();
+        else searchTerm = searchTerm.toLowerCase();
+
+        try {
+            const allEntries = await db.getAll('entries');
+            let results = allEntries.filter(e => {
+                const topicField = (e.topic || e.activity || '').toString().toLowerCase();
+                const ratingField = (e.bewertung || '').toString().toLowerCase().trim();
+                const studentForAllSearch = students.find(s => s.id === e.studentId);
+
+                switch (searchType) {
+                    case 'topic':
+                    case 'thema':
+                        return isExact ? topicField === searchTerm : topicField.includes(searchTerm);
+                    case 'rating':
+                    case 'bewertung':
+                        return searchTerm === '' || searchTerm === 'leer' ? ratingField === '' : ratingField === searchTerm;
+                    case 'name':
+                        return studentForAllSearch && studentForAllSearch.name.toLowerCase().includes(searchTerm);
+                    case 'all':
+                    default:
+                        const searchableFields = [e.topic, e.activity, e.bewertung, e.notes, e.thema].filter(f => f != null).map(f => f.toString().toLowerCase());
+                        if (studentForAllSearch && studentForAllSearch.name.toLowerCase().includes(searchTerm)) return true;
+                        return searchableFields.some(f => isExact ? f === searchTerm : f.includes(searchTerm));
+                }
+            });
+
+            results = results.map(e => ({ ...e, studentName: students.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}` }));
+            setSearchResults(results);
+            setViewMode('search');
+            setSearchModalOpen(false);
+        } catch (err) { console.error(err); setSearchResults([]); setViewMode('search'); setSearchModalOpen(false); }
     };
 
     // =======================
@@ -411,7 +318,6 @@ const App = () => {
     return (
         <div className="app-container">
             <Header onMenuClick={() => setNavOpen(!navOpen)} />
-
             <Toolbar
                 onAddStudent={() => setModal('add-student')}
                 onAddEntry={() => setModal('add-entry')}
@@ -426,7 +332,6 @@ const App = () => {
                 onStatistics={() => setModal('statistics')}
                 onHelp={() => setModal('help')}
             />
-
             <div className="main-layout">
                 <Navigation
                     students={students}
@@ -435,7 +340,6 @@ const App = () => {
                     open={navOpen}
                     onClose={() => setNavOpen(false)}
                 />
-
                 <MainContent
                     viewMode={viewMode}
                     selectedStudent={selectedStudent}
@@ -446,62 +350,13 @@ const App = () => {
                 />
             </div>
 
-            {/* Modals */}
-            {modal === 'add-student' && (
-                <StudentModal
-                    onClose={() => setModal(null)}
-                    onSave={handleAddStudent}
-                    masterData={masterData}
-                />
-            )}
-            {modal === 'add-entry' && selectedStudent && (
-                <EntryModal
-                    onClose={() => setModal(null)}
-                    onSave={handleAddEntry}
-                    masterData={masterData}
-                    student={selectedStudent}
-                    date={selectedDate}
-                />
-            )}
-            {modal === 'edit-entry' && editingEntry && (
-                <EntryModal
-                    onClose={() => { setEditingEntry(null); setModal(null); }}
-                    onSave={handleUpdateEntry}
-                    masterData={masterData}
-                    student={selectedStudent}
-                    date={selectedDate}
-                    existingEntry={editingEntry}
-                />
-            )}
-            {modal === 'settings' && (
-                <SettingsModal
-                    onClose={() => setModal(null)}
-                    onSave={(newSettings) => {
-                        setSettings(newSettings);
-                        applySettings(newSettings);
-                        db.put('settings', newSettings, 1);
-                        setModal(null);
-                    }}
-                    settings={settings}
-                />
-            )}
-            {modal === 'statistics' && (
-                <StatisticsModal
-                    onClose={() => setModal(null)}
-                    students={students}
-                    entries={entries}
-                />
-            )}
-            {modal === 'help' && (
-                <HelpModal onClose={() => setModal(null)} />
-            )}
-
-            {searchModalOpen && (
-                <SearchModal
-                    onClose={handleCloseSearch}
-                    onSearch={handleSearch}
-                />
-            )}
+            {modal === 'add-student' && <StudentModal onClose={() => setModal(null)} onSave={handleAddStudent} masterData={masterData} />}
+            {modal === 'add-entry' && selectedStudent && <EntryModal onClose={() => setModal(null)} onSave={handleAddEntry} masterData={masterData} student={selectedStudent} date={selectedDate} />}
+            {modal === 'edit-entry' && editingEntry && <EntryModal onClose={() => { setEditingEntry(null); setModal(null); }} onSave={handleUpdateEntry} masterData={masterData} student={selectedStudent} date={selectedDate} existingEntry={editingEntry} />}
+            {modal === 'settings' && <SettingsModal onClose={() => setModal(null)} onSave={(newSettings) => { setSettings(newSettings); applySettings(newSettings); db.put('settings', newSettings, 1); setModal(null); }} settings={settings} />}
+            {modal === 'statistics' && <StatisticsModal onClose={() => setModal(null)} students={students} entries={entries} />}
+            {modal === 'help' && <HelpModal onClose={() => setModal(null)} />}
+            {searchModalOpen && <SearchModal onClose={handleCloseSearch} onSearch={handleSearch} />}
         </div>
     );
 };
