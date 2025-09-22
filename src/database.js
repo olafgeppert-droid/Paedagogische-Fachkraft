@@ -31,6 +31,16 @@ export const setupDB = async () => {
 // =======================
 // Schüler-Funktionen
 // =======================
+export const getStudents = async (db) => {
+    if (!db) return [];
+    try {
+        return await db.getAll('students');
+    } catch (err) {
+        console.error('Fehler beim Abrufen der Schüler:', err);
+        return [];
+    }
+};
+
 export const getEntriesByStudentId = (db, studentId) => db.getAllFromIndex('entries', 'studentId', studentId);
 export const getEntriesByDate = (db, date) => db.getAllFromIndex('entries', 'date', date);
 
@@ -61,27 +71,15 @@ export const deleteStudent = async (db, studentId) => {
 };
 
 // =======================
-// Studenten abrufen
-// =======================
-export const getStudents = async (db) => {
-    if (!db) return [];
-    try {
-        return await db.getAll('students');
-    } catch (err) {
-        console.error('Fehler beim Abrufen der Schüler:', err);
-        return [];
-    }
-};
-// =======================
 // Eintrag-Funktionen
 // =======================
 export const addEntry = async (db, entryData) => {
     const id = await db.add('entries', entryData);
     return { ...entryData, id };
 };
+
 export const updateEntry = (db, entryData) => db.put('entries', entryData);
 export const deleteEntry = (db, entryId) => db.delete('entries', entryId);
-
 // =======================
 // Einstellungen-Funktionen
 // =======================
@@ -129,7 +127,7 @@ export const saveStateForUndo = async (db, history, historyIndex, setHistory, se
     }
 };
 
-export const undo = async (db, history, historyIndex, setHistoryIndex, setStudents) => {
+export const undo = async (db, history, historyIndex, setHistoryIndex, setStudents, setEntries) => {
     if (historyIndex <= 0 || !db) return;
     try {
         const prevState = history[historyIndex - 1];
@@ -143,13 +141,14 @@ export const undo = async (db, history, historyIndex, setHistoryIndex, setStuden
         await tx.done;
 
         if (setStudents) setStudents(await db.getAll('students'));
+        if (setEntries) setEntries(await db.getAll('entries'));
         setHistoryIndex(historyIndex - 1);
     } catch (err) {
         console.error('Fehler beim Undo:', err);
     }
 };
 
-export const redo = async (db, history, historyIndex, setHistoryIndex, setStudents) => {
+export const redo = async (db, history, historyIndex, setHistoryIndex, setStudents, setEntries) => {
     if (historyIndex >= history.length - 1 || !db) return;
     try {
         const nextState = history[historyIndex + 1];
@@ -163,6 +162,7 @@ export const redo = async (db, history, historyIndex, setHistoryIndex, setStuden
         await tx.done;
 
         if (setStudents) setStudents(await db.getAll('students'));
+        if (setEntries) setEntries(await db.getAll('entries'));
         setHistoryIndex(historyIndex + 1);
     } catch (err) {
         console.error('Fehler beim Redo:', err);
@@ -191,7 +191,7 @@ export const exportData = async (db) => {
     }
 };
 
-export const importData = async (db, event, setSettings, setMasterData, setStudents, setModal) => {
+export const importData = async (db, event, setSettings, setMasterData, setStudents, setModal, setEntries) => {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -211,6 +211,7 @@ export const importData = async (db, event, setSettings, setMasterData, setStude
             if (setSettings && data.settings) setSettings(data.settings);
             if (setMasterData && data.masterData) setMasterData(data.masterData);
             if (setStudents) setStudents(await db.getAll('students'));
+            if (setEntries) setEntries(await db.getAll('entries'));
             if (setModal) setModal(null);
             alert('Daten erfolgreich importiert!');
         } catch (err) {
@@ -220,7 +221,6 @@ export const importData = async (db, event, setSettings, setMasterData, setStude
     };
     reader.readAsText(file);
 };
-
 // =======================
 // Beispieldaten mit Protokollen
 // =======================
@@ -231,6 +231,7 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
         await tx.objectStore('students').clear();
         await tx.objectStore('entries').clear();
 
+        // Schüler-Daten
         const sampleStudents = [
             { id: 1, name: 'Kevin Mustermann', schoolYear: '2025/2026', school: 'Ostschule, Grundschule Neustadt', className: '1a', gender: 'männlich', nationality: 'Deutschland', germanLevel: 2, notes: 'Sehr aufmerksamer Schüler' },
             { id: 2, name: 'Anna Beispiel', schoolYear: '2025/2026', school: 'Heinz-Sielmann-Grundschule, Neustadt', className: '2b', gender: 'weiblich', nationality: 'Türkei', germanLevel: 1, notes: 'Braucht Unterstützung in Mathematik' },
@@ -241,6 +242,7 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
             await tx.objectStore('students').put(student);
         }
 
+        // Einträge & Protokolle
         const sampleEntries = [
             { id: 1, studentId: 1, date: '2025-09-01', activity: 'Mathematik: Addieren und Subtrahieren geübt', notes: 'Hat gut mitgemacht' },
             { id: 2, studentId: 2, date: '2025-09-01', activity: 'Lesen: Kurze Texte verstehen', notes: 'Brauchte Hilfestellung' },
@@ -254,6 +256,7 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
             await tx.objectStore('entries').put(entry);
         }
 
+        // MasterData
         const defaultMasterData = {
             subjects: ['Mathematik', 'Deutsch', 'Sachkunde', 'Sport'],
             activities: ['Hausaufgaben', 'Klassenarbeit', 'Projektarbeit', 'Freiarbeit'],
@@ -288,10 +291,9 @@ export const clearAllData = async (db, setStudents, setEntries, setSettings, set
         if (setStudents) setStudents([]);
         if (setEntries) setEntries([]);
         if (setSettings) setSettings({ theme: 'hell', fontSize: 16, inputFontSize: 16, customColors: {} });
-        if (setMasterData) setMasterData({ subjects: [], activities: [], notesTemplates: [] });
+        if (setMasterData) setMasterData({ subjects: [], activities: [], notesTemplates: [], protocolTemplates: [] });
     } catch (err) {
         console.error('Fehler beim Löschen aller Daten:', err);
         alert('Fehler beim Löschen aller Daten: ' + err.message);
     }
 };
-
