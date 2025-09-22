@@ -199,26 +199,17 @@ const App = () => {
                     
                     case 'rating':
                     case 'bewertung':
-                        if (searchTerm === 'leer' || searchTerm === 'empty') 
+                        // Vereinfachte Suche: nur die drei zulässigen Zustände
+                        if (searchTerm === '') {
+                            // Suche nach leerer Bewertung
                             return ratingField === '';
-                        
-                        if (searchTerm === 'positiv') {
-                            // Positive Bewertungen erkennen
-                            const positiveTerms = ['sehr gut', 'gut', 'positiv', 'erfolg', 'gut gemacht', 'exzellent', 'hervorragend', 'ausgezeichnet'];
-                            return positiveTerms.some(term => ratingField.includes(term));
                         }
-                        
-                        if (searchTerm === 'negativ') {
-                            // Negative Bewertungen erkennen
-                            const negativeTerms = ['schlecht', 'negativ', 'schwierig', 'probleme', 'hilfe', 'schwach', 'verbesserung', 'unzufrieden'];
-                            return negativeTerms.some(term => ratingField.includes(term));
-                        }
-                        
-                        return isExact ? ratingField === searchTerm : ratingField.includes(searchTerm);
+                        // Exakte Suche nach "positiv" oder "negativ"
+                        return ratingField === searchTerm;
                     
                     case 'name':
-                        const studentForName = students.find(s => s.id === e.studentId);
-                        return studentForName && studentForName.name.toLowerCase().includes(searchTerm);
+                        const studentForNameSearch = students.find(s => s.id === e.studentId);
+                        return studentForNameSearch && studentForNameSearch.name.toLowerCase().includes(searchTerm);
                     
                     case 'all':
                     default:
@@ -227,8 +218,8 @@ const App = () => {
                             e.thema // Für Rückwärtskompatibilität
                         ].filter(field => field != null).map(field => field.toString().toLowerCase());
                         
-                        const studentForSearch = students.find(s => s.id === e.studentId);
-                        if (studentForSearch && studentForSearch.name.toLowerCase().includes(searchTerm)) {
+                        const studentForAllSearch = students.find(s => s.id === e.studentId);
+                        if (studentForAllSearch && studentForAllSearch.name.toLowerCase().includes(searchTerm)) {
                             return true;
                         }
                         
