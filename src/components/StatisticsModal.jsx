@@ -13,13 +13,13 @@ const StatisticsModal = ({ students, entries, onClose }) => {
                 
                 <div>
                     <h3>Übersicht</h3>
-                    <p><strong>Gesamtzahl Kinder:</strong> {stats.totalStudents}</p>
+                    <p><strong>Gesamtzahl Schüler:</strong> {stats.totalStudents}</p>
                     <p><strong>Gesamtzahl Einträge:</strong> {stats.totalEntries}</p>
-                    <p><strong>Durchschnittliche Einträge pro Kind:</strong> {stats.totalStudents > 0 ? (stats.totalEntries / stats.totalStudents).toFixed(1) : 0}</p>
+                    <p><strong>Durchschnittliche Einträge pro Schüler:</strong> {stats.totalStudents > 0 ? (stats.totalEntries / stats.totalStudents).toFixed(1) : 0}</p>
                     
-                    <h3>Einträge nach Kindern</h3>
-                    <p><strong>Kinder mit Einträgen:</strong> {stats.studentsWithEntries}</p>
-                    <p><strong>Kinder ohne Einträge:</strong> {stats.studentsWithoutEntries}</p>
+                    <h3>Einträge nach Schülern</h3>
+                    <p><strong>Schüler mit Einträgen:</strong> {stats.studentsWithEntries}</p>
+                    <p><strong>Schüler ohne Einträge:</strong> {stats.studentsWithoutEntries}</p>
                     
                     <h3>Bewertungen</h3>
                     <p><strong>Positive Bewertungen:</strong> {stats.ratings.positiv}</p>
