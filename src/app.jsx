@@ -169,60 +169,82 @@ const App = () => {
     const handleCloseSearch = () => setSearchModalOpen(false);
 
     const handleSearch = async (criteria) => {
-        if (!db) return;
-        if (!criteria) return;
+    if (!db) return;
+    if (!criteria) return;
 
-        let searchTerm = '';
-        let searchType = 'all';
-        if (typeof criteria === 'string') searchTerm = criteria.trim();
-        else {
-            searchTerm = (criteria.value ?? '').toString().trim();
-            searchType = (criteria.type ?? 'all').toLowerCase();
-        }
+    let searchTerm = '';
+    let searchType = 'all';
+    
+    if (typeof criteria === 'string') {
+        searchTerm = criteria.trim();
+    } else {
+        searchTerm = (criteria.value ?? '').toString().trim();
+        searchType = (criteria.type ?? 'all').toLowerCase();
+    }
 
-        const isExact = /^".*"$/.test(searchTerm);
-        if (isExact) searchTerm = searchTerm.slice(1, -1).toLowerCase();
-        else searchTerm = searchTerm.toLowerCase();
+    const isExact = /^".*"$/.test(searchTerm);
+    if (isExact) searchTerm = searchTerm.slice(1, -1).toLowerCase();
+    else searchTerm = searchTerm.toLowerCase();
 
-        try {
-            const allEntries = await db.getAll('entries');
-            let results = allEntries.filter(e => {
-                const topicField = (e.topic ?? e.thema ?? e.activity ?? '').toString().toLowerCase();
-                const ratingField = (e.bewertung ?? '').toString().toLowerCase().trim();
+    try {
+        const allEntries = await db.getAll('entries');
+        let results = allEntries.filter(e => {
+            // KONSISTENTE FELDNAMEN - nur 'topic' und 'bewertung' verwenden
+            const topicField = (e.topic || e.activity || '').toString().toLowerCase();
+            const ratingField = (e.bewertung || '').toString().toLowerCase().trim();
 
-                switch (searchType) {
-                    case 'topic':
-                    case 'thema':
-                        return isExact ? topicField === searchTerm : topicField.includes(searchTerm);
-                    case 'rating':
-                    case 'bewertung':
-                        if (searchTerm === 'leer' || searchTerm === 'empty') return ratingField === '';
-                        return ratingField === searchTerm;
-                    case 'name':
-                        const student = students.find(s => s.id === e.studentId);
-                        return student && student.name.toLowerCase().includes(searchTerm);
-                    case 'all':
-                    default:
-                        return Object.values(e).some(val => val && val.toString().toLowerCase().includes(searchTerm));
-                }
-            });
+            switch (searchType) {
+                case 'topic':
+                case 'thema':
+                    return isExact ? topicField === searchTerm : topicField.includes(searchTerm);
+                
+                case 'rating':
+                case 'bewertung':
+                    if (searchTerm === 'leer' || searchTerm === 'empty') 
+                        return ratingField === '';
+                    
+                    if (searchTerm === 'positiv') {
+                        // Positive Bewertungen erkennen
+                        const positiveTerms = ['sehr gut', 'gut', 'positiv', 'erfolg', 'gut gemacht'];
+                        return positiveTerms.some(term => ratingField.includes(term));
+                    }
+                    
+                    if (searchTerm === 'negativ') {
+                        // Negative Bewertungen erkennen
+                        const negativeTerms = ['schlecht', 'negativ', 'schwierig', 'probleme', 'hilfe'];
+                        return negativeTerms.some(term => ratingField.includes(term));
+                    }
+                    
+                    return ratingField.includes(searchTerm);
+                
+                case 'name':
+                    const student = students.find(s => s.id === e.studentId);
+                    return student && student.name.toLowerCase().includes(searchTerm);
+                
+                case 'all':
+                default:
+                    return Object.values(e).some(val => 
+                        val && val.toString().toLowerCase().includes(searchTerm)
+                    );
+            }
+        });
 
-            results = results.map(e => ({
-                ...e,
-                studentName: students.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}`
-            }));
+        results = results.map(e => ({
+            ...e,
+            studentName: students.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}`
+        }));
 
-            setSearchResults(results);
-            setViewMode('search');
-            setSearchModalOpen(false);
-        } catch (err) {
-            console.error('Fehler bei der Suche:', err);
-            setSearchResults([]);
-            setViewMode('search');
-            setSearchModalOpen(false);
-        }
-    };
-    // src/app.jsx (Teil 2 von 2)
+        setSearchResults(results);
+        setViewMode('search');
+        setSearchModalOpen(false);
+    } catch (err) {
+        console.error('Fehler bei der Suche:', err);
+        setSearchResults([]);
+        setViewMode('search');
+        setSearchModalOpen(false);
+    }
+};
+
 // =======================
 // Einträge laden bei Änderung
 // =======================
