@@ -318,65 +318,81 @@ const App = () => {
     const handleCloseSearch = () => setSearchModalOpen(false);
 
     const handleSearch = async (criteria) => {
-        if (!db) return;
-        let type = '';
-        let value = '';
-        if (!criteria) return;
-        if (typeof criteria === 'string') {
-            type = 'all';
-            value = criteria;
-        } else {
-            type = criteria.type || criteria.searchType || (criteria.term ? 'all' : '');
-            value = (criteria.value ?? criteria.term ?? criteria.general ?? criteria.name ?? criteria.subject ?? criteria.rating ?? '').toString();
-        }
-        type = (type || 'all').toLowerCase();
-        const q = value.trim().toLowerCase();
+    if (!db) return;
 
-        try {
-            const allEntries = await db.getAll('entries');
-            let results = [];
+    let type = '';
+    let value = '';
+    if (!criteria) return;
 
-            if (type === 'all' || type === 'general') {
-                results = allEntries.filter(e =>
-                    Object.values(e).some(val => val && String(val).toLowerCase().includes(q))
+    if (typeof criteria === 'string') {
+        type = 'all';
+        value = criteria;
+    } else {
+        type = (criteria.type || criteria.searchType || (criteria.term ? 'all' : '')).toLowerCase();
+        value = (criteria.value ?? criteria.term ?? criteria.general ?? criteria.name ?? criteria.subject ?? criteria.rating ?? '').toString().trim().toLowerCase();
+    }
+
+    try {
+        const allEntries = await db.getAll('entries');
+        let results = [];
+
+        switch (type) {
+            case 'all':
+            case 'general':
+                if (!value) results = allEntries;
+                else results = allEntries.filter(e =>
+                    Object.values(e).some(val => val && String(val).toLowerCase().includes(value))
                 );
-            } else if (type === 'name') {
+                break;
+
+            case 'name':
                 results = allEntries.filter(e => {
                     const student = students.find(s => s.id === e.studentId);
-                    return student && student.name && student.name.toLowerCase().includes(q);
+                    return student && student.name?.toLowerCase().includes(value);
                 });
-            } else if (type === 'topic' || type === 'thema') {
+                break;
+
+            case 'topic':
+            case 'thema':
                 results = allEntries.filter(e => {
-                    const topicField = e.thema ?? e.topic ?? e.activity ?? '';
-                    return topicField.toString().toLowerCase().includes(q);
+                    const topicField = (e.topic ?? e.thema ?? e.activity ?? '').toString().toLowerCase();
+                    return topicField.includes(value);
                 });
-            } else if (type === 'rating' || type === 'bewertung') {
+                break;
+
+            case 'rating':
+            case 'bewertung':
                 results = allEntries.filter(e => {
-                    if (!q || q === 'leer' || q === 'empty') return !e.bewertung || String(e.bewertung).trim() === '';
-                    return (e.bewertung || '').toString().toLowerCase() === q;
+                    const ratingField = (e.bewertung ?? '').toString().toLowerCase().trim();
+                    if (value === 'leer' || value === 'empty') return ratingField === '';
+                    return ratingField === value;
                 });
-            } else {
+                break;
+
+            default:
                 results = allEntries.filter(e =>
-                    Object.values(e).some(val => String(val || '').toLowerCase().includes(q))
+                    Object.values(e).some(val => String(val ?? '').toLowerCase().includes(value))
                 );
-            }
-
-            // Schülername hinzufügen
-            results = results.map(e => ({
-                ...e,
-                studentName: students.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}`
-            }));
-
-            setSearchResults(results || []);
-            setViewMode('search');
-            setSearchModalOpen(false);
-        } catch (err) {
-            console.error('Fehler bei der Suche:', err);
-            setSearchResults([]);
-            setViewMode('search');
-            setSearchModalOpen(false);
+                break;
         }
-    };
+
+        // Schülername hinzufügen
+        results = results.map(e => ({
+            ...e,
+            studentName: students.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}`
+        }));
+
+        setSearchResults(results || []);
+        setViewMode('search');
+        setSearchModalOpen(false);
+
+    } catch (err) {
+        console.error('Fehler bei der Suche:', err);
+        setSearchResults([]);
+        setViewMode('search');
+        setSearchModalOpen(false);
+    }
+};
 
     if (!db) return <div>Datenbank wird initialisiert...</div>;
 
