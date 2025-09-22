@@ -1,5 +1,7 @@
 import React from 'react';
-import { version } from '../package.json'; // Version aus package.json importieren
+import { appVersion } from '../version.js';
+<div className="header-version">Version {appVersion}</div>
+
 
 const Header = ({ onMenuClick }) => {
   const currentDate = new Date().toLocaleDateString('de-DE', {
