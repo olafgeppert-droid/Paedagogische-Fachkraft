@@ -321,7 +321,7 @@ const SettingsModal = ({
                             {/* Modal Actions */}
                             <div className="modal-actions">
                                 <button type="button" className="button button-secondary" onClick={resetToDefault}>
-                                    🔄 Standard
+                                    🔄 Standardeinstellungen
                                 </button>
                                 <div className="action-group">
                                     <button type="button" className="button button-outline" onClick={onClose}>
