@@ -33,10 +33,6 @@ export const setupDB = async () => {
 // =======================
 export const getEntriesByStudentId = (db, studentId) => db.getAllFromIndex('entries', 'studentId', studentId);
 export const getEntriesByDate = (db, date) => db.getAllFromIndex('entries', 'date', date);
-
-// ✅ wieder hinzugefügt:
-export const getStudents = (db) => db.getAll('students');
-
 export const addStudent = async (db, studentData) => {
     const id = await db.add('students', studentData);
     return { ...studentData, id };
