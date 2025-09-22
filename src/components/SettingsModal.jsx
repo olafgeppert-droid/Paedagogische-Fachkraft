@@ -10,7 +10,7 @@ const SettingsModal = ({
     setStudents,
     setEntries,
     setSelectedStudent,
-  setSettings
+    setSettings
 }) => {
     // =======================
     // Form-State
@@ -49,16 +49,14 @@ const SettingsModal = ({
 
     const handleMasterDataSubmit = (e) => {
         e.preventDefault();
-        // Nur Stammdaten-Teile überschreiben
         if (onSaveMasterData) {
-            onSaveMasterData(prev => ({
-                ...prev,
+            onSaveMasterData({
                 schoolYears: masterFormData.schoolYears,
                 schools: masterFormData.schools,
                 subjects: masterFormData.subjects,
                 activities: masterFormData.activities,
                 notesTemplates: masterFormData.notesTemplates
-            }));
+            });
         }
         setShowMasterDataModal(false);
     };
@@ -156,7 +154,6 @@ const SettingsModal = ({
             }
         }));
     };
-
     // =======================
     // Beispieldaten & Alle Daten löschen
     // =======================
@@ -169,7 +166,6 @@ const SettingsModal = ({
             const db = await setupDB();
 
             await loadSampleData(db, (data) => {
-                // masterData aus DB + vorhandene schoolYears/Schulen
                 onSaveMasterData({
                     ...data,
                     schoolYears: masterFormData.schoolYears,
@@ -177,7 +173,6 @@ const SettingsModal = ({
                 });
             }, setStudents, setEntries);
 
-            // Sicherheitsupdate Parent-States
             const allStudents = await db.getAll('students');
             if (setStudents) setStudents(allStudents);
 
@@ -198,15 +193,13 @@ const SettingsModal = ({
         try {
             const db = await setupDB();
             await clearAllData(db, setStudents, setEntries, setSettings, () => {
-                onSaveMasterData({ schoolYears: [], schools: [], subjects: [], activities: [], notesTemplates: [] });
+                onSaveMasterData({ schoolYears: [], schools: {}, subjects: [], activities: [], notesTemplates: [] });
             });
 
-            // Sicherheitsupdate Parent-States
             if (setStudents) setStudents([]);
             if (setEntries) setEntries([]);
-            if (setSelectedStudent,
-  setSettings) setSelectedStudent,
-  setSettings(null);
+            if (setSelectedStudent) setSelectedStudent(null);
+            if (setSettings) setSettings(null);
 
             onClose();
         } catch (error) {
@@ -214,7 +207,8 @@ const SettingsModal = ({
             alert('Fehler beim Löschen aller Daten: ' + (error.message || error));
         }
     };
-        // =======================
+
+    // =======================
     // JSX Return
     // =======================
     return (
@@ -229,31 +223,29 @@ const SettingsModal = ({
 
                     <div className="modal-content">
                         <form onSubmit={handleSubmit}>
-                            {/* Theme Section */}
+                            {/* Farbschema & Schriftgrößen */}
                             <div className="settings-section">
                                 <h3>🎨 Farbschema</h3>
-                                <div className="form-group">
-                                    <div className="theme-grid">
-                                        {['hell','dunkel','farbig'].map(theme => (
-                                            <div
-                                                key={theme}
-                                                className={`theme-card ${formData.theme === theme ? 'active' : ''}`}
-                                                onClick={() => setFormData({ ...formData, theme })}
-                                            >
-                                                <div className={`theme-preview ${theme}-theme-preview`}>
-                                                    <div className="preview-header"></div>
-                                                    <div className="preview-toolbar"></div>
-                                                    <div className="preview-content"></div>
-                                                </div>
-                                                <div className="theme-info">
-                                                    <span className="radio-checkmark">
-                                                        {theme === 'hell' ? '☀️' : theme === 'dunkel' ? '🌙' : '🌈'}
-                                                    </span>
-                                                    <span>{theme === 'hell' ? 'Standard (Hell)' : theme === 'dunkel' ? 'Dunkel' : 'Farbig'}</span>
-                                                </div>
+                                <div className="theme-grid">
+                                    {['hell','dunkel','farbig'].map(theme => (
+                                        <div
+                                            key={theme}
+                                            className={`theme-card ${formData.theme === theme ? 'active' : ''}`}
+                                            onClick={() => setFormData({ ...formData, theme })}
+                                        >
+                                            <div className={`theme-preview ${theme}-theme-preview`}>
+                                                <div className="preview-header"></div>
+                                                <div className="preview-toolbar"></div>
+                                                <div className="preview-content"></div>
                                             </div>
-                                        ))}
-                                    </div>
+                                            <div className="theme-info">
+                                                <span className="radio-checkmark">
+                                                    {theme === 'hell' ? '☀️' : theme === 'dunkel' ? '🌙' : '🌈'}
+                                                </span>
+                                                <span>{theme === 'hell' ? 'Standard (Hell)' : theme === 'dunkel' ? 'Dunkel' : 'Farbig'}</span>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
 
                                 {formData.theme === 'farbig' && (
@@ -285,7 +277,6 @@ const SettingsModal = ({
                                 )}
                             </div>
 
-                            {/* Schriftgrößen Section */}
                             <div className="settings-section">
                                 <h3>📝 Schriftgrößen</h3>
                                 <div className="slider-group">
@@ -306,31 +297,17 @@ const SettingsModal = ({
                                                 onChange={(e) => setFormData(prev => ({ ...prev, [slider.key]: parseInt(e.target.value) }))}
                                                 className="slider"
                                             />
-                                            <div className="slider-scale">
-                                                <span style={{fontSize: '12px'}}>A</span>
-                                                <span style={{fontSize: '16px'}}>A</span>
-                                                <span style={{fontSize: '20px'}}>A</span>
-                                                <span style={{fontSize: '24px'}}>A</span>
-                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
-                            {/* Stammdaten Section */}
+                            {/* Stammdaten */}
                             <div className="settings-section">
                                 <h3>📊 Stammdaten</h3>
-                                <div className="master-data-card">
-                                    <p>Verwalten Sie Schuljahre, Schulen und Klassen</p>
-                                    <button
-                                        type="button"
-                                        className="button button-primary"
-                                        onClick={() => setShowMasterDataModal(true)}
-                                    >
-                                        📋 Stammdaten verwalten
-                                    </button>
-                                </div>
-
+                                <button type="button" className="button button-primary" onClick={() => setShowMasterDataModal(true)}>
+                                    📋 Stammdaten verwalten
+                                </button>
                                 <div className="settings-action-buttons" style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
                                     <button type="button" className="button button-warning" onClick={handleLoadSampleData}>
                                         📂 Beispieldaten laden
@@ -343,11 +320,7 @@ const SettingsModal = ({
 
                             {/* Modal Actions */}
                             <div className="modal-actions">
-                                <button
-                                    type="button"
-                                    className="button button-secondary button-back-to-main"
-                                    onClick={resetToDefault}
-                                >
+                                <button type="button" className="button button-secondary" onClick={resetToDefault}>
                                     🔄 Standard
                                 </button>
                                 <div className="action-group">
@@ -372,94 +345,48 @@ const SettingsModal = ({
                             <h2>📊 Stammdaten verwalten</h2>
                             <button className="modal-close" onClick={() => setShowMasterDataModal(false)} aria-label="Schließen">✖️</button>
                         </div>
-
                         <div className="modal-content">
                             <form onSubmit={handleMasterDataSubmit}>
-                                {/* Schuljahre Section */}
+                                {/* Schuljahre */}
                                 <div className="data-section">
                                     <h3>📅 Schuljahre</h3>
-                                    <p className="section-description">Z.B. 2025/2026</p>
-
                                     <div className="data-list">
-                                        {masterFormData.schoolYears && masterFormData.schoolYears.map(year => (
+                                        {masterFormData.schoolYears.map(year => (
                                             <div key={year} className="data-item">
-                                                <span className="item-text">{year}</span>
-                                                <button
-                                                    type="button"
-                                                    className="button button-danger button-icon"
-                                                    onClick={() => removeSchoolYear(year)}
-                                                    title="Schuljahr löschen"
-                                                >
-                                                    ❌
-                                                </button>
+                                                <span>{year}</span>
+                                                <button type="button" className="button button-danger button-icon" onClick={() => removeSchoolYear(year)}>❌</button>
                                             </div>
                                         ))}
                                     </div>
-                                    <button type="button" className="button button-outline" onClick={addSchoolYear}>
-                                        ➕ Schuljahr hinzufügen
-                                    </button>
+                                    <button type="button" className="button button-outline" onClick={addSchoolYear}>➕ Schuljahr hinzufügen</button>
                                 </div>
 
-                                <div className="divider"></div>
-
-                                {/* Schulen und Klassen Section */}
+                                {/* Schulen & Klassen */}
                                 <div className="data-section">
                                     <h3>🏫 Schulen und Klassen</h3>
-
-                                    <button type="button" className="button button-outline" onClick={addSchool}>
-                                        ➕ Neue Schule hinzufügen
-                                    </button>
-
-                                    <div className="schools-list">
-                                        {masterFormData.schools && Object.entries(masterFormData.schools).map(([school, classes]) => (
-                                            <div key={school} className="school-card">
-                                                <div className="school-header">
-                                                    <h4>{school}</h4>
-                                                    <button
-                                                        type="button"
-                                                        className="button button-danger button-icon"
-                                                        onClick={() => removeSchool(school)}
-                                                        title="Schule löschen"
-                                                    >
-                                                        ❌
-                                                    </button>
-                                                </div>
-
-                                                <p className="classes-title">Klassen für "{school}"</p>
-                                                <div className="classes-list">
-                                                    {classes && classes.map(className => (
-                                                        <div key={className} className="class-item">
-                                                            <span className="item-text">{className}</span>
-                                                            <button
-                                                                type="button"
-                                                                className="button button-danger button-icon"
-                                                                onClick={() => removeClass(school, className)}
-                                                                title="Klasse löschen"
-                                                            >
-                                                                ❌
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    className="button button-outline button-small"
-                                                    onClick={() => addClass(school)}
-                                                >
-                                                    ➕ Klasse hinzufügen
-                                                </button>
+                                    <button type="button" className="button button-outline" onClick={addSchool}>➕ Neue Schule hinzufügen</button>
+                                    {Object.entries(masterFormData.schools).map(([school, classes]) => (
+                                        <div key={school} className="school-card">
+                                            <div className="school-header">
+                                                <h4>{school}</h4>
+                                                <button type="button" className="button button-danger button-icon" onClick={() => removeSchool(school)}>❌</button>
                                             </div>
-                                        ))}
-                                    </div>
+                                            <div className="classes-list">
+                                                {classes.map(className => (
+                                                    <div key={className} className="class-item">
+                                                        <span>{className}</span>
+                                                        <button type="button" className="button button-danger button-icon" onClick={() => removeClass(school, className)}>❌</button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <button type="button" className="button button-outline" onClick={() => addClass(school)}>➕ Klasse hinzufügen</button>
+                                        </div>
+                                    ))}
                                 </div>
 
                                 <div className="modal-actions">
-                                    <button type="button" className="button button-outline" onClick={() => setShowMasterDataModal(false)}>
-                                        ❌ Schließen
-                                    </button>
-                                    <button type="submit" className="button button-primary">
-                                        ✅ Änderungen übernehmen
-                                    </button>
+                                    <button type="button" className="button button-outline" onClick={() => setShowMasterDataModal(false)}>❌ Schließen</button>
+                                    <button type="submit" className="button button-primary">✅ Änderungen übernehmen</button>
                                 </div>
                             </form>
                         </div>
