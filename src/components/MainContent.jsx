@@ -7,7 +7,7 @@ const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditE
                 <h2>Protokolle für {selectedStudent.name}</h2>
                 {entries.length === 0 ? (
                     <div className="welcome-screen centered">
-                        <p>Keine Einträge für dieses Kind.</p>
+                        <p>Keine Einträge für diesen Schüler.</p>
                     </div>
                 ) : (
                     <div className="entries-container">
@@ -85,7 +85,7 @@ const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditE
                 <div className="welcome-screen centered">
                     <h2>Willkommen!</h2>
                     <p>
-                        Wählen Sie links ein Kind aus der Liste, um die Protokolle anzuzeigen,
+                        Wählen Sie links einen Schüler aus der Liste, um die Protokolle anzuzeigen,
                         oder wählen Sie einen Tag, um alle Einträge für diesen Tag zu sehen.
                     </p>
                 </div>
