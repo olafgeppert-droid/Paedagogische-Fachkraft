@@ -141,7 +141,7 @@ const App = () => {
                 const masterDataLoaded = await database.get('masterData', 1);
                 if (masterDataLoaded) setMasterData(masterDataLoaded);
 
-                const allStudents = await database.getAll('students');
+                const allStudents = await getStudents(database);
                 setStudents(allStudents || []);
 
                 // Einträge laden für selektierten Schüler
