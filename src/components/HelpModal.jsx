@@ -1,5 +1,5 @@
 import React from 'react';
-import { version } from '../package.json'; // Version aus package.json importieren
+import { appVersion } from '../version.js';
 
 const HelpModal = ({ onClose }) => {
     return (
@@ -50,7 +50,7 @@ const HelpModal = ({ onClose }) => {
                 </div>
 
                 <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#666', textAlign: 'center' }}>
-                    Version {version}
+                    Version {appVersion}
                 </div>
             </div>
         </div>
