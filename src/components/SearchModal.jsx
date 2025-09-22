@@ -7,38 +7,27 @@ const SearchModal = ({ onClose, onSearch }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        let criteria = { type: searchType };
-
-        if (searchType === 'rating') {
-            criteria.value = rating;
-        } else {
-            criteria.value = searchTerm.trim();
-        }
-
+        const criteria = { type: searchType, value: searchType === 'rating' ? rating : searchTerm.trim() };
         onSearch(criteria);
         onClose();
     };
 
     return (
-        <div className="modal-overlay">
-            <div className="modal">
-                <div className="modal-header">
+        <div className="modal-overlay" style={overlayStyle}>
+            <div className="modal" style={modalStyle}>
+                <header style={headerStyle}>
                     <h2>🔍 Protokoll suchen</h2>
-                    <button className="modal-close" onClick={onClose}>×</button>
-                </div>
+                    <button onClick={onClose} style={closeButtonStyle}>×</button>
+                </header>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={formGroupStyle}>
                         <label htmlFor="searchType">Suchkriterium:</label>
                         <select
                             id="searchType"
                             value={searchType}
-                            onChange={(e) => {
-                                setSearchType(e.target.value);
-                                setSearchTerm('');
-                                setRating('');
-                            }}
+                            onChange={(e) => { setSearchType(e.target.value); setSearchTerm(''); setRating(''); }}
+                            style={selectStyle}
                         >
                             <option value="all">Allgemein</option>
                             <option value="name">Name</option>
@@ -48,7 +37,7 @@ const SearchModal = ({ onClose, onSearch }) => {
                     </div>
 
                     {searchType !== 'rating' && (
-                        <div className="form-group">
+                        <div style={formGroupStyle}>
                             <label htmlFor="searchTerm">Suchbegriff:</label>
                             <input
                                 id="searchTerm"
@@ -57,18 +46,20 @@ const SearchModal = ({ onClose, onSearch }) => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Begriff eingeben..."
                                 required
+                                style={inputStyle}
                             />
                         </div>
                     )}
 
                     {searchType === 'rating' && (
-                        <div className="form-group">
+                        <div style={formGroupStyle}>
                             <label htmlFor="rating">Erfolgsbewertung:</label>
                             <select
                                 id="rating"
                                 value={rating}
                                 onChange={(e) => setRating(e.target.value)}
                                 required
+                                style={selectStyle}
                             >
                                 <option value="">-- auswählen --</option>
                                 <option value="positiv">positiv</option>
@@ -78,25 +69,36 @@ const SearchModal = ({ onClose, onSearch }) => {
                         </div>
                     )}
 
-                    <div className="form-actions" style={{ marginTop: '1rem' }}>
-                        <button
-                            type="button"
-                            className="button button-secondary"
-                            onClick={onClose}
-                        >
-                            ❌ Abbrechen
-                        </button>
-                        <button
-                            type="submit"
-                            className="button button-success"
-                        >
-                            ✔️ OK
-                        </button>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                        <button type="button" onClick={onClose} style={buttonSecondaryStyle}>❌ Abbrechen</button>
+                        <button type="submit" style={buttonSuccessStyle}>✔️ OK</button>
                     </div>
                 </form>
             </div>
         </div>
     );
 };
+
+// =======================
+// Styles (inline, übersichtlich)
+// =======================
+const overlayStyle = {
+    position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+    backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center',
+    zIndex: 9999
+};
+
+const modalStyle = {
+    backgroundColor: '#fff', borderRadius: '12px', padding: '1.5rem', width: '90%', maxWidth: '400px',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column'
+};
+
+const headerStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' };
+const closeButtonStyle = { fontSize: '1.5rem', border: 'none', background: 'none', cursor: 'pointer' };
+const formGroupStyle = { display: 'flex', flexDirection: 'column', gap: '0.25rem' };
+const inputStyle = { padding: '0.5rem', fontSize: '1rem', borderRadius: '6px', border: '1px solid #ccc' };
+const selectStyle = { padding: '0.5rem', fontSize: '1rem', borderRadius: '6px', border: '1px solid #ccc' };
+const buttonSecondaryStyle = { padding: '0.5rem 1rem', background: '#ccc', borderRadius: '6px', border: 'none', cursor: 'pointer' };
+const buttonSuccessStyle = { padding: '0.5rem 1rem', background: '#4caf50', color: '#fff', borderRadius: '6px', border: 'none', cursor: 'pointer' };
 
 export default SearchModal;
