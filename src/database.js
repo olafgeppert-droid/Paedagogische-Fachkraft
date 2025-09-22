@@ -196,10 +196,10 @@ export const importData = async (db, event, setSettings, setMasterData, setStude
             if (data.masterData) await tx.objectStore('masterData').put(data.masterData);
             await tx.done;
 
-            if (setSettings && data.settings) setSettings(data.settings);
-            if (setMasterData && data.masterData) setMasterData(data.masterData);
-            if (setStudents) setStudents(await db.getAll('students'));
-            if (setModal) setModal(null);
+            if (setSettings && typeof setSettings === 'function' && data.settings) setSettings(data.settings);
+            if (setMasterData && typeof setMasterData === 'function' && data.masterData) setMasterData(data.masterData);
+            if (setStudents && typeof setStudents === 'function') setStudents(await db.getAll('students'));
+            if (setModal && typeof setModal === 'function') setModal(null);
             alert('Daten erfolgreich importiert!');
         } catch (err) {
             console.error('Fehler beim Importieren:', err);
@@ -237,10 +237,10 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
             { id: 2, studentId: 2, date: '2025-09-01', activity: 'Lesen: Kurze Texte verstehen', notes: 'Brauchte Hilfestellung' },
             { id: 3, studentId: 3, date: '2025-09-02', activity: 'Sachkunde: Pflanzen und Tiere', notes: 'Sehr interessiert' },
 
-            // Protokolle
-            { id: 4, studentId: 1, date: '2025-09-03', thema: 'Konflikt im Pausenhof', beobachtung: 'Schüler geriet in Streit', maßnahme: 'Konfliktgespräch mit Lehrkraft', erfolg: 'Schüler beruhigt', bewertung: 'positiv' },
-            { id: 5, studentId: 2, date: '2025-09-04', thema: 'Mathematikverständnis', beobachtung: 'Schwierigkeiten beim Einmaleins', maßnahme: 'Einzelübungen mit Lehrkraft', erfolg: 'Leichte Verbesserung', bewertung: 'neutral' },
-            { id: 6, studentId: 3, date: '2025-09-05', thema: 'Soziales Verhalten', beobachtung: 'Teilt Spielmaterial gut', maßnahme: 'Lob und Anerkennung', erfolg: 'Motivation gestärkt', bewertung: 'sehr positiv' }
+            // Protokolle (komplette Felder)
+            { id: 4, studentId: 1, date: '2025-09-03', protocolType: 'protokoll', thema: 'Konflikt im Pausenhof', beobachtung: 'Schüler geriet in Streit', maßnahme: 'Konfliktgespräch mit Lehrkraft', erfolg: 'Schüler beruhigt', bewertung: 'positiv', notes: '', activity: '' },
+            { id: 5, studentId: 2, date: '2025-09-04', protocolType: 'protokoll', thema: 'Mathematikverständnis', beobachtung: 'Schwierigkeiten beim Einmaleins', maßnahme: 'Einzelübungen mit Lehrkraft', erfolg: 'Leichte Verbesserung', bewertung: 'neutral', notes: '', activity: '' },
+            { id: 6, studentId: 3, date: '2025-09-05', protocolType: 'protokoll', thema: 'Soziales Verhalten', beobachtung: 'Teilt Spielmaterial gut', maßnahme: 'Lob und Anerkennung', erfolg: 'Motivation gestärkt', bewertung: 'sehr positiv', notes: '', activity: '' }
         ];
 
         for (const entry of sampleEntries) {
@@ -257,9 +257,9 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
         await tx.objectStore('masterData').put({ ...defaultMasterData, id: 1 });
         await tx.done;
 
-        if (setStudents) setStudents(await db.getAll('students'));
-        if (setEntries) setEntries(await db.getAll('entries'));
-        if (masterDataHandler) masterDataHandler(defaultMasterData);
+        if (setStudents && typeof setStudents === 'function') setStudents(await db.getAll('students'));
+        if (setEntries && typeof setEntries === 'function') setEntries(await db.getAll('entries'));
+        if (masterDataHandler && typeof masterDataHandler === 'function') masterDataHandler(defaultMasterData);
     } catch (err) {
         console.error('Fehler beim Laden der Beispieldaten:', err);
         alert('Fehler beim Laden der Beispieldaten: ' + err.message);
@@ -279,9 +279,12 @@ export const clearAllData = async (db, setStudents, setEntries, setSettings, set
         await tx.objectStore('masterData').clear();
         await tx.done;
 
-        if (setStudents) setStudents([]);
-        if (setEntries) setEntries([]);        
-        if (setMasterData) setMasterData({ subjects: [], activities: [], notesTemplates: [] });
+        // State-Updates nach Abschluss der Transaktion
+        if (setStudents && typeof setStudents === 'function') setStudents([]);
+        if (setEntries && typeof setEntries === 'function') setEntries([]);
+        // setSettings darf optional sein — nur aufrufen, wenn Funktion übergeben wurde
+        if (setSettings && typeof setSettings === 'function') setSettings({ theme: 'hell', fontSize: 16, inputFontSize: 16, customColors: {} });
+        if (setMasterData && typeof setMasterData === 'function') setMasterData({ subjects: [], activities: [], notesTemplates: [] });
     } catch (err) {
         console.error('Fehler beim Löschen aller Daten:', err);
         alert('Fehler beim Löschen aller Daten: ' + err.message);
