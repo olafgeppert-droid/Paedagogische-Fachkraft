@@ -38,7 +38,7 @@ const StudentModal = ({ student, masterData, onSave, onDelete, onClose }) => {
         <div className="modal-overlay">
             <div className="modal">
                 <div className="modal-header">
-                    <h2>{student ? 'Kind bearbeiten' : 'Neues Kind anlegen'}</h2>
+                    <h2>{student ? 'Schüler bearbeiten' : 'Neuen Schüler anlegen'}</h2>
                     <button className="modal-close" onClick={onClose}>×</button>
                 </div>
 
