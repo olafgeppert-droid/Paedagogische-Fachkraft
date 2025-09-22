@@ -1,7 +1,5 @@
 import React from 'react';
 import { appVersion } from '../version.js';
-<div className="header-version">Version {appVersion}</div>
-
 
 const Header = ({ onMenuClick }) => {
   const currentDate = new Date().toLocaleDateString('de-DE', {
@@ -22,7 +20,7 @@ const Header = ({ onMenuClick }) => {
       
       <div className="header-right">
         <div className="header-date">{currentDate}</div>
-        <div className="header-version">Version {version}</div>
+        <div className="header-version">Version {appVersion}</div>
       </div>
     </header>
   );
