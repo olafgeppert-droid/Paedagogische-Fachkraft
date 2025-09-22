@@ -14,16 +14,16 @@ const HelpModal = ({ onClose }) => {
                 <div style={{ paddingRight: '1rem', maxHeight: '60vh', overflowY: 'auto' }}>
                     <p>Willkommen bei der Hilfe für Ihre Anwendung zur pädagogischen Dokumentation.</p>
 
-                    <h3>👥 1. Kinder verwalten</h3>
+                    <h3>👥 1. Schüler verwalten</h3>
                     <ul>
-                        <li><strong>Kind anlegen:</strong> Klicken Sie auf "👥 Kind hinzufügen" in der Werkzeugleiste</li>
-                        <li><strong>Kind bearbeiten:</strong> Wählen Sie ein Kind aus und klicken auf "✏️ Kind bearbeiten"</li>
-                        <li><strong>Kind suchen:</strong> Nutzen Sie das Suchfeld in der Navigation</li>
+                        <li><strong>Schüler anlegen:</strong> Klicken Sie auf "👥 Kind hinzufügen" in der Werkzeugleiste</li>
+                        <li><strong>Schüler bearbeiten:</strong> Wählen Sie ein Kind aus und klicken auf "✏️ Kind bearbeiten"</li>
+                        <li><strong>Schüler suchen:</strong> Nutzen Sie das Suchfeld in der Navigation</li>
                     </ul>
 
                     <h3>📝 2. Einträge verwalten</h3>
                     <ul>
-                        <li><strong>Neuer Eintrag:</strong> Wählen Sie ein Kind aus und klicken auf "📝 Eintrag hinzufügen"</li>
+                        <li><strong>Neuer Eintrag:</strong> Wählen Sie einen Schüler aus und klicken auf "📝 Eintrag hinzufügen"</li>
                         <li><strong>Eintrag bearbeiten:</strong> Wählen Sie einen Eintrag aus und klicken auf "🔧 Eintrag bearbeiten"</li>
                     </ul>
 
