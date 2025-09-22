@@ -312,7 +312,7 @@ const App = () => {
     const handleEditProtocol = (entry) => { setEditingEntry(entry); setModal('entry'); };
 
     // =======================
-    // Suche (erweitert, korrigiert)
+    // Suche (erweitert) – funktioniert nun für Thema & Bewertung korrekt
     // =======================
     const handleOpenSearch = () => setSearchModalOpen(true);
     const handleCloseSearch = () => setSearchModalOpen(false);
@@ -322,16 +322,14 @@ const App = () => {
         let type = '';
         let value = '';
         if (!criteria) return;
-
         if (typeof criteria === 'string') {
             type = 'all';
             value = criteria;
         } else {
-            type = criteria.type || criteria.searchType || 'all';
+            type = criteria.type || criteria.searchType || (criteria.term ? 'all' : '');
             value = (criteria.value ?? criteria.term ?? criteria.general ?? criteria.name ?? criteria.subject ?? criteria.rating ?? '').toString();
         }
-
-        type = type.toLowerCase();
+        type = (type || 'all').toLowerCase();
         const q = value.trim().toLowerCase();
 
         try {
@@ -339,29 +337,31 @@ const App = () => {
             let results = [];
 
             if (type === 'all' || type === 'general') {
-                results = q ? allEntries.filter(e => Object.values(e).some(val => val && String(val).toLowerCase().includes(q))) : allEntries;
-            } 
-            else if (type === 'name') {
+                results = allEntries.filter(e =>
+                    Object.values(e).some(val => val && String(val).toLowerCase().includes(q))
+                );
+            } else if (type === 'name') {
                 results = allEntries.filter(e => {
                     const student = students.find(s => s.id === e.studentId);
-                    return student?.name?.toLowerCase().includes(q);
+                    return student && student.name && student.name.toLowerCase().includes(q);
                 });
-            } 
-            else if (type === 'topic' || type === 'thema') {
-                results = allEntries.filter(e => ((e.thema ?? e.activity ?? e.topic ?? '').toString().toLowerCase().includes(q)));
-            } 
-            else if (type === 'rating' || type === 'bewertung') {
-                results = q === '' 
-                    ? allEntries 
-                    : q === 'leer' || q === 'empty'
-                        ? allEntries.filter(e => !e.bewertung || String(e.bewertung).trim() === '')
-                        : allEntries.filter(e => String(e.bewertung ?? '').toLowerCase() === q);
-            } 
-            else {
-                results = allEntries.filter(e => Object.values(e).some(val => String(val ?? '').toLowerCase().includes(q)));
+            } else if (type === 'topic' || type === 'thema') {
+                results = allEntries.filter(e => {
+                    const topicField = e.thema ?? e.topic ?? e.activity ?? '';
+                    return topicField.toString().toLowerCase().includes(q);
+                });
+            } else if (type === 'rating' || type === 'bewertung') {
+                results = allEntries.filter(e => {
+                    if (!q || q === 'leer' || q === 'empty') return !e.bewertung || String(e.bewertung).trim() === '';
+                    return (e.bewertung || '').toString().toLowerCase() === q;
+                });
+            } else {
+                results = allEntries.filter(e =>
+                    Object.values(e).some(val => String(val || '').toLowerCase().includes(q))
+                );
             }
 
-            // Schülername ergänzen
+            // Schülername hinzufügen
             results = results.map(e => ({
                 ...e,
                 studentName: students.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}`
@@ -381,103 +381,103 @@ const App = () => {
     if (!db) return <div>Datenbank wird initialisiert...</div>;
 
     // =======================
-    // JSX Return
-    // =======================
-    return (
-        <div className="app">
-            <Header onMenuClick={() => setNavOpen(!navOpen)} />
-            <Toolbar
-                selectedStudent={selectedStudent}
-                selectedDate={selectedDate}
-                onAddStudent={handleShowNewStudent}
-                onEditStudent={() => setModal('student')}
-                onAddEntry={handleShowNewProtocol}
-                onSearchProtocol={handleOpenSearch}
-                onPrint={() => window.print()}
-                onExport={handleExport}
-                onImport={handleImport}
-                onUndo={handleUndo}
-                onRedo={handleRedo}
-                canUndo={historyIndex > 0}
-                canRedo={historyIndex < history.length - 1}
-            />
-            <Navigation
-                isOpen={navOpen}
-                students={filteredStudents()}
-                selectedStudent={selectedStudent}
-                selectedDate={selectedDate}
-                filters={filters}
+// JSX Return
+// =======================
+return (
+    <div className="app">
+        <Header onMenuClick={() => setNavOpen(!navOpen)} />
+        <Toolbar
+            selectedStudent={selectedStudent}
+            selectedDate={selectedDate}
+            onAddStudent={handleShowNewStudent}
+            onEditStudent={() => setModal('student')}
+            onAddEntry={handleShowNewProtocol}
+            onSearchProtocol={handleOpenSearch}
+            onPrint={() => window.print()}
+            onExport={handleExport}
+            onImport={handleImport}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            canUndo={historyIndex > 0}
+            canRedo={historyIndex < history.length - 1}
+        />
+        <Navigation
+            isOpen={navOpen}
+            students={filteredStudents()}
+            selectedStudent={selectedStudent}
+            selectedDate={selectedDate}
+            filters={filters}
+            masterData={masterData}
+            onStudentSelect={(student) => { setSelectedStudent(student); setViewMode('student'); }}
+            onDateSelect={(date) => { setSelectedDate(date); setViewMode('day'); }}
+            onFilterChange={setFilters}
+            onShowStats={() => setModal('statistics')}
+            onShowSettings={() => setModal('settings')}
+            onShowHelp={() => setModal('help')}
+        />
+        <MainContent
+            viewMode={viewMode}
+            selectedStudent={selectedStudent}
+            selectedDate={selectedDate}
+            entries={viewMode === 'search' ? searchResults : entries}
+            onEditEntry={handleEditProtocol}
+        />
+
+        {modal === 'student' && (
+            <StudentModal
+                student={selectedStudent}
                 masterData={masterData}
-                onStudentSelect={(student) => { setSelectedStudent(student); setViewMode('student'); }}
-                onDateSelect={(date) => { setSelectedDate(date); setViewMode('day'); }}
-                onFilterChange={setFilters}
-                onShowStats={() => setModal('statistics')}
-                onShowSettings={() => setModal('settings')}
-                onShowHelp={() => setModal('help')}
+                onSave={saveStudentHandler}
+                onDelete={deleteStudentHandler}
+                onClose={() => setModal(null)}
+                setSettings={setSettings}
             />
-            <MainContent
-                viewMode={viewMode}
-                selectedStudent={selectedStudent}
-                selectedDate={selectedDate}
-                entries={viewMode === 'search' ? searchResults : entries}
-                onEditEntry={handleEditProtocol}
+        )}
+        {modal === 'entry' && (
+            <EntryModal
+                entry={editingEntry}
+                student={selectedStudent}
+                students={students}
+                masterData={masterData}
+                onSave={saveEntryHandler}
+                onClose={() => { setModal(null); setEditingEntry(null); }}
             />
+        )}
+        {modal === 'settings' && (
+            <SettingsModal
+                settings={settings}
+                masterData={masterData}
+                onSave={saveSettingsHandler}
+                onSaveMasterData={saveMasterDataHandler}
+                onClose={() => setModal(null)}
+                setSettings={setSettings}
+            />
+        )}
+        {modal === 'statistics' && (
+            <StatisticsModal
+                students={students}
+                entries={entries}
+                onClose={() => setModal(null)}
+                setSettings={setSettings}
+            />
+        )}
+        {modal === 'help' && (
+            <HelpModal
+                onClose={() => setModal(null)}
+                setSettings={setSettings}
+            />
+        )}
 
-            {modal === 'student' && (
-                <StudentModal
-                    student={selectedStudent}
-                    masterData={masterData}
-                    onSave={saveStudentHandler}
-                    onDelete={deleteStudentHandler}
-                    onClose={() => setModal(null)}
-                    setSettings={setSettings}
-                />
-            )}
-            {modal === 'entry' && (
-                <EntryModal
-                    entry={editingEntry}
-                    student={selectedStudent}
-                    students={students}
-                    masterData={masterData}
-                    onSave={saveEntryHandler}
-                    onClose={() => { setModal(null); setEditingEntry(null); }}
-                />
-            )}
-            {modal === 'settings' && (
-                <SettingsModal
-                    settings={settings}
-                    masterData={masterData}
-                    onSave={saveSettingsHandler}
-                    onSaveMasterData={saveMasterDataHandler}
-                    onClose={() => setModal(null)}
-                    setSettings={setSettings}
-                />
-            )}
-            {modal === 'statistics' && (
-                <StatisticsModal
-                    students={students}
-                    entries={entries}
-                    onClose={() => setModal(null)}
-                    setSettings={setSettings}
-                />
-            )}
-            {modal === 'help' && (
-                <HelpModal
-                    onClose={() => setModal(null)}
-                    setSettings={setSettings}
-                />
-            )}
-
-            {searchModalOpen && (
-                <SearchModal
-                    onClose={handleCloseSearch}
-                    onSearch={handleSearch}
-                    masterData={masterData}
-                    students={students}
-                />
-            )}
-        </div>
-    );
+        {searchModalOpen && (
+            <SearchModal
+                onClose={handleCloseSearch}
+                onSearch={handleSearch}
+                masterData={masterData}
+                students={students}
+            />
+        )}
+    </div>
+);
 };
 
 export default App;
