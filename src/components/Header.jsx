@@ -19,7 +19,7 @@ const Header = ({ onMenuClick }) => {
       
       <div className="header-right">
         <div className="header-date">{currentDate}</div>
-        <div className="header-version">Version 1.8.0</div>
+        <div className="header-version">Version 1.8.1</div>
       </div>
     </header>
   );
