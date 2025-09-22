@@ -1,6 +1,7 @@
 import React from 'react';
+import { version } from '../package.json'; // Version aus package.json importieren
 
-const HelpModal = ({ onClose, version }) => {
+const HelpModal = ({ onClose }) => {
     return (
         <div className="modal-overlay">
             <div className="modal">
@@ -9,7 +10,7 @@ const HelpModal = ({ onClose, version }) => {
                     <button className="modal-close" onClick={onClose}>×</button>
                 </div>
 
-                    <div style={{ paddingRight: '1rem', maxHeight: '60vh', overflowY: 'auto' }}>
+                <div style={{ paddingRight: '1rem', maxHeight: '60vh', overflowY: 'auto' }}>
                     <p>Willkommen bei der Hilfe für Ihre Anwendung zur pädagogischen Dokumentation.</p>
 
                     <h3>👥 1. Kinder verwalten</h3>
@@ -48,15 +49,12 @@ const HelpModal = ({ onClose, version }) => {
                     </button>
                 </div>
 
-                {version && (
-                    <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#666', textAlign: 'center' }}>
-                        Version {version}
-                    </div>
-                )}
+                <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#666', textAlign: 'center' }}>
+                    Version {version}
+                </div>
             </div>
         </div>
     );
 };
 
-// ES-Modul Export
 export default HelpModal;
