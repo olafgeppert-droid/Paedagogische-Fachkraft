@@ -217,8 +217,8 @@ const App = () => {
                         return isExact ? ratingField === searchTerm : ratingField.includes(searchTerm);
                     
                     case 'name':
-                        const studentName = students.find(s => s.id === e.studentId);
-                        return studentName && studentName.name.toLowerCase().includes(searchTerm);
+                        const studentForName = students.find(s => s.id === e.studentId);
+                        return studentForName && studentForName.name.toLowerCase().includes(searchTerm);
                     
                     case 'all':
                     default:
@@ -227,8 +227,8 @@ const App = () => {
                             e.thema // Für Rückwärtskompatibilität
                         ].filter(field => field != null).map(field => field.toString().toLowerCase());
                         
-                        const studentAll = students.find(s => s.id === e.studentId);
-                        if (studentAll && studentAll.name.toLowerCase().includes(searchTerm)) {
+                        const studentForSearch = students.find(s => s.id === e.studentId);
+                        if (studentForSearch && studentForSearch.name.toLowerCase().includes(searchTerm)) {
                             return true;
                         }
                         
