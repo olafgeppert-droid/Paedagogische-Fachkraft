@@ -60,7 +60,7 @@ const Navigation = ({
                     <input
                         type="text"
                         className="search-input"
-                        placeholder="🔍 Kind suchen..."
+                        placeholder="🔍 Schüler suchen..."
                         value={searchTerm}
                         onChange={handleSearchChange}
                     />
