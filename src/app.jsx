@@ -148,7 +148,6 @@ const App = () => {
                     const firstStudent = allStudents[0];
                     setSelectedStudent(firstStudent);
                     const entriesData = await getEntriesByStudentId(database, firstStudent.id);
-                    // Schülername zu jedem Eintrag hinzufügen
                     const entriesWithNames = entriesData.map(e => ({
                         ...e,
                         studentName: allStudents.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}`
@@ -162,7 +161,7 @@ const App = () => {
         };
         initDB();
     }, [applySettings]);
-// src/app.jsx (Teil 2 von 2)
+    // src/app.jsx (Teil 2 von 2)
     // =======================
     // Einträge laden bei Änderung
     // =======================
@@ -313,7 +312,7 @@ const App = () => {
     const handleEditProtocol = (entry) => { setEditingEntry(entry); setModal('entry'); };
 
     // =======================
-    // Suche (erweitert)
+    // Suche (erweitert, korrigiert)
     // =======================
     const handleOpenSearch = () => setSearchModalOpen(true);
     const handleCloseSearch = () => setSearchModalOpen(false);
@@ -323,14 +322,16 @@ const App = () => {
         let type = '';
         let value = '';
         if (!criteria) return;
+
         if (typeof criteria === 'string') {
             type = 'all';
             value = criteria;
         } else {
-            type = criteria.type || criteria.searchType || (criteria.term ? 'all' : '');
+            type = criteria.type || criteria.searchType || 'all';
             value = (criteria.value ?? criteria.term ?? criteria.general ?? criteria.name ?? criteria.subject ?? criteria.rating ?? '').toString();
         }
-        type = (type || 'all').toLowerCase();
+
+        type = type.toLowerCase();
         const q = value.trim().toLowerCase();
 
         try {
@@ -338,28 +339,29 @@ const App = () => {
             let results = [];
 
             if (type === 'all' || type === 'general') {
-                if (!q) results = allEntries;
-                else {
-                    results = allEntries.filter(e =>
-                        Object.values(e).some(val => val && String(val).toLowerCase().includes(q))
-                    );
-                }
-            } else if (type === 'name') {
+                results = q ? allEntries.filter(e => Object.values(e).some(val => val && String(val).toLowerCase().includes(q))) : allEntries;
+            } 
+            else if (type === 'name') {
                 results = allEntries.filter(e => {
                     const student = students.find(s => s.id === e.studentId);
-                    return student && student.name && student.name.toLowerCase().includes(q);
+                    return student?.name?.toLowerCase().includes(q);
                 });
-            } else if (type === 'topic' || type === 'thema') {
-                results = allEntries.filter(e => (e.thema || e.activity || e.topic || '').toString().toLowerCase().includes(q));
-            } else if (type === 'rating' || type === 'bewertung') {
-                if (!q) results = allEntries;
-                else if (q === 'leer' || q === 'empty') results = allEntries.filter(e => !e.bewertung || String(e.bewertung).trim() === '');
-                else results = allEntries.filter(e => (e.bewertung || '').toString().toLowerCase() === q);
-            } else {
-                results = allEntries.filter(e => Object.values(e).some(val => String(val || '').toLowerCase().includes(q)));
+            } 
+            else if (type === 'topic' || type === 'thema') {
+                results = allEntries.filter(e => ((e.thema ?? e.activity ?? e.topic ?? '').toString().toLowerCase().includes(q)));
+            } 
+            else if (type === 'rating' || type === 'bewertung') {
+                results = q === '' 
+                    ? allEntries 
+                    : q === 'leer' || q === 'empty'
+                        ? allEntries.filter(e => !e.bewertung || String(e.bewertung).trim() === '')
+                        : allEntries.filter(e => String(e.bewertung ?? '').toLowerCase() === q);
+            } 
+            else {
+                results = allEntries.filter(e => Object.values(e).some(val => String(val ?? '').toLowerCase().includes(q)));
             }
 
-            // Schülername hinzufügen
+            // Schülername ergänzen
             results = results.map(e => ({
                 ...e,
                 studentName: students.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}`
