@@ -64,6 +64,19 @@ export const deleteStudent = async (db, studentId) => {
 };
 
 // =======================
+// Studenten abrufen
+// =======================
+export const getStudents = async (db) => {
+    if (!db) return [];
+    try {
+        return await db.getAll('students');
+    } catch (err) {
+        console.error('Fehler beim Abrufen der Schüler:', err);
+        return [];
+    }
+};
+
+// =======================
 // Eintrag-Funktionen
 // =======================
 export const addEntry = async (db, entryData) => {
