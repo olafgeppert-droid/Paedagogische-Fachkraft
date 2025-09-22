@@ -79,13 +79,9 @@ const SearchModal = ({ onClose, onSearch }) => {
                                 style={selectStyle}
                             >
                                 <option value="">-- Bewertung auswählen --</option>
-                                <option value="positiv">positiv (Sehr gut, Gut, Erfolg)</option>
-                                <option value="negativ">negativ (Schlecht, Probleme, Hilfe)</option>
-                                <option value="leer">leer (keine Bewertung)</option>
-                                <option value="sehr gut">Sehr gut</option>
-                                <option value="gut">Gut</option>
-                                <option value="schlecht">Schlecht</option>
-                                <option value="ausgezeichnet">Ausgezeichnet</option>
+                                <option value="positiv">positiv</option>
+                                <option value="negativ">negativ</option>
+                                <option value="">leer (keine Bewertung)</option>
                             </select>
                         </div>
                     )}
