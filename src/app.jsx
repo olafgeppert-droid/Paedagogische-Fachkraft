@@ -161,7 +161,68 @@ const App = () => {
         };
         initDB();
     }, [applySettings]);
-   // src/app.jsx (Teil 2 von 2)
+
+    // =======================
+    // Suche Modal Funktionen
+    // =======================
+    const handleOpenSearch = () => setSearchModalOpen(true);
+    const handleCloseSearch = () => setSearchModalOpen(false);
+
+    const handleSearch = async (criteria) => {
+        if (!db) return;
+        if (!criteria) return;
+
+        let searchTerm = '';
+        let searchType = 'all';
+        if (typeof criteria === 'string') searchTerm = criteria.trim();
+        else {
+            searchTerm = (criteria.value ?? '').toString().trim();
+            searchType = (criteria.type ?? 'all').toLowerCase();
+        }
+
+        const isExact = /^".*"$/.test(searchTerm);
+        if (isExact) searchTerm = searchTerm.slice(1, -1).toLowerCase();
+        else searchTerm = searchTerm.toLowerCase();
+
+        try {
+            const allEntries = await db.getAll('entries');
+            let results = allEntries.filter(e => {
+                const topicField = (e.topic ?? e.thema ?? e.activity ?? '').toString().toLowerCase();
+                const ratingField = (e.bewertung ?? '').toString().toLowerCase().trim();
+
+                switch (searchType) {
+                    case 'topic':
+                    case 'thema':
+                        return isExact ? topicField === searchTerm : topicField.includes(searchTerm);
+                    case 'rating':
+                    case 'bewertung':
+                        if (searchTerm === 'leer' || searchTerm === 'empty') return ratingField === '';
+                        return ratingField === searchTerm;
+                    case 'name':
+                        const student = students.find(s => s.id === e.studentId);
+                        return student && student.name.toLowerCase().includes(searchTerm);
+                    case 'all':
+                    default:
+                        return Object.values(e).some(val => val && val.toString().toLowerCase().includes(searchTerm));
+                }
+            });
+
+            results = results.map(e => ({
+                ...e,
+                studentName: students.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}`
+            }));
+
+            setSearchResults(results);
+            setViewMode('search');
+            setSearchModalOpen(false);
+        } catch (err) {
+            console.error('Fehler bei der Suche:', err);
+            setSearchResults([]);
+            setViewMode('search');
+            setSearchModalOpen(false);
+        }
+    };
+    // src/app.jsx (Teil 2 von 2)
 // =======================
 // Einträge laden bei Änderung
 // =======================
@@ -311,12 +372,6 @@ const handleShowNewProtocol = () => { setEditingEntry(null); setModal('entry'); 
 const handleEditProtocol = (entry) => { setEditingEntry(entry); setModal('entry'); };
 
 // =======================
-// Suche Modal
-// =======================
-const handleOpenSearch = () => setSearchModalOpen(true);
-const handleCloseSearch = () => setSearchModalOpen(false);
-
-// =======================
 // JSX Return
 // =======================
 return (
@@ -408,13 +463,10 @@ return (
             <SearchModal
                 onClose={handleCloseSearch}
                 onSearch={handleSearch}
-                masterData={masterData}
-                students={students}
-                hintText='Für exakte Suche setzen Sie den Suchbegriff in Anführungszeichen, z. B. „Mathematik: Addieren“ findet nur Einträge mit exakt diesem Eintrag.'
             />
         )}
     </div>
 );
 };
 
-export default App; 
+export default App;
