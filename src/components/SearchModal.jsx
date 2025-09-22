@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const SearchModal = ({ onClose, onSearch }) => {
+const SearchModal = ({ onClose, onSearch, hintText }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchType, setSearchType] = useState('all');
     const [rating, setRating] = useState('');
@@ -20,11 +20,7 @@ const SearchModal = ({ onClose, onSearch }) => {
                     <button onClick={onClose} style={closeButtonStyle}>×</button>
                 </header>
 
-                <p style={hintStyle}>
-                    Für exakte Suche setzen Sie den Suchbegriff in Anführungszeichen, z. B. „Mathematik: Addieren“ findet nur Einträge mit exakt diesem Eintrag.
-                </p>
-
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <div style={formGroupStyle}>
                         <label htmlFor="searchType">Suchkriterium:</label>
                         <select
@@ -41,18 +37,21 @@ const SearchModal = ({ onClose, onSearch }) => {
                     </div>
 
                     {searchType !== 'rating' && (
-                        <div style={formGroupStyle}>
-                            <label htmlFor="searchTerm">Suchbegriff:</label>
-                            <input
-                                id="searchTerm"
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Begriff eingeben..."
-                                required
-                                style={inputStyle}
-                            />
-                        </div>
+                        <>
+                            <div style={formGroupStyle}>
+                                <label htmlFor="searchTerm">Suchbegriff:</label>
+                                <input
+                                    id="searchTerm"
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Begriff eingeben..."
+                                    required
+                                    style={inputStyle}
+                                />
+                            </div>
+                            <p style={hintStyle}>{hintText}</p>
+                        </>
                     )}
 
                     {searchType === 'rating' && (
@@ -73,7 +72,7 @@ const SearchModal = ({ onClose, onSearch }) => {
                         </div>
                     )}
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '0.5rem' }}>
                         <button type="button" onClick={onClose} style={buttonSecondaryStyle}>❌ Abbrechen</button>
                         <button type="submit" style={buttonSuccessStyle}>✔️ OK</button>
                     </div>
