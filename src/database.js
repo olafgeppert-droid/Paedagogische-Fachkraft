@@ -34,6 +34,9 @@ export const setupDB = async () => {
 export const getEntriesByStudentId = (db, studentId) => db.getAllFromIndex('entries', 'studentId', studentId);
 export const getEntriesByDate = (db, date) => db.getAllFromIndex('entries', 'date', date);
 
+// ✅ wieder hinzugefügt:
+export const getStudents = (db) => db.getAll('students');
+
 export const addStudent = async (db, studentData) => {
     const id = await db.add('students', studentData);
     return { ...studentData, id };
@@ -196,10 +199,10 @@ export const importData = async (db, event, setSettings, setMasterData, setStude
             if (data.masterData) await tx.objectStore('masterData').put(data.masterData);
             await tx.done;
 
-            if (setSettings && typeof setSettings === 'function' && data.settings) setSettings(data.settings);
-            if (setMasterData && typeof setMasterData === 'function' && data.masterData) setMasterData(data.masterData);
-            if (setStudents && typeof setStudents === 'function') setStudents(await db.getAll('students'));
-            if (setModal && typeof setModal === 'function') setModal(null);
+            if (setSettings && data.settings) setSettings(data.settings);
+            if (setMasterData && data.masterData) setMasterData(data.masterData);
+            if (setStudents) setStudents(await db.getAll('students'));
+            if (setModal) setModal(null);
             alert('Daten erfolgreich importiert!');
         } catch (err) {
             console.error('Fehler beim Importieren:', err);
@@ -208,6 +211,12 @@ export const importData = async (db, event, setSettings, setMasterData, setStude
     };
     reader.readAsText(file);
 };
+
+// =======================
+// Beispieldaten mit Protokollen
+// =======================
+// (Rest der Datei bleibt unverändert – deine loadSampleData, clearAllData usw.)
+
 
 // =======================
 // Beispieldaten mit Protokollen
