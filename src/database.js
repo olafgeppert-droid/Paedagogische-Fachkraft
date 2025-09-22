@@ -72,7 +72,6 @@ export const getStudents = async (db) => {
         return [];
     }
 };
-
 // =======================
 // Eintrag-Funktionen
 // =======================
@@ -169,6 +168,7 @@ export const redo = async (db, history, historyIndex, setHistoryIndex, setStuden
         console.error('Fehler beim Redo:', err);
     }
 };
+
 // =======================
 // Export / Import
 // =======================
@@ -231,7 +231,6 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
         await tx.objectStore('students').clear();
         await tx.objectStore('entries').clear();
 
-        // Schüler-Daten
         const sampleStudents = [
             { id: 1, name: 'Kevin Mustermann', schoolYear: '2025/2026', school: 'Ostschule, Grundschule Neustadt', className: '1a', gender: 'männlich', nationality: 'Deutschland', germanLevel: 2, notes: 'Sehr aufmerksamer Schüler' },
             { id: 2, name: 'Anna Beispiel', schoolYear: '2025/2026', school: 'Heinz-Sielmann-Grundschule, Neustadt', className: '2b', gender: 'weiblich', nationality: 'Türkei', germanLevel: 1, notes: 'Braucht Unterstützung in Mathematik' },
@@ -242,14 +241,10 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
             await tx.objectStore('students').put(student);
         }
 
-        // Einträge & Protokolle
         const sampleEntries = [
-            // normale Einträge
             { id: 1, studentId: 1, date: '2025-09-01', activity: 'Mathematik: Addieren und Subtrahieren geübt', notes: 'Hat gut mitgemacht' },
             { id: 2, studentId: 2, date: '2025-09-01', activity: 'Lesen: Kurze Texte verstehen', notes: 'Brauchte Hilfestellung' },
             { id: 3, studentId: 3, date: '2025-09-02', activity: 'Sachkunde: Pflanzen und Tiere', notes: 'Sehr interessiert' },
-
-            // Protokolle
             { id: 4, studentId: 1, date: '2025-09-03', thema: 'Konflikt im Pausenhof', beobachtung: 'Schüler geriet in Streit', maßnahme: 'Konfliktgespräch mit Lehrkraft', erfolg: 'Schüler beruhigt', bewertung: 'positiv' },
             { id: 5, studentId: 2, date: '2025-09-04', thema: 'Mathematikverständnis', beobachtung: 'Schwierigkeiten beim Einmaleins', maßnahme: 'Einzelübungen mit Lehrkraft', erfolg: 'Leichte Verbesserung', bewertung: 'neutral' },
             { id: 6, studentId: 3, date: '2025-09-05', thema: 'Soziales Verhalten', beobachtung: 'Teilt Spielmaterial gut', maßnahme: 'Lob und Anerkennung', erfolg: 'Motivation gestärkt', bewertung: 'sehr positiv' }
@@ -259,7 +254,6 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
             await tx.objectStore('entries').put(entry);
         }
 
-        // MasterData
         const defaultMasterData = {
             subjects: ['Mathematik', 'Deutsch', 'Sachkunde', 'Sport'],
             activities: ['Hausaufgaben', 'Klassenarbeit', 'Projektarbeit', 'Freiarbeit'],
@@ -300,3 +294,4 @@ export const clearAllData = async (db, setStudents, setEntries, setSettings, set
         alert('Fehler beim Löschen aller Daten: ' + err.message);
     }
 };
+
