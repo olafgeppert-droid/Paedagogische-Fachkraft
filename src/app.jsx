@@ -82,7 +82,6 @@ const App = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [appState, setAppState] = useState('database');
 
-    // Force Update für iPad/iOS
     const [, forceUpdate] = useState(0);
     const triggerRender = () => forceUpdate(prev => prev + 1);
 
@@ -144,7 +143,6 @@ const App = () => {
                 const allStudents = await getStudents(database);
                 setStudents(allStudents || []);
 
-                // Einträge laden für selektierten Schüler
                 if (allStudents && allStudents.length > 0) {
                     const firstStudent = allStudents[0];
                     setSelectedStudent(firstStudent);
@@ -158,6 +156,7 @@ const App = () => {
         };
         initDB();
     }, [applySettings]);
+
     // =======================
     // Einträge laden bei Änderung
     // =======================
@@ -375,15 +374,50 @@ const App = () => {
                 onEditEntry={handleEditProtocol}
             />
 
-            {modal === 'student' && <StudentModal student={selectedStudent} masterData={masterData} onSave={saveStudentHandler} onDelete={deleteStudentHandler} onClose={() => setModal(null)},
-  setSettings={setSettings} />}
-            {modal === 'entry' && <EntryModal entry={editingEntry} student={selectedStudent} students={students} masterData={masterData} onSave={saveEntryHandler} onClose={() => { setModal(null); setEditingEntry(null); }} />}
-            {modal === 'settings' && <SettingsModal settings={settings} masterData={masterData} onSave={saveSettingsHandler} onSaveMasterData={saveMasterDataHandler} onClose={() => setModal(null)},
-  setSettings={setSettings} />}
-            {modal === 'statistics' && <StatisticsModal students={students} entries={entries} onClose={() => setModal(null)},
-  setSettings={setSettings} />}
-            {modal === 'help' && <HelpModal onClose={() => setModal(null)},
-  setSettings={setSettings} />}
+            {modal === 'student' && (
+                <StudentModal
+                    student={selectedStudent}
+                    masterData={masterData}
+                    onSave={saveStudentHandler}
+                    onDelete={deleteStudentHandler}
+                    onClose={() => setModal(null)}
+                    setSettings={setSettings}
+                />
+            )}
+            {modal === 'entry' && (
+                <EntryModal
+                    entry={editingEntry}
+                    student={selectedStudent}
+                    students={students}
+                    masterData={masterData}
+                    onSave={saveEntryHandler}
+                    onClose={() => { setModal(null); setEditingEntry(null); }}
+                />
+            )}
+            {modal === 'settings' && (
+                <SettingsModal
+                    settings={settings}
+                    masterData={masterData}
+                    onSave={saveSettingsHandler}
+                    onSaveMasterData={saveMasterDataHandler}
+                    onClose={() => setModal(null)}
+                    setSettings={setSettings}
+                />
+            )}
+            {modal === 'statistics' && (
+                <StatisticsModal
+                    students={students}
+                    entries={entries}
+                    onClose={() => setModal(null)}
+                    setSettings={setSettings}
+                />
+            )}
+            {modal === 'help' && (
+                <HelpModal
+                    onClose={() => setModal(null)}
+                    setSettings={setSettings}
+                />
+            )}
 
             {searchModalOpen && <SearchModal onClose={handleCloseSearch} onSearch={handleSearch} masterData={masterData} students={students} />}
         </div>
