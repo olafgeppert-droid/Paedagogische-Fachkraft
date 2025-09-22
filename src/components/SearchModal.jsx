@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const SearchModal = ({ onClose, onSearch, hintText }) => {
+const SearchModal = ({ onClose, onSearch }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchType, setSearchType] = useState('all');
     const [rating, setRating] = useState('');
@@ -20,7 +20,11 @@ const SearchModal = ({ onClose, onSearch, hintText }) => {
                     <button onClick={onClose} style={closeButtonStyle}>×</button>
                 </header>
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <p style={hintStyle}>
+                    Für exakte Suche setzen Sie den Suchbegriff in Anführungszeichen, z. B. „Mathematik: Addieren“ findet nur Einträge mit exakt diesem Eintrag.
+                </p>
+
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div style={formGroupStyle}>
                         <label htmlFor="searchType">Suchkriterium:</label>
                         <select
@@ -37,21 +41,18 @@ const SearchModal = ({ onClose, onSearch, hintText }) => {
                     </div>
 
                     {searchType !== 'rating' && (
-                        <>
-                            <div style={formGroupStyle}>
-                                <label htmlFor="searchTerm">Suchbegriff:</label>
-                                <input
-                                    id="searchTerm"
-                                    type="text"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    placeholder="Begriff eingeben..."
-                                    required
-                                    style={inputStyle}
-                                />
-                            </div>
-                            <p style={hintStyle}>{hintText}</p>
-                        </>
+                        <div style={formGroupStyle}>
+                            <label htmlFor="searchTerm">Suchbegriff:</label>
+                            <input
+                                id="searchTerm"
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Begriff eingeben..."
+                                required
+                                style={inputStyle}
+                            />
+                        </div>
                     )}
 
                     {searchType === 'rating' && (
@@ -72,7 +73,7 @@ const SearchModal = ({ onClose, onSearch, hintText }) => {
                         </div>
                     )}
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '0.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                         <button type="button" onClick={onClose} style={buttonSecondaryStyle}>❌ Abbrechen</button>
                         <button type="submit" style={buttonSuccessStyle}>✔️ OK</button>
                     </div>
@@ -83,7 +84,7 @@ const SearchModal = ({ onClose, onSearch, hintText }) => {
 };
 
 // =======================
-// Styles (inline, übersichtlich)
+// Styles (inline)
 // =======================
 const overlayStyle = {
     position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
