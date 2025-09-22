@@ -33,6 +33,7 @@ export const setupDB = async () => {
 // =======================
 export const getEntriesByStudentId = (db, studentId) => db.getAllFromIndex('entries', 'studentId', studentId);
 export const getEntriesByDate = (db, date) => db.getAllFromIndex('entries', 'date', date);
+
 export const addStudent = async (db, studentData) => {
     const id = await db.add('students', studentData);
     return { ...studentData, id };
@@ -168,7 +169,6 @@ export const redo = async (db, history, historyIndex, setHistoryIndex, setStuden
         console.error('Fehler beim Redo:', err);
     }
 };
-
 // =======================
 // Export / Import
 // =======================
@@ -220,12 +220,6 @@ export const importData = async (db, event, setSettings, setMasterData, setStude
     };
     reader.readAsText(file);
 };
-
-// =======================
-// Beispieldaten mit Protokollen
-// =======================
-// (Rest der Datei bleibt unverändert – deine loadSampleData, clearAllData usw.)
-
 
 // =======================
 // Beispieldaten mit Protokollen
