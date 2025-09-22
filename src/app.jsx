@@ -148,7 +148,12 @@ const App = () => {
                     const firstStudent = allStudents[0];
                     setSelectedStudent(firstStudent);
                     const entriesData = await getEntriesByStudentId(database, firstStudent.id);
-                    setEntries(entriesData || []);
+                    // Schülername zu jedem Eintrag hinzufügen
+                    const entriesWithNames = entriesData.map(e => ({
+                        ...e,
+                        studentName: allStudents.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}`
+                    }));
+                    setEntries(entriesWithNames || []);
                 }
 
             } catch (error) {
@@ -157,7 +162,7 @@ const App = () => {
         };
         initDB();
     }, [applySettings]);
-
+// src/app.jsx (Teil 2 von 2)
     // =======================
     // Einträge laden bei Änderung
     // =======================
@@ -171,13 +176,18 @@ const App = () => {
                 } else if (viewMode === 'day' && selectedDate) {
                     entriesData = await getEntriesByDate(db, selectedDate);
                 }
+                // Schülername ergänzen
+                entriesData = entriesData.map(e => ({
+                    ...e,
+                    studentName: students.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}`
+                }));
                 setEntries(entriesData || []);
             } catch (error) {
                 console.error('Fehler beim Laden der Einträge:', error);
             }
         };
         loadEntries();
-    }, [db, selectedStudent, selectedDate, viewMode]);
+    }, [db, selectedStudent, selectedDate, viewMode, students]);
 
     // =======================
     // Filter & Suche
@@ -217,7 +227,7 @@ const App = () => {
             console.error('Fehler beim Löschen des Schülers:', error);
         }
     };
-// src/app.jsx (Teil 2 von 2)
+
     // =======================
     // Eintrag-Handler
     // =======================
@@ -230,7 +240,7 @@ const App = () => {
                 setEntries(entries.map(e => e.id === entryData.id ? entryData : e));
             } else {
                 const newEntry = await addEntry(db, entryData);
-                setEntries([...entries, newEntry]);
+                setEntries([...entries, { ...newEntry, studentName: students.find(s => s.id === newEntry.studentId)?.name || `Schüler ${newEntry.studentId}` }]);
             }
             setModal(null);
             setEditingEntry(null);
@@ -301,22 +311,15 @@ const App = () => {
     const handleShowNewStudent = () => { setSelectedStudent(null); setModal('student'); };
     const handleShowNewProtocol = () => { setEditingEntry(null); setModal('entry'); };
     const handleEditProtocol = (entry) => { setEditingEntry(entry); setModal('entry'); };
-    const findEntryToEdit = () => {
-        if (!selectedStudent || !selectedDate || entries.length === 0) return null;
-        return entries.find(entry => entry.studentId === selectedStudent.id && entry.date === selectedDate) || null;
-    };
 
     // =======================
     // Suche (erweitert)
-    // - akzeptiert: { type, value } oder { type, term } oder legacy object with keys
-    // - type: 'all'|'general'|'name'|'topic'|'rating'
     // =======================
     const handleOpenSearch = () => setSearchModalOpen(true);
     const handleCloseSearch = () => setSearchModalOpen(false);
 
     const handleSearch = async (criteria) => {
         if (!db) return;
-        // Normalisiere input
         let type = '';
         let value = '';
         if (!criteria) return;
@@ -324,7 +327,6 @@ const App = () => {
             type = 'all';
             value = criteria;
         } else {
-            // support both shapes
             type = criteria.type || criteria.searchType || (criteria.term ? 'all' : '');
             value = (criteria.value ?? criteria.term ?? criteria.general ?? criteria.name ?? criteria.subject ?? criteria.rating ?? '').toString();
         }
@@ -332,55 +334,36 @@ const App = () => {
         const q = value.trim().toLowerCase();
 
         try {
-            // Lade vollständige Eintragsliste aus DB (globaler Suchlauf)
             const allEntries = await db.getAll('entries');
-
             let results = [];
 
             if (type === 'all' || type === 'general') {
                 if (!q) results = allEntries;
                 else {
-                    results = allEntries.filter(e => {
-                        return Object.values(e).some(val => {
-                            if (val === null || val === undefined) return false;
-                            return String(val).toLowerCase().includes(q);
-                        });
-                    });
+                    results = allEntries.filter(e =>
+                        Object.values(e).some(val => val && String(val).toLowerCase().includes(q))
+                    );
                 }
             } else if (type === 'name') {
-                if (!q) results = [];
-                else {
-                    results = allEntries.filter(e => {
-                        const student = students.find(s => s.id === e.studentId);
-                        return student && student.name && student.name.toLowerCase().includes(q);
-                    });
-                }
+                results = allEntries.filter(e => {
+                    const student = students.find(s => s.id === e.studentId);
+                    return student && student.name && student.name.toLowerCase().includes(q);
+                });
             } else if (type === 'topic' || type === 'thema') {
-                if (!q) results = [];
-                else {
-                    results = allEntries.filter(e => {
-                        const topicField = (e.thema || e.activity || e.topic || '');
-                        return topicField.toString().toLowerCase().includes(q);
-                    });
-                }
+                results = allEntries.filter(e => (e.thema || e.activity || e.topic || '').toString().toLowerCase().includes(q));
             } else if (type === 'rating' || type === 'bewertung') {
-                if (!q) {
-                    results = allEntries;
-                } else if (q === 'leer' || q === 'empty') {
-                    results = allEntries.filter(e => !e.bewertung || String(e.bewertung).trim() === '');
-                } else {
-                    results = allEntries.filter(e => {
-                        const r = (e.bewertung || '').toString().toLowerCase();
-                        return r === q;
-                    });
-                }
-            } else {
-                // fallback: treat as general
                 if (!q) results = allEntries;
-                else {
-                    results = allEntries.filter(e => Object.values(e).some(val => String(val || '').toLowerCase().includes(q)));
-                }
+                else if (q === 'leer' || q === 'empty') results = allEntries.filter(e => !e.bewertung || String(e.bewertung).trim() === '');
+                else results = allEntries.filter(e => (e.bewertung || '').toString().toLowerCase() === q);
+            } else {
+                results = allEntries.filter(e => Object.values(e).some(val => String(val || '').toLowerCase().includes(q)));
             }
+
+            // Schülername hinzufügen
+            results = results.map(e => ({
+                ...e,
+                studentName: students.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}`
+            }));
 
             setSearchResults(results || []);
             setViewMode('search');
