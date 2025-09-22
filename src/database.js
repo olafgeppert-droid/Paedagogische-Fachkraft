@@ -265,9 +265,10 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
         for (const student of sampleStudents) await tx.objectStore('students').put(student);
 
         const sampleEntries = [
-            { id: 1, studentId: 1, date: '2025-09-01', activity: 'Mathematik: Addieren', notes: 'Hat gut mitgemacht' },
-            { id: 2, studentId: 2, date: '2025-09-01', activity: 'Lesen: Texte', notes: 'Brauchte Hilfestellung' },
-            { id: 3, studentId: 3, date: '2025-09-02', activity: 'Sachkunde', notes: 'Sehr interessiert' }
+            { id: 1, studentId: 1, date: '2025-09-01', activity: 'Mathematik: Addieren', topic: 'Mathematik', notes: 'Hat gut mitgemacht', bewertung: 'Sehr gut' },
+            { id: 2, studentId: 2, date: '2025-09-01', activity: 'Lesen: Texte', topic: 'Deutsch', notes: 'Brauchte Hilfestellung', bewertung: 'Gut' },
+            { id: 3, studentId: 3, date: '2025-09-02', activity: 'Sachkunde', topic: 'Sachkunde', notes: 'Sehr interessiert', bewertung: 'Sehr gut' },
+            { id: 4, studentId: 1, date: '2025-09-03', activity: 'Sport: Ballspiel', topic: 'Sport', notes: 'Viel Energie', bewertung: '' } // leerer Eintrag
         ];
 
         for (const entry of sampleEntries) await tx.objectStore('entries').put(entry);
@@ -283,6 +284,7 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
         if (setStudents) setStudents(await db.getAll('students'));
         if (setEntries) setEntries(await db.getAll('entries'));
         if (masterDataHandler) masterDataHandler(defaultMasterData);
+
     } catch (err) {
         console.error('Fehler beim Laden der Beispieldaten:', err);
         alert('Fehler beim Laden der Beispieldaten: ' + err.message);
