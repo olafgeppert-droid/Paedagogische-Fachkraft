@@ -107,7 +107,9 @@ const EntryCard = ({ entry, student, onEdit }) => {
             <p><strong>Beobachtungen:</strong> {entry.observations}</p>
             <p><strong>Maßnahmen:</strong> {entry.measures}</p>
             {entry.erfolg && <p><strong>Erfolg:</strong> {entry.erfolg}</p>}
-            {entry.erfolgRating && <p><strong>Bewertung:</strong> {entry.erfolgRating}</p>}
+            {entry.erfolgRating && entry.erfolgRating !== 'none' && (
+                <p><strong>Bewertung:</strong> {entry.erfolgRating}</p>
+            )}
             <button className="button button-3d" onClick={onEdit}>Bearbeiten</button>
         </div>
     );
