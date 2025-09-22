@@ -55,23 +55,27 @@ const SearchModal = ({ onClose, onSearch }) => {
                         </div>
                     )}
 
-                    {searchType === 'rating' && (
-                        <div style={formGroupStyle}>
-                            <label htmlFor="rating">Erfolgsbewertung:</label>
-                            <select
-                                id="rating"
-                                value={rating}
-                                onChange={(e) => setRating(e.target.value)}
-                                required
-                                style={selectStyle}
-                            >
-                                <option value="">-- auswählen --</option>
-                                <option value="positiv">positiv</option>
-                                <option value="negativ">negativ</option>
-                                <option value="leer">leer</option>
-                            </select>
-                        </div>
-                    )}
+                    // In SearchModal.jsx - ersetzen Sie den rating select:
+{searchType === 'rating' && (
+    <div style={formGroupStyle}>
+        <label htmlFor="rating">Erfolgsbewertung:</label>
+        <select
+            id="rating"
+            value={rating}
+            onChange={(e) => setRating(e.target.value)}
+            required
+            style={selectStyle}
+        >
+            <option value="">-- auswählen --</option>
+            <option value="positiv">positiv (Sehr gut, Gut, Erfolg)</option>
+            <option value="negativ">negativ (Schlecht, Probleme, Hilfe)</option>
+            <option value="leer">leer (keine Bewertung)</option>
+            <option value="sehr gut">Sehr gut</option>
+            <option value="gut">Gut</option>
+            <option value="schlecht">Schlecht</option>
+        </select>
+    </div>
+)}
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                         <button type="button" onClick={onClose} style={buttonSecondaryStyle}>❌ Abbrechen</button>
