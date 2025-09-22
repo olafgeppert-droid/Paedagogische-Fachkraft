@@ -1,4 +1,5 @@
 import React from 'react';
+import { version } from '../package.json'; // Version aus package.json importieren
 
 const Header = ({ onMenuClick }) => {
   const currentDate = new Date().toLocaleDateString('de-DE', {
@@ -19,7 +20,7 @@ const Header = ({ onMenuClick }) => {
       
       <div className="header-right">
         <div className="header-date">{currentDate}</div>
-        <div className="header-version">Version 1.8.1</div>
+        <div className="header-version">Version {version}</div>
       </div>
     </header>
   );
