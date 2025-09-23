@@ -1,4 +1,3 @@
-// src/app.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header.jsx';
 import Toolbar from './components/Toolbar.jsx';
@@ -34,7 +33,7 @@ const lightenColor = (color, percent) => {
     const num = parseInt(color.replace('#', ''), 16);
     const amt = Math.round(2.55 * percent);
     const R = (num >> 16) + amt;
-    const G = (num >> 8 & 0x00FF) + amt;
+    const G = ((num >> 8) & 0x00FF) + amt;
     const B = (num & 0x0000FF) + amt;
     return '#' + (
         0x1000000 +
@@ -48,7 +47,7 @@ const darkenColor = (color, percent) => {
     const num = parseInt(color.replace('#', ''), 16);
     const amt = Math.round(2.55 * percent);
     const R = (num >> 16) - amt;
-    const G = (num >> 8 & 0x00FF) - amt;
+    const G = ((num >> 8) & 0x00FF) - amt;
     const B = (num & 0x0000FF) - amt;
     return '#' + (
         0x1000000 +
@@ -231,140 +230,142 @@ const App = () => {
     // =======================
     // Toolbar-Aktionen
     // =======================
-    const handleExport = async () => { if (db) try { await exportData(db); } catch (err) { console.error(err); } };
-    const handleImport = async (file) => {
+    const handleExport = async () => {
+        if (db) {
+            try {
+                await exportData(db);
+            } catch (err) {
+                console.error('Fehler beim Exportieren:', err);
+            }
+        }
+    };
+
+    const handleImport = async (event) => {
         if (!db) return;
         try {
-            await importData(db, file);
+            await importData(db, event, setSettings, setMasterData, setStudents, setModal);
             const updatedStudents = await getStudents(db);
             setStudents(updatedStudents);
             setSelectedStudent(updatedStudents.length > 0 ? updatedStudents[0] : null);
             await loadEntries();
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error('Fehler beim Importieren:', err);
+        }
     };
-    const handleUndo = async () => { if (db) try { await undo(db); await loadEntries(); } catch (err) { console.error(err); } };
-    const handleRedo = async () => { if (db) try { await redo(db); await loadEntries(); } catch (err) { console.error(err); } };
+
+    const handleUndo = async () => {
+        // Undo-Funktion (optional, falls implementiert)
+    };
+
+    const handleRedo = async () => {
+        // Redo-Funktion (optional, falls implementiert)
+    };
+
     const handleLoadSampleData = async () => {
         if (!db) return;
         try {
-            await loadSampleData(db);
-            const updatedStudents = await getStudents(db);
-            setStudents(updatedStudents);
-            setSelectedStudent(updatedStudents.length > 0 ? updatedStudents[0] : null);
-            await loadEntries();
-        } catch (err) { console.error(err); }
+            await loadSampleData(db, setMasterData, setStudents, setEntries);
+        } catch (err) {
+            console.error('Fehler beim Laden der Beispieldaten:', err);
+        }
     };
+
     const handleClearAllData = async () => {
         if (!db) return;
-        if (!window.confirm("⚠️ Alle Daten wirklich löschen?")) return;
-        try {
-            await clearAllData(db);
-            setStudents([]);
-            setEntries([]);
-            setSelectedStudent(null);
-        } catch (err) { console.error(err); }
-    };
-
-    // =======================
-    // Search Modal
-    // =======================
-    const handleOpenSearch = () => setSearchModalOpen(true);
-    const handleCloseSearch = () => setSearchModalOpen(false);
-    const handleSearch = async (criteria) => {
-        if (!db || !criteria) return;
-        let searchTerm = '';
-        let searchType = 'all';
-        if (typeof criteria === 'string') searchTerm = criteria.trim();
-        else { searchTerm = (criteria.value ?? '').toString().trim(); searchType = (criteria.type ?? 'all').toLowerCase(); }
-
-        const isExact = /^".*"$/.test(searchTerm);
-        if (isExact) searchTerm = searchTerm.slice(1, -1).toLowerCase();
-        else searchTerm = searchTerm.toLowerCase();
-
-        try {
-            const allEntries = await db.getAll('entries');
-            let results = allEntries.filter(e => {
-                const topicField = ((e.topic ?? '') || (e.activity ?? '')).toString().toLowerCase();
-                const ratingField = (e.bewertung ?? '').toString().toLowerCase().trim();
-                const studentForAllSearch = students.find(s => s.id === e.studentId);
-
-                switch (searchType) {
-                    case 'topic':
-                    case 'thema':
-                        return isExact ? topicField === searchTerm : topicField.includes(searchTerm);
-                    case 'rating':
-                    case 'bewertung':
-                        return searchTerm === '' || searchTerm === 'leer' ? ratingField === '' : ratingField === searchTerm;
-                    case 'name':
-                        return studentForAllSearch && (studentForAllSearch.name || '').toLowerCase().includes(searchTerm);
-                    case 'all':
-                    default:
-                        const searchableFields = [e.topic, e.activity, e.bewertung, e.notes, e.thema]
-                            .filter(f => f != null)
-                            .map(f => f.toString().toLowerCase());
-                        if (studentForAllSearch && (studentForAllSearch.name || '').toLowerCase().includes(searchTerm)) return true;
-                        return searchableFields.some(f => isExact ? f === searchTerm : f.includes(searchTerm));
-                }
-            });
-
-            results = results.map(e => ({ ...e, studentName: students.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}` }));
-            setSearchResults(results);
-            setEntries(results);
-            setViewMode('search');
-            setSearchModalOpen(false);
-        } catch (err) {
-            console.error(err);
-            setSearchResults([]);
-            setEntries([]);
-            setViewMode('search');
-            setSearchModalOpen(false);
+        if (window.confirm('Sind Sie sicher, dass Sie alle Daten löschen möchten?')) {
+            try {
+                await clearAllData(db, setStudents, setEntries, setSettings, setMasterData);
+                setSelectedStudent(null);
+                setSelectedDate(new Date().toISOString().split('T')[0]);
+            } catch (err) {
+                console.error('Fehler beim Löschen aller Daten:', err);
+            }
         }
     };
 
     // =======================
-    // Rendering
+    // Render
     // =======================
     return (
-        <div className="app-container">
-            <Header onMenuClick={() => setNavOpen(!navOpen)} />
+        <div className="app">
+            <Header settings={settings} />
             <Toolbar
-                onAddStudent={() => setModal('add-student')}
-                onAddEntry={() => setModal('add-entry')}
-                onSearch={handleOpenSearch}
                 onExport={handleExport}
                 onImport={handleImport}
                 onUndo={handleUndo}
                 onRedo={handleRedo}
                 onLoadSampleData={handleLoadSampleData}
                 onClearAllData={handleClearAllData}
-                onSettings={() => setModal('settings')}
-                onStatistics={() => setModal('statistics')}
-                onHelp={() => setModal('help')}
+                onOpenSearch={() => setSearchModalOpen(true)}
             />
-            <div className="main-layout">
-                <Navigation
-                    students={students}
-                    selectedStudent={selectedStudent}
-                    onSelectStudent={setSelectedStudent}
-                    open={navOpen}
-                    onClose={() => setNavOpen(false)}
+            <Navigation
+                students={students}
+                selectedStudent={selectedStudent}
+                onSelectStudent={(s) => setSelectedStudent(s)}
+                navOpen={navOpen}
+                setNavOpen={setNavOpen}
+            />
+            <MainContent
+                viewMode={viewMode}
+                selectedStudent={selectedStudent}
+                selectedDate={selectedDate}
+                entries={viewMode === 'search' ? searchResults : entries}
+                onEditEntry={(entry) => {
+                    setEditingEntry(entry);
+                    setModal('entry');
+                }}
+            />
+            {modal === 'student' && (
+                <StudentModal
+                    student={selectedStudent}
+                    onClose={() => setModal(null)}
+                    onSave={handleUpdateStudent}
                 />
-                <MainContent
-                    viewMode={viewMode}
-                    selectedStudent={selectedStudent}
-                    selectedDate={selectedDate}
-                    entries={entries}
-                    onEditEntry={(entry) => { setEditingEntry(entry); setModal('edit-entry'); }}
+            )}
+            {modal === 'entry' && (
+                <EntryModal
+                    existingEntry={editingEntry}
+                    student={selectedStudent}
+                    date={selectedDate}
+                    masterData={masterData}
+                    onClose={() => {
+                        setModal(null);
+                        setEditingEntry(null);
+                    }}
+                    onSave={async (entry) => {
+                        if (editingEntry) await handleUpdateEntry(entry);
+                        else await handleAddEntry(entry);
+                        setEditingEntry(null);
+                        setModal(null);
+                    }}
                 />
-            </div>
-
-            {modal === 'add-student' && <StudentModal onClose={() => setModal(null)} onSave={handleAddStudent} masterData={masterData} />}
-            {modal === 'add-entry' && selectedStudent && <EntryModal onClose={() => setModal(null)} onSave={handleAddEntry} masterData={masterData} student={selectedStudent} date={selectedDate} />}
-            {modal === 'edit-entry' && editingEntry && <EntryModal onClose={() => { setEditingEntry(null); setModal(null); }} onSave={handleUpdateEntry} masterData={masterData} student={selectedStudent} date={selectedDate} existingEntry={editingEntry} />}
-            {modal === 'settings' && <SettingsModal onClose={() => setModal(null)} onSave={(newSettings) => { setSettings(newSettings); applySettings(newSettings); db.put('settings', newSettings, 1); setModal(null); }} settings={settings} />}
-            {modal === 'statistics' && <StatisticsModal onClose={() => setModal(null)} students={students} entries={entries} />}
+            )}
+            {modal === 'settings' && (
+                <SettingsModal
+                    settings={settings}
+                    onClose={() => setModal(null)}
+                    onSave={(newSettings) => {
+                        setSettings(newSettings);
+                        applySettings(newSettings);
+                    }}
+                />
+            )}
+            {modal === 'statistics' && (
+                <StatisticsModal onClose={() => setModal(null)} students={students} entries={entries} />
+            )}
             {modal === 'help' && <HelpModal onClose={() => setModal(null)} />}
-            {searchModalOpen && <SearchModal onClose={handleCloseSearch} onSearch={handleSearch} />}
+            {searchModalOpen && (
+                <SearchModal
+                    students={students}
+                    entries={entries}
+                    masterData={masterData}
+                    onClose={() => setSearchModalOpen(false)}
+                    onSearch={(results) => {
+                        setSearchResults(results);
+                        setViewMode('search');
+                    }}
+                />
+            )}
         </div>
     );
 };
