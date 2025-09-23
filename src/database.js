@@ -1,3 +1,6 @@
+// =======================
+// database.js – Teil 1
+// =======================
 import { openDB } from 'idb';
 
 // =======================
@@ -102,6 +105,9 @@ export const addEntry = async (db, entryData) => {
 export const updateEntry = async (db, entryData) => {
     await db.put('entries', entryData);
 };
+// =======================
+// database.js – Teil 2
+// =======================
 
 export const deleteEntry = async (db, entryId) => {
     await db.delete('entries', entryId);
