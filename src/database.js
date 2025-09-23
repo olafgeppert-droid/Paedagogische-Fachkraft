@@ -45,7 +45,7 @@ export const deleteStudent = async (db, studentId) => {
         const tx = db.transaction(['students', 'entries'], 'readwrite');
         const entryStore = tx.objectStore('entries');
         const index = entryStore.index('studentId');
-        let cursor = await index.openCursor(IDBKeyRange.only(studentId));
+        let cursor = await (window.IDBKeyRange ? index.openCursor(IDBKeyRange.only(studentId)) : index.openCursor(studentId));
         while (cursor) {
             await cursor.delete();
             cursor = await cursor.continue();
@@ -107,6 +107,7 @@ export const updateEntry = async (db, entryData) => {
 export const deleteEntry = async (db, entryId) => {
     await db.delete('entries', entryId);
 };
+
 // =======================
 // Einstellungen-Funktionen
 // =======================
@@ -265,12 +266,12 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
         for (const student of sampleStudents) await tx.objectStore('students').put(student);
 
         const sampleEntries = [
-            { id: 1, studentId: 1, date: '2025-09-01', activity: 'Mathematik: Addieren', topic: 'Mathematik', notes: 'Hat gut mitgemacht', bewertung: 'Sehr gut' },
-            { id: 2, studentId: 2, date: '2025-09-01', activity: 'Lesen: Texte', topic: 'Deutsch', notes: 'Brauchte Hilfestellung', bewertung: 'Gut' },
-            { id: 3, studentId: 3, date: '2025-09-02', activity: 'Sachkunde', topic: 'Sachkunde', notes: 'Sehr interessiert', bewertung: 'Sehr gut' },
-            { id: 4, studentId: 1, date: '2025-09-03', activity: 'Sport: Ballspiel', topic: 'Sport', notes: 'Viel Energie', bewertung: '' }, // leerer Eintrag
-            { id: 5, studentId: 2, date: '2025-09-04', activity: 'Mathematik: Subtrahieren', topic: 'Mathematik', notes: 'Hat Schwierigkeiten gezeigt', bewertung: 'Schlecht' },
-            { id: 6, studentId: 3, date: '2025-09-04', activity: 'Deutsch: Rechtschreibung', topic: 'Deutsch', notes: 'Exzellente Leistung', bewertung: 'Ausgezeichnet' }
+            { id: 1, studentId: 1, date: '2025-09-01', subject: 'Mathematik', observations: 'Hat gut mitgemacht', measures: 'Additionsaufgaben', erfolg: 'Gut', erfolgRating: 'positiv' },
+            { id: 2, studentId: 2, date: '2025-09-01', subject: 'Deutsch', observations: 'Brauchte Hilfestellung', measures: 'Lesetexte', erfolg: 'Ausreichend', erfolgRating: 'negativ' },
+            { id: 3, studentId: 3, date: '2025-09-02', subject: 'Sachkunde', observations: 'Sehr interessiert', measures: 'Experiment', erfolg: 'Sehr gut', erfolgRating: 'positiv' },
+            { id: 4, studentId: 1, date: '2025-09-03', subject: 'Sport', observations: 'Viel Energie', measures: 'Ballspiel', erfolg: '', erfolgRating: '' },
+            { id: 5, studentId: 2, date: '2025-09-04', subject: 'Mathematik', observations: 'Hat Schwierigkeiten gezeigt', measures: 'Subtraktionsaufgaben', erfolg: 'Schlecht', erfolgRating: 'negativ' },
+            { id: 6, studentId: 3, date: '2025-09-04', subject: 'Deutsch', observations: 'Exzellente Leistung', measures: 'Rechtschreibung', erfolg: 'Sehr gut', erfolgRating: 'positiv' }
         ];
 
         for (const entry of sampleEntries) await tx.objectStore('entries').put(entry);
