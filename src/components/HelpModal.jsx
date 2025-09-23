@@ -13,6 +13,8 @@ const HelpModal = ({ onClose }) => {
 
                 <div style={{ padding: '1rem', maxHeight: '70vh', overflowY: 'auto', lineHeight: '1.5' }}>
                     <p>Willkommen zur ausführlichen Hilfe für die <strong>pädagogische Dokumentations-App</strong>! 🎓 Hier erfahren Sie Schritt für Schritt, wie Sie Schüler verwalten, Einträge bearbeiten, Daten sichern, suchen und filtern können.</p>
+                    <br />
+                    <br />
 
                     <h3>👥 1. Schülerverwaltung</h3>
                     <p>In der Navigationsleiste sehen Sie alle Schüler. Sie können neue Schüler hinzufügen, bestehende bearbeiten oder löschen.</p>
@@ -35,6 +37,8 @@ const HelpModal = ({ onClose }) => {
                         <li>Kombination Suche + Dropdowns: Suchbegriff „Anna“ + Schuljahr „2024/2025“ → zeigt Anna aus dem gewählten Jahr.</li>
                         <li>Datumsauswahl 📅: Filtert Einträge nach dem ausgewählten Tag, zeigt aber Schülerliste unverändert.</li>
                         <li>„❌ Filter löschen“ → setzt alle Filter zurück und zeigt alle Schüler.</li>
+                        <br />
+                        <br />
                     </ul>
 
                     <h3>📝 2. Einträge verwalten</h3>
@@ -53,6 +57,8 @@ const HelpModal = ({ onClose }) => {
                         <li>Filtern nach Schüler + Thema → zeigt nur Einträge dieses Schülers mit dem gewählten Thema.</li>
                         <li>Alle Filter kombinierbar: Schüler, Datum, Schuljahr, Schule, Klasse, Thema/Projekt.</li>
                         <li>Suchfeld in Toolbar öffnet zusätzlich eine Volltextsuche über alle Einträge und Schüler.</li>
+                        <br />
+                        <br />
                     </ul>
 
                     <h3>🔎 3. Suche & erweiterte Filter</h3>
@@ -80,6 +86,8 @@ const HelpModal = ({ onClose }) => {
                         <li>Exakte Suche „Mathematik“ → nur Einträge mit exakt diesem Thema.</li>
                         <li>Kombination Suchbegriff + Datum → zeigt Treffer nur an dem gewählten Tag.</li>
                         <li>Filter Schüler + Suchbegriff + Klasse → sehr gezielte Eingrenzung möglich.</li>
+                        <br />
+                        <br />
                     </ul>
 
                     <h3>💾 4. Datenmanagement</h3>
@@ -89,6 +97,8 @@ const HelpModal = ({ onClose }) => {
                         <li><strong>Drucken:</strong> Toolbar → „🖨️ Drucken“. Druckt die aktuelle Ansicht (z.B. alle Einträge eines Schülers).</li>
                         <li><strong>Beispieldaten laden:</strong> Toolbar → „📂 Beispieldaten“. Nützlich für Testzwecke.</li>
                         <li><strong>Alle Daten löschen:</strong> Toolbar → „❌ Alle Daten löschen“. Sicherheitsabfrage schützt vor versehentlichem Löschen.</li>
+                        <br />
+                        <br />
                     </ul>
 
                     <h3>⚙️ 5. Einstellungen</h3>
@@ -97,6 +107,8 @@ const HelpModal = ({ onClose }) => {
                         <li>Schriftgröße anpassen: für Standardtext und Eingabefelder</li>
                         <li>Stammdaten verwalten: Schuljahre, Schulen, Klassen, Aktivitäten, Notizvorlagen</li>
                         <li>Alle Einstellungen werden automatisch gespeichert</li>
+                        <br />
+                        <br />
                     </ul>
 
                     <h3>📊 6. Statistiken</h3>
@@ -106,6 +118,8 @@ const HelpModal = ({ onClose }) => {
                         <li>Filter aus Navigation wirken direkt auf die Diagramme</li>
                         <li>Diagramme visualisieren Einträge nach Thema, Bewertung, Aktivität oder Schüler</li>
                         <li>Interaktiv: Klicken auf eine Kategorie, um Detailinformationen zu sehen</li>
+                        <br />
+                        <br />
                     </ul>
 
                     <h3>🖐️ 7. Hilfe & Support</h3>
@@ -113,6 +127,8 @@ const HelpModal = ({ onClose }) => {
                         <li>Button ❓ „Hilfe“ öffnet dieses Fenster jederzeit</li>
                         <li>Dialoge schließen über × oben rechts oder „✔️ Verstanden“-Button</li>
                         <li>Software-Version wird am unteren Rand angezeigt: {appVersion}</li>
+                        <br />
+                        <br />
                     </ul>
 
                     <p>Mit dieser Hilfe können Sie nun alle Funktionen optimal nutzen, Schüler und Einträge gezielt suchen, filtern und verwalten, sowie Daten sichern und analysieren.</p>
