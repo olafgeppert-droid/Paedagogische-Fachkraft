@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { setupDB, loadSampleData, clearAllData } from '../database'; // Import der DB-Funktionen
+import { setupDB, loadSampleData, clearAllData } from '../database';
 
 const SettingsModal = ({
     settings,
@@ -12,16 +12,12 @@ const SettingsModal = ({
     setSelectedStudent,
     setSettings
 }) => {
-    // =======================
-    // Form-State
-    // =======================
     const [formData, setFormData] = useState(settings || {
         theme: 'hell',
         fontSize: 16,
         inputFontSize: 16
     });
 
-    // Korrigierte Initialisierung von masterFormData
     const [masterFormData, setMasterFormData] = useState({
         schoolYears: masterData?.schoolYears || [],
         schools: masterData?.schools || {},
@@ -73,9 +69,7 @@ const SettingsModal = ({
             header: '#e74c3c',
             windowBackground: '#f39c12'
         });
-        setTimeout(() => {
-            onClose();
-        }, 300);
+        setTimeout(() => onClose(), 300);
     };
 
     // =======================
@@ -105,7 +99,7 @@ const SettingsModal = ({
     };
 
     const addSchool = () => {
-        const newSchool = prompt('Neue Schule hinzufügen:', 'Heinz-Sielmann-Schule, Grundschule Neustadt an der Weinstraße');
+        const newSchool = prompt('Neue Schule hinzufügen:');
         if (newSchool && !masterFormData.schools[newSchool]) {
             setMasterFormData(prev => ({
                 ...prev,
@@ -154,33 +148,20 @@ const SettingsModal = ({
             }
         }));
     };
+
     // =======================
     // Beispieldaten & Alle Daten löschen
     // =======================
     const handleLoadSampleData = async () => {
-        if (!window.confirm(
-            'Wollen Sie wirklich die Beispieldaten laden? Das überschreibt alle Ihre vorhandenen Daten. Speichern Sie Ihre eigenen Daten vorher!'
-        )) return;
+        if (!window.confirm('Beispieldaten laden? Alle vorhandenen Daten werden überschrieben!')) return;
 
         try {
             const db = await setupDB();
-
             await loadSampleData(db, (data) => {
-                onSaveMasterData({
-                    ...data,
-                    schoolYears: masterFormData.schoolYears,
-                    schools: masterFormData.schools
-                });
+                if (onSaveMasterData) onSaveMasterData(data);
             }, setStudents, setEntries);
-
-            const allStudents = await db.getAll('students');
-            if (setStudents) setStudents(allStudents);
-
-            const allEntries = await db.getAll('entries');
-            if (setEntries) setEntries(allEntries);
-
             onClose();
-            alert('Beispieldaten erfolgreich geladen! Bitte laden Sie die Seite im Browser neu.');
+            alert('Beispieldaten erfolgreich geladen! Bitte Browser-Seite ggf. neu laden.');
         } catch (error) {
             console.error('Fehler beim Laden der Beispieldaten:', error);
             alert('Fehler beim Laden der Beispieldaten: ' + (error.message || error));
@@ -188,19 +169,12 @@ const SettingsModal = ({
     };
 
     const handleClearAllData = async () => {
-        if (!window.confirm('Wollen Sie wirklich alle Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden! Laden Sie die Browser-Seite nach dem Löschen der Daten neu.')) return;
+        if (!window.confirm('Alle Daten löschen? Diese Aktion ist endgültig!')) return;
 
         try {
             const db = await setupDB();
-            await clearAllData(db, setStudents, setEntries, setSettings, () => {
-                onSaveMasterData({ schoolYears: [], schools: {}, subjects: [], activities: [], notesTemplates: [] });
-            });
-
-            if (setStudents) setStudents([]);
-            if (setEntries) setEntries([]);
+            await clearAllData(db, setStudents, setEntries, setSettings, onSaveMasterData);
             if (setSelectedStudent) setSelectedStudent(null);
-            if (setSettings) setSettings(null);
-
             onClose();
         } catch (error) {
             console.error('Fehler beim Löschen aller Daten:', error);
@@ -213,17 +187,15 @@ const SettingsModal = ({
     // =======================
     return (
         <>
-            {/* Haupt-Einstellungen Modal */}
             <div className="modal-overlay">
                 <div className="modal settings-modal">
                     <div className="modal-header">
                         <h2>⚙️ Einstellungen</h2>
                         <button className="modal-close" onClick={onClose} aria-label="Schließen">✖️</button>
                     </div>
-
                     <div className="modal-content">
                         <form onSubmit={handleSubmit}>
-                            {/* Farbschema & Schriftgrößen */}
+                            {/* Farbschema */}
                             <div className="settings-section">
                                 <h3>🎨 Farbschema</h3>
                                 <div className="theme-grid">
@@ -247,7 +219,6 @@ const SettingsModal = ({
                                         </div>
                                     ))}
                                 </div>
-
                                 {formData.theme === 'farbig' && (
                                     <div className="color-customization">
                                         <h4>🎨 Benutzerdefinierte Farben</h4>
@@ -266,7 +237,6 @@ const SettingsModal = ({
                                                             value={customColors[color.key]}
                                                             onChange={(e) => setCustomColors(prev => ({ ...prev, [color.key]: e.target.value }))}
                                                             className="color-picker"
-                                                            aria-label={`Farbe für ${color.label}`}
                                                         />
                                                         <span className="color-value">{customColors[color.key]}</span>
                                                     </div>
@@ -277,6 +247,7 @@ const SettingsModal = ({
                                 )}
                             </div>
 
+                            {/* Schriftgrößen */}
                             <div className="settings-section">
                                 <h3>📝 Schriftgrößen</h3>
                                 <div className="slider-group">
@@ -295,7 +266,6 @@ const SettingsModal = ({
                                                 max="24"
                                                 value={slider.value}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, [slider.key]: parseInt(e.target.value) }))}
-                                                className="slider"
                                             />
                                         </div>
                                     ))}
@@ -342,51 +312,48 @@ const SettingsModal = ({
                 <div className="modal-overlay">
                     <div className="modal masterdata-modal">
                         <div className="modal-header">
-                            <h2>📊 Stammdaten verwalten</h2>
-                            <button className="modal-close" onClick={() => setShowMasterDataModal(false)} aria-label="Schließen">✖️</button>
+                            <h2>🗂️ Stammdaten verwalten</h2>
+                            <button className="modal-close" onClick={() => setShowMasterDataModal(false)}>✖️</button>
                         </div>
                         <div className="modal-content">
                             <form onSubmit={handleMasterDataSubmit}>
-                                {/* Schuljahre */}
-                                <div className="data-section">
-                                    <h3>📅 Schuljahre</h3>
-                                    <div className="data-list">
-                                        {masterFormData.schoolYears.map(year => (
-                                            <div key={year} className="data-item">
-                                                <span>{year}</span>
-                                                <button type="button" className="button button-danger button-icon" onClick={() => removeSchoolYear(year)}>❌</button>
-                                            </div>
+                                <div className="masterdata-section">
+                                    <h4>Schuljahre</h4>
+                                    <ul>
+                                        {masterFormData.schoolYears.map(y => (
+                                            <li key={y}>
+                                                {y} <button type="button" onClick={() => removeSchoolYear(y)}>✖️</button>
+                                            </li>
                                         ))}
-                                    </div>
-                                    <button type="button" className="button button-outline" onClick={addSchoolYear}>➕ Schuljahr hinzufügen</button>
+                                    </ul>
+                                    <button type="button" className="button button-small" onClick={addSchoolYear}>➕ Schuljahr</button>
                                 </div>
 
-                                {/* Schulen & Klassen */}
-                                <div className="data-section">
-                                    <h3>🏫 Schulen und Klassen</h3>
-                                    <button type="button" className="button button-outline" onClick={addSchool}>➕ Neue Schule hinzufügen</button>
-                                    {Object.entries(masterFormData.schools).map(([school, classes]) => (
-                                        <div key={school} className="school-card">
-                                            <div className="school-header">
-                                                <h4>{school}</h4>
-                                                <button type="button" className="button button-danger button-icon" onClick={() => removeSchool(school)}>❌</button>
-                                            </div>
-                                            <div className="classes-list">
-                                                {classes.map(className => (
-                                                    <div key={className} className="class-item">
-                                                        <span>{className}</span>
-                                                        <button type="button" className="button button-danger button-icon" onClick={() => removeClass(school, className)}>❌</button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <button type="button" className="button button-outline" onClick={() => addClass(school)}>➕ Klasse hinzufügen</button>
-                                        </div>
-                                    ))}
+                                <div className="masterdata-section">
+                                    <h4>Schulen & Klassen</h4>
+                                    <ul>
+                                        {Object.keys(masterFormData.schools).map(school => (
+                                            <li key={school}>
+                                                {school} 
+                                                <button type="button" onClick={() => removeSchool(school)}>✖️</button>
+                                                <ul>
+                                                    {masterFormData.schools[school].map(cls => (
+                                                        <li key={cls}>
+                                                            {cls} <button type="button" onClick={() => removeClass(school, cls)}>✖️</button>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                                <button type="button" className="button button-small" onClick={() => addClass(school)}>➕ Klasse</button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <button type="button" className="button button-small" onClick={addSchool}>➕ Schule</button>
                                 </div>
 
+                                {/* TODO: Fächer, Aktivitäten, Notizen */}
                                 <div className="modal-actions">
-                                    <button type="button" className="button button-outline" onClick={() => setShowMasterDataModal(false)}>❌ Schließen</button>
-                                    <button type="submit" className="button button-primary">✅ Änderungen übernehmen</button>
+                                    <button type="button" className="button button-outline" onClick={() => setShowMasterDataModal(false)}>❌ Abbrechen</button>
+                                    <button type="submit" className="button button-primary">✅ Speichern</button>
                                 </div>
                             </form>
                         </div>
