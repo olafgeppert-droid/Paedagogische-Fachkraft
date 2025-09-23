@@ -4,8 +4,8 @@ const Toolbar = ({
     selectedStudent,
     selectedDate,
     onAddStudent,
-    onEditStudent,      // Schüler bearbeiten
-    onSearchProtocol,   // Protokoll suchen
+    onEditStudent,
+    onSearchProtocol,
     onAddEntry,
     onPrint,
     onExport,
@@ -17,7 +17,7 @@ const Toolbar = ({
 }) => {
     return (
         <div className="toolbar">
-            {/* Erste Zeile: Schüler und Protokoll Funktionen */}
+            {/* Erste Zeile: Schüler- und Protokoll-Funktionen */}
             <div className="toolbar-row">
                 <button
                     className="button"
@@ -49,7 +49,7 @@ const Toolbar = ({
                     className="button"
                     onClick={onSearchProtocol}
                     title="Protokoll suchen"
-                    disabled={!selectedStudent}
+                    disabled={false} // Immer aktiv, auch wenn kein Schüler ausgewählt
                 >
                     🔍 Protokoll suchen
                 </button>
