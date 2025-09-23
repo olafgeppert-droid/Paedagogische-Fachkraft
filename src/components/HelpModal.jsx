@@ -20,9 +20,9 @@ const HelpModal = ({ onClose }) => {
                     <p>In der Navigationsleiste sehen Sie alle Schüler. Sie können neue Schüler hinzufügen, bestehende bearbeiten oder löschen.</p>
 
                     <ul>
-                        <li><strong>Schüler hinzufügen:</strong> Toolbar → „👥 Kind hinzufügen“. Geben Sie Name, Geschlecht, Schule, Klasse und optional Notizen ein. Nach dem Speichern erscheint der Schüler sofort in der Liste.</li>
+                        <li><strong>Schüler hinzufügen:</strong> Toolbar → „👥 Neuer Schüler“. Geben Sie Name, Geschlecht, Schule, Klasse und optional Notizen ein. Nach dem Speichern erscheint der Schüler sofort in der Liste.</li>
 
-                        <li><strong>Schüler bearbeiten:</strong> Wählen Sie einen Schüler aus → „✏️ Kind bearbeiten“. Ändern Sie die gewünschten Angaben und speichern.</li>
+                        <li><strong>Schüler bearbeiten:</strong> Wählen Sie einen Schüler aus → „✏️ Schüler bearbeiten“. Ändern Sie die gewünschten Angaben und speichern.</li>
 
                         <li><strong>Schüler löschen:</strong> Im Bearbeitungsdialog auf „❌ Löschen“. Alle zugehörigen Einträge werden ebenfalls entfernt. Vorsicht!</li>
 
