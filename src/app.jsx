@@ -284,8 +284,8 @@ const App = () => {
         try {
             const allEntries = await db.getAll('entries');
             let results = allEntries.filter(e => {
-                const topicField = (e.topic || e.activity || '').toString().toLowerCase();
-                const ratingField = (e.bewertung || '').toString().toLowerCase().trim();
+                const topicField = ((e.topic ?? '') || (e.activity ?? '')).toString().toLowerCase();
+                const ratingField = (e.bewertung ?? '').toString().toLowerCase().trim();
                 const studentForAllSearch = students.find(s => s.id === e.studentId);
 
                 switch (searchType) {
@@ -296,20 +296,29 @@ const App = () => {
                     case 'bewertung':
                         return searchTerm === '' || searchTerm === 'leer' ? ratingField === '' : ratingField === searchTerm;
                     case 'name':
-                        return studentForAllSearch && studentForAllSearch.name.toLowerCase().includes(searchTerm);
+                        return studentForAllSearch && (studentForAllSearch.name || '').toLowerCase().includes(searchTerm);
                     case 'all':
                     default:
-                        const searchableFields = [e.topic, e.activity, e.bewertung, e.notes, e.thema].filter(f => f != null).map(f => f.toString().toLowerCase());
-                        if (studentForAllSearch && studentForAllSearch.name.toLowerCase().includes(searchTerm)) return true;
+                        const searchableFields = [e.topic, e.activity, e.bewertung, e.notes, e.thema]
+                            .filter(f => f != null)
+                            .map(f => f.toString().toLowerCase());
+                        if (studentForAllSearch && (studentForAllSearch.name || '').toLowerCase().includes(searchTerm)) return true;
                         return searchableFields.some(f => isExact ? f === searchTerm : f.includes(searchTerm));
                 }
             });
 
             results = results.map(e => ({ ...e, studentName: students.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}` }));
             setSearchResults(results);
+            setEntries(results);
             setViewMode('search');
             setSearchModalOpen(false);
-        } catch (err) { console.error(err); setSearchResults([]); setViewMode('search'); setSearchModalOpen(false); }
+        } catch (err) {
+            console.error(err);
+            setSearchResults([]);
+            setEntries([]);
+            setViewMode('search');
+            setSearchModalOpen(false);
+        }
     };
 
     // =======================
@@ -345,7 +354,6 @@ const App = () => {
                     selectedStudent={selectedStudent}
                     selectedDate={selectedDate}
                     entries={entries}
-                    searchResults={searchResults}
                     onEditEntry={(entry) => { setEditingEntry(entry); setModal('edit-entry'); }}
                 />
             </div>
