@@ -41,6 +41,7 @@ const SettingsModal = ({
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave({ ...formData, customColors });
+        onClose(); // Fenster schließen
     };
 
     const handleMasterDataSubmit = (e) => {
@@ -317,41 +318,44 @@ const SettingsModal = ({
                         </div>
                         <div className="modal-content">
                             <form onSubmit={handleMasterDataSubmit}>
-                                <div className="masterdata-section">
-                                    <h4>Schuljahre</h4>
-                                    <ul>
-                                        {masterFormData.schoolYears.map(y => (
-                                            <li key={y}>
-                                                {y} <button type="button" onClick={() => removeSchoolYear(y)}>✖️</button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    <button type="button" className="button button-small" onClick={addSchoolYear}>➕ Schuljahr</button>
-                                </div>
+                                <div className="masterdata-container">
+                                    <div className="masterdata-column">
+                                        <h4>Schuljahre</h4>
+                                        <ul>
+                                            {masterFormData.schoolYears.map(y => (
+                                                <li key={y}>
+                                                    {y} <button type="button" onClick={() => removeSchoolYear(y)}>✖️</button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                        <button type="button" className="button button-small" onClick={addSchoolYear}>➕ Schuljahr</button>
+                                    </div>
 
-                                <div className="masterdata-section">
-                                    <h4>Schulen & Klassen</h4>
-                                    <ul>
+                                    <div className="masterdata-column">
+                                        <h4>Schulen & Klassen</h4>
                                         {Object.keys(masterFormData.schools).map(school => (
-                                            <li key={school}>
-                                                {school} 
-                                                <button type="button" onClick={() => removeSchool(school)}>✖️</button>
-                                                <ul>
+                                            <div key={school} className="school-card">
+                                                <div className="school-header">
+                                                    <h4>{school}</h4>
+                                                    <button type="button" onClick={() => removeSchool(school)}>✖️</button>
+                                                </div>
+                                                <div className="classes-list">
                                                     {masterFormData.schools[school].map(cls => (
-                                                        <li key={cls}>
-                                                            {cls} <button type="button" onClick={() => removeClass(school, cls)}>✖️</button>
-                                                        </li>
+                                                        <div key={cls} className="class-item">
+                                                            <span>{cls}</span>
+                                                            <button type="button" onClick={() => removeClass(school, cls)}>✖️</button>
+                                                        </div>
                                                     ))}
-                                                </ul>
+                                                </div>
                                                 <button type="button" className="button button-small" onClick={() => addClass(school)}>➕ Klasse</button>
-                                            </li>
+                                            </div>
                                         ))}
-                                    </ul>
-                                    <button type="button" className="button button-small" onClick={addSchool}>➕ Schule</button>
+                                        <button type="button" className="button button-small" onClick={addSchool}>➕ Schule</button>
+                                    </div>
                                 </div>
 
-                                {/* TODO: Fächer, Aktivitäten, Notizen */}
-                                <div className="modal-actions">
+                                {/* Footer fixiert */}
+                                <div className="modal-footer">
                                     <button type="button" className="button button-outline" onClick={() => setShowMasterDataModal(false)}>❌ Abbrechen</button>
                                     <button type="submit" className="button button-primary">✅ Speichern</button>
                                 </div>
