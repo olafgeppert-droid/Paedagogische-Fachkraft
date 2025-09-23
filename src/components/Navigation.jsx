@@ -3,7 +3,6 @@ import React from 'react';
 const Navigation = ({
     isOpen = false,
     students = [],
-    filteredStudents = [],
     selectedStudent = null,
     selectedDate = '',
     filters = { search: '', schoolYear: '', school: '', className: '' },
@@ -18,12 +17,11 @@ const Navigation = ({
     const [searchTerm, setSearchTerm] = React.useState(filters.search);
     const [localFilters, setLocalFilters] = React.useState(filters);
 
+    // Update Search Term
     const handleSearchChange = (e) => {
         const value = e.target.value;
         setSearchTerm(value);
-        const newFilters = { ...localFilters, search: value };
-        setLocalFilters(newFilters);
-        onFilterChange(newFilters);
+        onFilterChange({ ...localFilters, search: value });
     };
 
     const handleFilterChange = (filterType, value) => {
@@ -33,12 +31,7 @@ const Navigation = ({
     };
 
     const clearAllFilters = () => {
-        const clearedFilters = {
-            search: '',
-            schoolYear: '',
-            school: '',
-            className: ''
-        };
+        const clearedFilters = { search: '', schoolYear: '', school: '', className: '' };
         setSearchTerm('');
         setLocalFilters(clearedFilters);
         onFilterChange(clearedFilters);
@@ -53,6 +46,35 @@ const Navigation = ({
         localFilters.className || 
         selectedDate ||
         selectedStudent;
+
+    // Filter Students basierend auf searchTerm
+    const filteredStudents = students.filter(s =>
+        s.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // iOS-kompatibler Export/Teilen
+    const handleExportClick = async () => {
+        try {
+            const blob = await onShowStats(); // onShowStats wird als Export-Funktion übergeben
+            const url = URL.createObjectURL(blob);
+
+            if (navigator.share) { // iOS/Android Share API
+                await navigator.share({
+                    title: 'Daten exportieren',
+                    files: [new File([blob], 'export.json', { type: 'application/json' })],
+                });
+            } else {
+                // fallback Download
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'export.json';
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        } catch (err) {
+            console.error('Export fehlgeschlagen:', err);
+        }
+    };
 
     return (
         <nav className={`nav ${isOpen ? 'open' : ''}`}>
@@ -153,11 +175,7 @@ const Navigation = ({
                                 onClick={() => onStudentSelect(student)}
                             >
                                 <span className="student-avatar">
-                                    {student.gender === 'w'
-                                        ? '👧'
-                                        : student.gender === 'm'
-                                            ? '👦'
-                                            : '👤'}
+                                    {student.gender === 'w' ? '👧' : student.gender === 'm' ? '👦' : '👤'}
                                 </span>
                                 <div className="student-info">
                                     <div className="student-name">{student.name}</div>
@@ -180,6 +198,9 @@ const Navigation = ({
                     </button>
                     <button className="button button-info" onClick={onShowHelp} style={{ padding: '0.6rem' }}>
                         ❓ Hilfe
+                    </button>
+                    <button className="button button-info" onClick={handleExportClick} style={{ padding: '0.6rem' }}>
+                        💾 Export / Teilen
                     </button>
                 </div>
 
