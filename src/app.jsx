@@ -18,7 +18,6 @@ import {
     deleteStudent,
     addEntry,
     updateEntry,
-    exportData,
     importData,
     undo,
     redo,
@@ -212,37 +211,63 @@ const App = () => {
             setModal(null);
         } catch (err) { console.error(err); }
     };
+
     // =======================
-// Eintrags-Funktionen
-// =======================
-const handleAddEntry = async (entry) => {
-    if (!db || !selectedStudent) return;
-    try {
-        await addEntry(db, { ...entry, studentId: selectedStudent.id, date: selectedDate });
-        await loadEntries();
-        setModal(null);
-    } catch (err) { console.error(err); }
-};
+    // Eintrags-Funktionen
+    // =======================
+    const handleAddEntry = async (entry) => {
+        if (!db || !selectedStudent) return;
+        try {
+            await addEntry(db, { ...entry, studentId: selectedStudent.id, date: selectedDate });
+            await loadEntries();
+            setModal(null);
+        } catch (err) { console.error(err); }
+    };
 
-const handleUpdateEntry = async (entry) => {
-    if (!db) return;
-    try {
-        await updateEntry(db, entry);
-        await loadEntries();
-        setModal(null);
-    } catch (err) { console.error(err); }
-};
-
-// =======================
+    const handleUpdateEntry = async (entry) => {
+        if (!db) return;
+        try {
+            await updateEntry(db, entry);
+            await loadEntries();
+            setModal(null);
+        } catch (err) { console.error(err); }
+    };
+    // =======================
 // Toolbar-Aktionen + weitere Handler
 // =======================
 const handleExport = async () => {
-    if (db) {
-        try {
-            await exportData(db);
-        } catch (err) {
-            console.error('Fehler beim Exportieren:', err);
+    if (!db) return;
+    try {
+        const allData = await db.getAll('students');
+        const entriesData = await db.getAll('entries');
+        const masterDataData = await db.getAll('masterData');
+        const settingsData = await db.getAll('settings');
+        const exportObject = { students: allData, entries: entriesData, masterData: masterDataData[0] || {}, settings: settingsData[0] || {} };
+        const jsonStr = JSON.stringify(exportObject, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const now = new Date();
+        const dateStr = now.toISOString().replace(/[:]/g, '-').split('.')[0];
+        const fileName = `paedagogische-dokumentation-${dateStr}.json`;
+
+        // iOS / Safari / Web Share API
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'application/json' })] })) {
+            const file = new File([blob], fileName, { type: 'application/json' });
+            try {
+                await navigator.share({ files: [file], title: 'Export Daten', text: 'Export der pädagogischen Dokumentation' });
+            } catch (err) {
+                console.error('Export abgebrochen oder fehlgeschlagen:', err);
+            }
+        } else {
+            // Fallback: Download-Link
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
+    } catch (err) {
+        console.error('Fehler beim Exportieren:', err);
     }
 };
 
@@ -294,12 +319,10 @@ const handleClearAllData = async () => {
     }
 };
 
-const handlePrint = () => {
-    window.print();
-};
+const handlePrint = () => { window.print(); };
 
 // =======================
-// Such-Handler (SearchModal Ergebnis verarbeiten)
+// Such-Handler
 // =======================
 const handleSearch = async (criteria) => {
     if (!db) return;
@@ -352,20 +375,12 @@ const handleSearch = async (criteria) => {
 // =======================
 // Navigation-Handler
 // =======================
-const handleStudentClick = (student) => {
-    setSelectedStudent(student);
-};
-
-const handleEditStudent = () => {
-    if (selectedStudent) setModal('student');
-};
-
-const handleOpenSearch = () => {
-    setSearchModalOpen(true);
-};
+const handleStudentClick = (student) => { setSelectedStudent(student); };
+const handleEditStudent = () => { if (selectedStudent) setModal('student'); };
+const handleOpenSearch = () => { setSearchModalOpen(true); };
 
 // =======================
-// Filter für Schülerliste (Navigation)
+// Filter für Schülerliste
 // =======================
 const filteredStudents = students.filter(s =>
     s.name.toLowerCase().includes(studentFilterTerm.toLowerCase())
