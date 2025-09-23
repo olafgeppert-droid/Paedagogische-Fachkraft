@@ -11,109 +11,111 @@ const HelpModal = ({ onClose }) => {
                     <button className="modal-close" onClick={onClose}>×</button>
                 </div>
 
-                <div style={{ paddingRight: '1rem', maxHeight: '70vh', overflowY: 'auto' }}>
-                    <p>Willkommen zur umfassenden Hilfe für die <strong>pädagogische Dokumentations-App</strong>! 🎓 Diese Anleitung erklärt Schritt für Schritt alle Funktionen, Buttons und Dialoge, sowie die Such- und Filtermöglichkeiten.</p>
+                <div style={{ padding: '1rem', maxHeight: '70vh', overflowY: 'auto', lineHeight: '1.5' }}>
+                    <p>Willkommen zur ausführlichen Hilfe für die <strong>pädagogische Dokumentations-App</strong>! 🎓 Hier erfahren Sie Schritt für Schritt, wie Sie Schüler verwalten, Einträge bearbeiten, Daten sichern, suchen und filtern können.</p>
 
                     <h3>👥 1. Schülerverwaltung</h3>
-                    <p>Alle Informationen zu Schülern werden zentral verwaltet. Sie können neue Schüler hinzufügen, bestehende bearbeiten, löschen oder filtern.</p>
+                    <p>In der Navigationsleiste sehen Sie alle Schüler. Sie können neue Schüler hinzufügen, bestehende bearbeiten oder löschen.</p>
+
                     <ul>
-                        <li><strong>Schüler hinzufügen:</strong> Klicken Sie auf <span role="img">👥</span> „Kind hinzufügen“ in der Toolbar. Es öffnet sich ein Dialog, in dem Sie folgende Angaben machen:
-                            <ul>
-                                <li>Name des Kindes</li>
-                                <li>Geschlecht (m/w)</li>
-                                <li>Klasse</li>
-                                <li>Schule</li>
-                                <li>Besondere Notizen oder Hinweise</li>
-                            </ul>
-                            Nach dem Speichern wird der neue Schüler sofort in der Navigation angezeigt.
-                        </li>
-                        <li><strong>Schüler bearbeiten:</strong> Wählen Sie ein Kind in der Navigationsliste aus und klicken Sie auf „✏️ Kind bearbeiten“. Sie können alle zuvor gespeicherten Angaben ändern.</li>
-                        <li><strong>Schüler löschen:</strong> Im Bearbeitungsdialog gibt es einen „❌ Löschen“-Button. Achtung: Alle Einträge dieses Schülers werden ebenfalls gelöscht.</li>
-                        <li><strong>Filter & Suche:</strong> In der Navigation finden Sie oben ein Suchfeld 🔍. 
-                            <ul>
-                                <li>Beispiel: Eingabe <code>Anna</code> zeigt alle Schüler mit „Anna“ im Namen.</li>
-                                <li>Beispiel: <code>an</code> zeigt Anna, Jana und andere Treffer.</li>
-                                <li>Filter nach Schuljahr, Schule oder Klasse: Wählen Sie aus den Dropdowns. Mehrere Filter kombinierbar.</li>
-                                <li>Mit „❌ Filter löschen“ entfernen Sie alle Filter gleichzeitig.</li>
-                            </ul>
-                        </li>
-                        <li><strong>Schülerauswahl:</strong> Klicken Sie auf einen Schüler, um seine Einträge im Hauptbereich anzuzeigen.</li>
+                        <li><strong>Schüler hinzufügen:</strong> Toolbar → „👥 Kind hinzufügen“. Geben Sie Name, Geschlecht, Schule, Klasse und optional Notizen ein. Nach dem Speichern erscheint der Schüler sofort in der Liste.</li>
+
+                        <li><strong>Schüler bearbeiten:</strong> Wählen Sie einen Schüler aus → „✏️ Kind bearbeiten“. Ändern Sie die gewünschten Angaben und speichern.</li>
+
+                        <li><strong>Schüler löschen:</strong> Im Bearbeitungsdialog auf „❌ Löschen“. Alle zugehörigen Einträge werden ebenfalls entfernt. Vorsicht!</li>
+
+                        <li><strong>Filter & Suche:</strong> Oben in der Navigation finden Sie ein Suchfeld 🔍 und mehrere Dropdowns für Schuljahr, Schule und Klasse.</li>
+                    </ul>
+
+                    <p><strong>Beispiele für Filter-Kombinationen:</strong></p>
+                    <ul>
+                        <li>Suchfeld: <code>Anna</code> → zeigt alle Schüler, deren Name „Anna“ enthält.</li>
+                        <li>Dropdown Schuljahr: <code>2024/2025</code> → zeigt nur Schüler dieses Jahrgangs.</li>
+                        <li>Dropdown Schule + Klasse: z.B. Schule „Grundschule A“ und Klasse „3b“ → zeigt nur Schüler aus dieser Klasse.</li>
+                        <li>Kombination Suche + Dropdowns: Suchbegriff „Anna“ + Schuljahr „2024/2025“ → zeigt Anna aus dem gewählten Jahr.</li>
+                        <li>Datumsauswahl 📅: Filtert Einträge nach dem ausgewählten Tag, zeigt aber Schülerliste unverändert.</li>
+                        <li>„❌ Filter löschen“ → setzt alle Filter zurück und zeigt alle Schüler.</li>
                     </ul>
 
                     <h3>📝 2. Einträge verwalten</h3>
-                    <p>Jeder Schüler kann beliebig viele Einträge haben, z. B. Beobachtungen, Aktivitäten oder Bewertungen.</p>
+                    <p>Jeder Schüler kann mehrere Einträge haben. Einträge können Beobachtungen, Aktivitäten, Bewertungen oder Notizen sein.</p>
+
                     <ul>
-                        <li><strong>Neuer Eintrag:</strong> Klicken Sie auf „📝 Eintrag hinzufügen“ in der Toolbar. Dialogfelder:
-                            <ul>
-                                <li>Datum auswählen</li>
-                                <li>Thema/Projekt</li>
-                                <li>Aktivität</li>
-                                <li>Bewertung/Noten</li>
-                                <li>Notizen</li>
-                            </ul>
-                        </li>
-                        <li><strong>Eintrag bearbeiten:</strong> Klicken Sie auf einen bestehenden Eintrag. Wählen Sie „🔧 Eintrag bearbeiten“, ändern Sie die Daten und speichern Sie.</li>
-                        <li><strong>Eintrag löschen:</strong> Direkt im Bearbeitungsdialog über „❌ Löschen“. Nur der gewählte Eintrag wird entfernt.</li>
-                        <li><strong>Datum filtern:</strong> In der Navigation können Sie ein Datum auswählen 📅, um Einträge eines bestimmten Tages zu sehen.</li>
-                        <li><strong>Beispiel:</strong> Datum „2025-09-23“ → zeigt alle Einträge vom heutigen Tag.</li>
+                        <li><strong>Neuer Eintrag:</strong> Toolbar → „📝 Eintrag hinzufügen“. Wählen Sie Schüler, Datum, Thema, Aktivität, Bewertung und Notizen aus.</li>
+                        <li><strong>Eintrag bearbeiten:</strong> Klicken Sie auf einen Eintrag → „🔧 Eintrag bearbeiten“.</li>
+                        <li><strong>Eintrag löschen:</strong> Nur im Bearbeitungsdialog über „❌ Löschen“ möglich.</li>
+                        <li><strong>Datum filtern:</strong> Wählen Sie oben in der Navigation ein Datum, um nur Einträge dieses Tages anzuzeigen.</li>
                     </ul>
 
-                    <h3>🔎 3. Suchen & Filtern von Protokollen</h3>
-                    <p>Die Suchfunktion erlaubt eine gezielte Abfrage über alle Einträge und Schüler.</p>
+                    <p><strong>Besonderheiten beim Filtern von Einträgen:</strong></p>
                     <ul>
-                        <li><strong>Suchdialog öffnen:</strong> Toolbar-Button 🔍 „Protokoll suchen“.</li>
-                        <li><strong>Suchbegriffe:</strong> Sie können nach:
+                        <li>Filtern nach Schüler + Datum → zeigt nur Einträge des gewählten Schülers am gewählten Tag.</li>
+                        <li>Filtern nach Schüler + Thema → zeigt nur Einträge dieses Schülers mit dem gewählten Thema.</li>
+                        <li>Alle Filter kombinierbar: Schüler, Datum, Schuljahr, Schule, Klasse, Thema/Projekt.</li>
+                        <li>Suchfeld in Toolbar öffnet zusätzlich eine Volltextsuche über alle Einträge und Schüler.</li>
+                    </ul>
+
+                    <h3>🔎 3. Suche & erweiterte Filter</h3>
+                    <p>Die Suche ist mächtig und kann nach unterschiedlichen Kriterien arbeiten.</p>
+
+                    <ul>
+                        <li><strong>Suchdialog öffnen:</strong> Toolbar → „🔍 Protokoll suchen“.</li>
+                        <li><strong>Suchbegriffe:</strong>
                             <ul>
-                                <li>Thema/Projekt (<code>Mathematik</code>)</li>
-                                <li>Aktivität (<code>Experiment</code>)</li>
-                                <li>Bewertung (<code>gut</code>)</li>
-                                <li>Notizen (<code>Hausaufgabe erledigt</code>)</li>
-                                <li>Schülername (<code>Anna</code>)</li>
+                                <li>Thema/Projekt</li>
+                                <li>Aktivität</li>
+                                <li>Bewertung</li>
+                                <li>Notizen</li>
+                                <li>Schülername</li>
                             </ul>
                         </li>
                         <li><strong>Exakte Suche:</strong> Mit Anführungszeichen: <code>"Mathematik"</code> → nur exakte Treffer.</li>
-                        <li><strong>Alle Felder durchsuchen:</strong> Auswahl „Alle Felder“ durchsucht automatisch Thema, Aktivität, Notizen, Bewertung und Schülername.</li>
-                        <li><strong>Beispiel 1:</strong> Suchbegriff <code>Projekt</code>, Filter: Thema → zeigt alle Einträge mit „Projekt“ im Thema.</li>
-                        <li><strong>Beispiel 2:</strong> Suchbegriff <code>Anna</code>, Filter: Name → zeigt nur Einträge von Anna.</li>
-                        <li><strong>Suchergebnisse bearbeiten:</strong> Klicken Sie auf einen Eintrag → Bearbeiten oder Löschen.</li>
-                        <li><strong>Filter kombinieren:</strong> Zusätzlich zu Textsuche können Sie Datum, Klasse oder Schule filtern.</li>
-                        <li><strong>Mini-Screenshot:</strong> <img src="/screenshots/search_example.png" alt="Suchbeispiel" style={{ width: '100px', cursor: 'pointer' }} onClick={() => window.open('/screenshots/search_example.png')} /></li>
+                        <li><strong>Alle Felder durchsuchen:</strong> Auswahl „Alle Felder“ durchsucht Thema, Aktivität, Notizen, Bewertung und Schülername.</li>
+                    </ul>
+
+                    <p><strong>Beispiele für Such- und Filter-Kombinationen:</strong></p>
+                    <ul>
+                        <li>Suchbegriff „Anna“ + Filter Name → zeigt nur Einträge von Anna.</li>
+                        <li>Suchbegriff „Experiment“ + Filter Aktivität → zeigt alle Experiment-Einträge.</li>
+                        <li>Exakte Suche „Mathematik“ → nur Einträge mit exakt diesem Thema.</li>
+                        <li>Kombination Suchbegriff + Datum → zeigt Treffer nur an dem gewählten Tag.</li>
+                        <li>Filter Schüler + Suchbegriff + Klasse → sehr gezielte Eingrenzung möglich.</li>
                     </ul>
 
                     <h3>💾 4. Datenmanagement</h3>
                     <ul>
-                        <li><strong>Exportieren:</strong> Button 💾 „Exportieren“ erstellt eine JSON-Datei aller Daten. Auf iOS/Android öffnet sich der Teilen-Dialog 📱.</li>
-                        <li><strong>Importieren:</strong> Button 📥 „Importieren“ → wählt eine Sicherungsdatei aus und lädt Daten.</li>
-                        <li><strong>Drucken:</strong> Button 🖨️ „Drucken“ → PDF oder Ausdruck der aktuellen Ansicht.</li>
-                        <li><strong>Beispieldaten:</strong> Button 📂 „Beispieldaten“ lädt Demo-Schüler und Einträge.</li>
-                        <li><strong>Alle Daten löschen:</strong> Button ❌ „Alle Daten löschen“ → Sicherheitsabfrage schützt vor versehentlichem Löschen.</li>
+                        <li><strong>Exportieren:</strong> Toolbar → „💾 Exportieren“. Erstellt eine JSON-Datei aller Daten. Auf iOS/Android öffnet sich der Teilen-Dialog.</li>
+                        <li><strong>Importieren:</strong> Toolbar → „📥 Importieren“. Wählen Sie eine Sicherungsdatei aus.</li>
+                        <li><strong>Drucken:</strong> Toolbar → „🖨️ Drucken“. Druckt die aktuelle Ansicht (z.B. alle Einträge eines Schülers).</li>
+                        <li><strong>Beispieldaten laden:</strong> Toolbar → „📂 Beispieldaten“. Nützlich für Testzwecke.</li>
+                        <li><strong>Alle Daten löschen:</strong> Toolbar → „❌ Alle Daten löschen“. Sicherheitsabfrage schützt vor versehentlichem Löschen.</li>
                     </ul>
 
                     <h3>⚙️ 5. Einstellungen</h3>
                     <ul>
-                        <li><strong>Farbschema:</strong> hell 🌞, dunkel 🌙 oder kontrastreich 🎨.</li>
-                        <li><strong>Schriftgröße:</strong> Anpassung für Texte und Eingabefelder.</li>
-                        <li><strong>Stammdaten verwalten:</strong> Schuljahre, Schulen, Klassen, Aktivitäten, Notizvorlagen.</li>
-                        <li><strong>Speicherung:</strong> Alle Einstellungen werden automatisch im Browser gespeichert.</li>
+                        <li>Farbschema: hell 🌞, dunkel 🌙 oder kontrastreich 🎨</li>
+                        <li>Schriftgröße anpassen: für Standardtext und Eingabefelder</li>
+                        <li>Stammdaten verwalten: Schuljahre, Schulen, Klassen, Aktivitäten, Notizvorlagen</li>
+                        <li>Alle Einstellungen werden automatisch gespeichert</li>
                     </ul>
 
                     <h3>📊 6. Statistiken</h3>
+                    <p>Statistiken geben Ihnen eine Übersicht zu Schülern, Klassen, Aktivitäten und Bewertungen.</p>
                     <ul>
-                        <li>Button 📊 „Statistiken“ in Toolbar oder Navigation.</li>
-                        <li>Übersicht nach Schüler, Klasse oder Zeitraum.</li>
-                        <li>Diagramme zu Aktivitäten, Bewertungen, Notizen.</li>
-                        <li>Filter aus Navigation wirken direkt auf Statistiken.</li>
-                        <li>Mini-Screenshot: <img src="/screenshots/stats_example.png" alt="Statistiken" style={{ width: '100px', cursor: 'pointer' }} onClick={() => window.open('/screenshots/stats_example.png')} /></li>
+                        <li>Button 📊 „Statistiken“ in Toolbar oder Navigation</li>
+                        <li>Filter aus Navigation wirken direkt auf die Diagramme</li>
+                        <li>Diagramme visualisieren Einträge nach Thema, Bewertung, Aktivität oder Schüler</li>
+                        <li>Interaktiv: Klicken auf eine Kategorie, um Detailinformationen zu sehen</li>
                     </ul>
 
                     <h3>🖐️ 7. Hilfe & Support</h3>
                     <ul>
-                        <li>Button ❓ „Hilfe“ öffnet diese Anleitung jederzeit.</li>
-                        <li>Dialoge schließen über × oben rechts.</li>
-                        <li>Versionsanzeige am unteren Rand: {appVersion}</li>
+                        <li>Button ❓ „Hilfe“ öffnet dieses Fenster jederzeit</li>
+                        <li>Dialoge schließen über × oben rechts oder „✔️ Verstanden“-Button</li>
+                        <li>Software-Version wird am unteren Rand angezeigt: {appVersion}</li>
                     </ul>
 
-                    <p>Mit dieser ausführlichen Hilfe sollten alle Funktionen, Filter, Suchmöglichkeiten und Datenoperationen verständlich sein. Nutzen Sie die Such- und Filterfunktionen, um gezielt Schüler und Einträge zu finden, und bearbeiten Sie Daten komfortabel über Toolbar und Navigation.</p>
+                    <p>Mit dieser Hilfe können Sie nun alle Funktionen optimal nutzen, Schüler und Einträge gezielt suchen, filtern und verwalten, sowie Daten sichern und analysieren.</p>
                 </div>
 
                 <div className="form-actions" style={{ marginTop: '1rem' }}>
