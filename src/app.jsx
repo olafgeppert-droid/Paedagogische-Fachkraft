@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header.jsx';
 import Toolbar from './components/Toolbar.jsx';
@@ -121,6 +122,7 @@ const App = () => {
             try {
                 const database = await setupDB();
                 setDb(database);
+                console.log('DB initialized:', database);
 
                 const settingsData = await database.get('settings', 1);
                 if (settingsData) {
@@ -232,11 +234,8 @@ const App = () => {
     // =======================
     const handleExport = async () => {
         if (db) {
-            try {
-                await exportData(db);
-            } catch (err) {
-                console.error('Fehler beim Exportieren:', err);
-            }
+            try { await exportData(db); } 
+            catch (err) { console.error('Fehler beim Exportieren:', err); }
         }
     };
 
@@ -246,128 +245,3 @@ const App = () => {
             await importData(db, event, setSettings, setMasterData, setStudents, setModal);
             const updatedStudents = await getStudents(db);
             setStudents(updatedStudents);
-            setSelectedStudent(updatedStudents.length > 0 ? updatedStudents[0] : null);
-            await loadEntries();
-        } catch (err) {
-            console.error('Fehler beim Importieren:', err);
-        }
-    };
-
-    const handleUndo = async () => {
-        // Undo-Funktion (optional, falls implementiert)
-    };
-
-    const handleRedo = async () => {
-        // Redo-Funktion (optional, falls implementiert)
-    };
-
-    const handleLoadSampleData = async () => {
-        if (!db) return;
-        try {
-            await loadSampleData(db, setMasterData, setStudents, setEntries);
-        } catch (err) {
-            console.error('Fehler beim Laden der Beispieldaten:', err);
-        }
-    };
-
-    const handleClearAllData = async () => {
-        if (!db) return;
-        if (window.confirm('Sind Sie sicher, dass Sie alle Daten löschen möchten?')) {
-            try {
-                await clearAllData(db, setStudents, setEntries, setSettings, setMasterData);
-                setSelectedStudent(null);
-                setSelectedDate(new Date().toISOString().split('T')[0]);
-            } catch (err) {
-                console.error('Fehler beim Löschen aller Daten:', err);
-            }
-        }
-    };
-
-    // =======================
-    // Render
-    // =======================
-    return (
-        <div className="app">
-            <Header settings={settings} />
-            <Toolbar
-                onExport={handleExport}
-                onImport={handleImport}
-                onUndo={handleUndo}
-                onRedo={handleRedo}
-                onLoadSampleData={handleLoadSampleData}
-                onClearAllData={handleClearAllData}
-                onOpenSearch={() => setSearchModalOpen(true)}
-            />
-            <Navigation
-                students={students}
-                selectedStudent={selectedStudent}
-                onSelectStudent={(s) => setSelectedStudent(s)}
-                navOpen={navOpen}
-                setNavOpen={setNavOpen}
-            />
-            <MainContent
-                viewMode={viewMode}
-                selectedStudent={selectedStudent}
-                selectedDate={selectedDate}
-                entries={viewMode === 'search' ? searchResults : entries}
-                onEditEntry={(entry) => {
-                    setEditingEntry(entry);
-                    setModal('entry');
-                }}
-            />
-            {modal === 'student' && (
-                <StudentModal
-                    student={selectedStudent}
-                    onClose={() => setModal(null)}
-                    onSave={handleUpdateStudent}
-                />
-            )}
-            {modal === 'entry' && (
-                <EntryModal
-                    existingEntry={editingEntry}
-                    student={selectedStudent}
-                    date={selectedDate}
-                    masterData={masterData}
-                    onClose={() => {
-                        setModal(null);
-                        setEditingEntry(null);
-                    }}
-                    onSave={async (entry) => {
-                        if (editingEntry) await handleUpdateEntry(entry);
-                        else await handleAddEntry(entry);
-                        setEditingEntry(null);
-                        setModal(null);
-                    }}
-                />
-            )}
-            {modal === 'settings' && (
-                <SettingsModal
-                    settings={settings}
-                    onClose={() => setModal(null)}
-                    onSave={(newSettings) => {
-                        setSettings(newSettings);
-                        applySettings(newSettings);
-                    }}
-                />
-            )}
-            {modal === 'statistics' && (
-                <StatisticsModal onClose={() => setModal(null)} students={students} entries={entries} />
-            )}
-            {modal === 'help' && <HelpModal onClose={() => setModal(null)} />}
-            {searchModalOpen && (
-                <SearchModal
-                    students={students}
-                    entries={entries}
-                    masterData={masterData}
-                    onClose={() => setSearchModalOpen(false)}
-                    onSearch={(results) => {
-                        setSearchResults(results);
-                        setViewMode('search');
-                    }}
-                />
-            )}
-        </div>
-    );
-};
-
-export default App;
