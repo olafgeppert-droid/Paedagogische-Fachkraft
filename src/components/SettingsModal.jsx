@@ -39,8 +39,9 @@ const SettingsModal = ({
     // Handlers
     // =======================
     const handleSubmit = (e) => {
-        e.preventDefault();
-        onSave({ ...formData, customColors });
+    e.preventDefault();
+    onSave({ ...formData, customColors });
+    onClose(); // <-- Modal schließen nach Übernehmen
     };
 
     const handleMasterDataSubmit = (e) => {
