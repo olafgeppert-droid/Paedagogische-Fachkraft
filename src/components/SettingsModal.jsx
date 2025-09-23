@@ -41,7 +41,6 @@ const SettingsModal = ({
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave({ ...formData, customColors });
-        onClose(); // Fenster schließen
     };
 
     const handleMasterDataSubmit = (e) => {
@@ -354,7 +353,6 @@ const SettingsModal = ({
                                     </div>
                                 </div>
 
-                                {/* Footer fixiert */}
                                 <div className="modal-footer">
                                     <button type="button" className="button button-outline" onClick={() => setShowMasterDataModal(false)}>❌ Abbrechen</button>
                                     <button type="submit" className="button button-primary">✅ Speichern</button>
