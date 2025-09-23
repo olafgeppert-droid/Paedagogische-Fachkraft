@@ -17,7 +17,6 @@ const Navigation = ({
     const [searchTerm, setSearchTerm] = React.useState(filters.search);
     const [localFilters, setLocalFilters] = React.useState(filters);
 
-    // Update Search Term
     const handleSearchChange = (e) => {
         const value = e.target.value;
         setSearchTerm(value);
@@ -47,34 +46,9 @@ const Navigation = ({
         selectedDate ||
         selectedStudent;
 
-    // Filter Students basierend auf searchTerm
     const filteredStudents = students.filter(s =>
         s.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
-    // iOS-kompatibler Export/Teilen
-    const handleExportClick = async () => {
-        try {
-            const blob = await onShowStats(); // onShowStats wird als Export-Funktion übergeben
-            const url = URL.createObjectURL(blob);
-
-            if (navigator.share) { // iOS/Android Share API
-                await navigator.share({
-                    title: 'Daten exportieren',
-                    files: [new File([blob], 'export.json', { type: 'application/json' })],
-                });
-            } else {
-                // fallback Download
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'export.json';
-                a.click();
-                URL.revokeObjectURL(url);
-            }
-        } catch (err) {
-            console.error('Export fehlgeschlagen:', err);
-        }
-    };
 
     return (
         <nav className={`nav ${isOpen ? 'open' : ''}`}>
@@ -198,9 +172,6 @@ const Navigation = ({
                     </button>
                     <button className="button button-info" onClick={onShowHelp} style={{ padding: '0.6rem' }}>
                         ❓ Hilfe
-                    </button>
-                    <button className="button button-info" onClick={handleExportClick} style={{ padding: '0.6rem' }}>
-                        💾 Export / Teilen
                     </button>
                 </div>
 
