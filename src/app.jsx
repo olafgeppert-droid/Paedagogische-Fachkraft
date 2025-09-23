@@ -256,11 +256,11 @@ const handleImport = async (event) => {
 };
 
 const handleUndo = async () => {
-    await undo(db, history, historyIndex, setHistoryIndex, setStudents);
+    // Undo-Funktion (optional, falls implementiert)
 };
 
 const handleRedo = async () => {
-    await redo(db, history, historyIndex, setHistoryIndex, setStudents);
+    // Redo-Funktion (optional, falls implementiert)
 };
 
 const handleLoadSampleData = async () => {
@@ -290,8 +290,7 @@ const handleClearAllData = async () => {
 // =======================
 return (
     <div className="app">
-        <Header settings={settings} onMenuClick={() => setNavOpen(!navOpen)} />
-
+        <Header settings={settings} />
         <Toolbar
             onExport={handleExport}
             onImport={handleImport}
@@ -301,22 +300,13 @@ return (
             onClearAllData={handleClearAllData}
             onOpenSearch={() => setSearchModalOpen(true)}
         />
-
         <Navigation
-            isOpen={navOpen}
             students={students}
             selectedStudent={selectedStudent}
-            selectedDate={selectedDate}
-            filters={{ search: '' }}
-            masterData={masterData}
-            onStudentSelect={(s) => setSelectedStudent(s)}
-            onDateSelect={setSelectedDate}
-            onFilterChange={() => {}}
-            onShowStats={() => setModal('statistics')}
-            onShowSettings={() => setModal('settings')}
-            onShowHelp={() => setModal('help')}
+            onSelectStudent={(s) => setSelectedStudent(s)}
+            navOpen={navOpen}
+            setNavOpen={setNavOpen}
         />
-
         <MainContent
             viewMode={viewMode}
             selectedStudent={selectedStudent}
@@ -327,15 +317,15 @@ return (
                 setModal('entry');
             }}
         />
-
         {modal === 'student' && (
             <StudentModal
                 student={selectedStudent}
                 onClose={() => setModal(null)}
                 onSave={handleUpdateStudent}
+                onDelete={handleDeleteStudent}
+                masterData={masterData}
             />
         )}
-
         {modal === 'entry' && (
             <EntryModal
                 existingEntry={editingEntry}
@@ -354,7 +344,6 @@ return (
                 }}
             />
         )}
-
         {modal === 'settings' && (
             <SettingsModal
                 settings={settings}
@@ -365,13 +354,10 @@ return (
                 }}
             />
         )}
-
         {modal === 'statistics' && (
             <StatisticsModal onClose={() => setModal(null)} students={students} entries={entries} />
         )}
-
         {modal === 'help' && <HelpModal onClose={() => setModal(null)} />}
-
         {searchModalOpen && (
             <SearchModal
                 students={students}
@@ -385,6 +371,8 @@ return (
             />
         )}
     </div>
-);
+); // Ende return
+
+}; // Ende App-Komponente
 
 export default App;
