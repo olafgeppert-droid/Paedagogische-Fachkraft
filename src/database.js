@@ -45,7 +45,7 @@ export const deleteStudent = async (db, studentId) => {
         const tx = db.transaction(['students', 'entries'], 'readwrite');
         const entryStore = tx.objectStore('entries');
         const index = entryStore.index('studentId');
-        let cursor = await (window.IDBKeyRange ? index.openCursor(IDBKeyRange.only(studentId)) : index.openCursor(studentId));
+        let cursor = await index.openCursor(IDBKeyRange.only(studentId));
         while (cursor) {
             await cursor.delete();
             cursor = await cursor.continue();
@@ -133,69 +133,6 @@ export const filterStudents = (students, criteria = {}) => {
 };
 
 // =======================
-// Undo/Redo-Funktionen
-// =======================
-export const saveStateForUndo = async (db, history, historyIndex, setHistory, setHistoryIndex) => {
-    try {
-        const [students, entries, settings, masterData] = await Promise.all([
-            db.getAll('students'),
-            db.getAll('entries'),
-            db.get('settings', 1),
-            db.get('masterData', 1)
-        ]);
-        const currentState = { students, entries, settings, masterData, timestamp: new Date().toISOString() };
-        const newHistory = history.slice(0, historyIndex + 1);
-        newHistory.push(currentState);
-        if (newHistory.length > 50) newHistory.shift();
-
-        setHistory(newHistory);
-        setHistoryIndex(newHistory.length - 1);
-    } catch (err) {
-        console.error('Fehler beim Speichern des Zustands für Undo:', err);
-    }
-};
-
-export const undo = async (db, history, historyIndex, setHistoryIndex, setStudents) => {
-    if (historyIndex <= 0 || !db) return;
-    try {
-        const prevState = history[historyIndex - 1];
-        const tx = db.transaction(['students','entries','settings','masterData'], 'readwrite');
-        await tx.objectStore('students').clear();
-        await tx.objectStore('entries').clear();
-        for (const s of prevState.students) await tx.objectStore('students').add(s);
-        for (const e of prevState.entries) await tx.objectStore('entries').add(e);
-        if (prevState.settings) await tx.objectStore('settings').put(prevState.settings);
-        if (prevState.masterData) await tx.objectStore('masterData').put(prevState.masterData);
-        await tx.done;
-
-        if (setStudents) setStudents(await db.getAll('students'));
-        setHistoryIndex(historyIndex - 1);
-    } catch (err) {
-        console.error('Fehler beim Undo:', err);
-    }
-};
-
-export const redo = async (db, history, historyIndex, setHistoryIndex, setStudents) => {
-    if (historyIndex >= history.length - 1 || !db) return;
-    try {
-        const nextState = history[historyIndex + 1];
-        const tx = db.transaction(['students','entries','settings','masterData'], 'readwrite');
-        await tx.objectStore('students').clear();
-        await tx.objectStore('entries').clear();
-        for (const s of nextState.students) await tx.objectStore('students').add(s);
-        for (const e of nextState.entries) await tx.objectStore('entries').add(e);
-        if (nextState.settings) await tx.objectStore('settings').put(nextState.settings);
-        if (nextState.masterData) await tx.objectStore('masterData').put(nextState.masterData);
-        await tx.done;
-
-        if (setStudents) setStudents(await db.getAll('students'));
-        setHistoryIndex(historyIndex + 1);
-    } catch (err) {
-        console.error('Fehler beim Redo:', err);
-    }
-};
-
-// =======================
 // Export / Import
 // =======================
 export const exportData = async (db) => {
@@ -266,12 +203,12 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
         for (const student of sampleStudents) await tx.objectStore('students').put(student);
 
         const sampleEntries = [
-            { id: 1, studentId: 1, date: '2025-09-01', subject: 'Mathematik', observations: 'Hat gut mitgemacht', measures: 'Additionsaufgaben', erfolg: 'Gut', erfolgRating: 'positiv' },
-            { id: 2, studentId: 2, date: '2025-09-01', subject: 'Deutsch', observations: 'Brauchte Hilfestellung', measures: 'Lesetexte', erfolg: 'Ausreichend', erfolgRating: 'negativ' },
-            { id: 3, studentId: 3, date: '2025-09-02', subject: 'Sachkunde', observations: 'Sehr interessiert', measures: 'Experiment', erfolg: 'Sehr gut', erfolgRating: 'positiv' },
-            { id: 4, studentId: 1, date: '2025-09-03', subject: 'Sport', observations: 'Viel Energie', measures: 'Ballspiel', erfolg: '', erfolgRating: '' },
-            { id: 5, studentId: 2, date: '2025-09-04', subject: 'Mathematik', observations: 'Hat Schwierigkeiten gezeigt', measures: 'Subtraktionsaufgaben', erfolg: 'Schlecht', erfolgRating: 'negativ' },
-            { id: 6, studentId: 3, date: '2025-09-04', subject: 'Deutsch', observations: 'Exzellente Leistung', measures: 'Rechtschreibung', erfolg: 'Sehr gut', erfolgRating: 'positiv' }
+            { id: 1, studentId: 1, date: '2025-09-01', activity: 'Mathematik: Addieren', topic: 'Mathematik', notes: 'Hat gut mitgemacht', bewertung: 'Sehr gut' },
+            { id: 2, studentId: 2, date: '2025-09-01', activity: 'Lesen: Texte', topic: 'Deutsch', notes: 'Brauchte Hilfestellung', bewertung: 'Gut' },
+            { id: 3, studentId: 3, date: '2025-09-02', activity: 'Sachkunde', topic: 'Sachkunde', notes: 'Sehr interessiert', bewertung: 'Sehr gut' },
+            { id: 4, studentId: 1, date: '2025-09-03', activity: 'Sport: Ballspiel', topic: 'Sport', notes: 'Viel Energie', bewertung: '' },
+            { id: 5, studentId: 2, date: '2025-09-04', activity: 'Mathematik: Subtrahieren', topic: 'Mathematik', notes: 'Hat Schwierigkeiten gezeigt', bewertung: 'Schlecht' },
+            { id: 6, studentId: 3, date: '2025-09-04', activity: 'Deutsch: Rechtschreibung', topic: 'Deutsch', notes: 'Exzellente Leistung', bewertung: 'Ausgezeichnet' }
         ];
 
         for (const entry of sampleEntries) await tx.objectStore('entries').put(entry);
