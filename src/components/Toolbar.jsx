@@ -1,12 +1,12 @@
 import React from 'react';
 
 const Toolbar = ({
-    selectedStudent, 
-    selectedDate, 
-    onAddStudent, 
+    selectedStudent,
+    selectedDate,
+    onAddStudent,
     onEditStudent,      // Schüler bearbeiten
     onSearchProtocol,   // Protokoll suchen
-    onAddEntry, 
+    onAddEntry,
     onPrint,
     onExport,
     onImport,
@@ -36,21 +36,20 @@ const Toolbar = ({
                     ✏️ Schüler bearbeiten
                 </button>
                 
-                {/* zuerst Protokoll anlegen */}
                 <button
                     className="button"
                     onClick={onAddEntry}
                     title="Neues Protokoll anlegen"
+                    disabled={!selectedStudent}
                 >
                     📝 Protokoll anlegen
                 </button>
 
-                {/* dann Protokoll suchen */}
                 <button
                     className="button"
                     onClick={onSearchProtocol}
                     title="Protokoll suchen"
-                    disabled={!selectedStudent && !selectedDate}
+                    disabled={!selectedStudent}
                 >
                     🔍 Protokoll suchen
                 </button>
@@ -62,6 +61,7 @@ const Toolbar = ({
                     className="button"
                     onClick={onPrint}
                     title="Drucken"
+                    disabled={!selectedStudent}
                 >
                     🖨️ Drucken
                 </button>
