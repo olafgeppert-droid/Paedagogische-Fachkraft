@@ -123,7 +123,6 @@ const App = () => {
             try {
                 const database = await setupDB();
                 setDb(database);
-                console.log('DB initialized:', database);
 
                 const settingsData = await database.get('settings', 1);
                 if (settingsData) {
@@ -388,7 +387,7 @@ return (
             onRedo={handleRedo}
             onLoadSampleData={handleLoadSampleData}
             onClearAllData={handleClearAllData}
-            onSearchProtocol={handleOpenSearch} // immer aktiv
+            onSearchProtocol={handleOpenSearch}
             onAddStudent={() => { setSelectedStudent(null); setModal('student'); }}
             onAddEntry={() => { setEditingEntry(null); setModal('entry'); }}
             onPrint={handlePrint}
