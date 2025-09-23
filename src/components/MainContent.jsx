@@ -1,6 +1,8 @@
 import React from 'react';
+import EntryModal from './EntryModal';
 
 const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditEntry }) => {
+
     if (viewMode === 'student' && selectedStudent) {
         return (
             <div className="main">
@@ -23,12 +25,12 @@ const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditE
                 )}
             </div>
         );
-    } else if (viewMode === 'day' && selectedDate) {
+    }
+
+    if (viewMode === 'day' && selectedDate) {
         const entriesByStudent = {};
         entries.forEach((entry) => {
-            if (!entriesByStudent[entry.studentId]) {
-                entriesByStudent[entry.studentId] = [];
-            }
+            if (!entriesByStudent[entry.studentId]) entriesByStudent[entry.studentId] = [];
             entriesByStudent[entry.studentId].push(entry);
         });
 
@@ -48,6 +50,7 @@ const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditE
                                     <EntryCard
                                         key={entry.id}
                                         entry={entry}
+                                        student={{ name: entry.studentName, id: entry.studentId }}
                                         onEdit={() => onEditEntry(entry)}
                                     />
                                 ))}
@@ -57,7 +60,9 @@ const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditE
                 )}
             </div>
         );
-    } else if (viewMode === 'search') {
+    }
+
+    if (viewMode === 'search') {
         return (
             <div className="main">
                 <h2>🔍 Suchergebnisse</h2>
@@ -71,6 +76,7 @@ const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditE
                             <EntryCard
                                 key={entry.id}
                                 entry={entry}
+                                student={{ name: entry.studentName, id: entry.studentId }}
                                 onEdit={() => onEditEntry(entry)}
                             />
                         ))}
@@ -78,19 +84,19 @@ const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditE
                 )}
             </div>
         );
-    } else {
-        return (
-            <div className="main">
-                <div className="welcome-screen centered">
-                    <h2>Willkommen!</h2>
-                    <p>
-                        Wählen Sie links einen Schüler aus der Liste, um die Protokolle anzuzeigen,
-                        oder wählen Sie einen Tag, um alle Einträge für diesen Tag zu sehen.
-                    </p>
-                </div>
-            </div>
-        );
     }
+
+    return (
+        <div className="main">
+            <div className="welcome-screen centered">
+                <h2>Willkommen!</h2>
+                <p>
+                    Wählen Sie links einen Schüler aus der Liste, um die Protokolle anzuzeigen,
+                    oder wählen Sie einen Tag, um alle Einträge für diesen Tag zu sehen.
+                </p>
+            </div>
+        </div>
+    );
 };
 
 const EntryCard = ({ entry, student, onEdit }) => {
@@ -99,15 +105,15 @@ const EntryCard = ({ entry, student, onEdit }) => {
     return (
         <div className="entry-card">
             <div className="entry-header">
-                <span className="entry-subject">{entry.subject}</span>
+                <span className="entry-subject">{entry.subject || entry.topic}</span>
                 <span className="entry-date">{new Date(entry.date).toLocaleDateString('de-DE')}</span>
             </div>
             <p><strong>Schüler:</strong> {studentName}</p>
-            <p><strong>Beobachtungen:</strong> {entry.observations}</p>
-            <p><strong>Maßnahmen:</strong> {entry.measures}</p>
+            <p><strong>Beobachtungen:</strong> {entry.observations || entry.notes}</p>
+            <p><strong>Maßnahmen:</strong> {entry.measures || entry.activity}</p>
             {entry.erfolg && <p><strong>Erfolg:</strong> {entry.erfolg}</p>}
             {entry.erfolgRating && entry.erfolgRating !== 'none' && (
-                <p><strong>Bewertung:</strong> {entry.erfolgRating}</p>
+                <p><strong>Bewertung:</strong> {entry.erfolgRating || entry.bewertung}</p>
             )}
             <button className="button button-3d" onClick={onEdit}>Bearbeiten</button>
         </div>
