@@ -4,8 +4,8 @@ const Toolbar = ({
     selectedStudent,
     selectedDate,
     onAddStudent,
-    onEditStudent,
-    onSearchProtocol,
+    onEditStudent,      // Schüler bearbeiten
+    onSearchProtocol,   // Protokoll suchen
     onAddEntry,
     onPrint,
     onExport,
@@ -17,7 +17,7 @@ const Toolbar = ({
 }) => {
     return (
         <div className="toolbar">
-            {/* Erste Zeile: Schüler- und Protokoll-Funktionen */}
+            {/* Erste Zeile: Schüler- und Protokollfunktionen */}
             <div className="toolbar-row">
                 <button
                     className="button"
@@ -45,17 +45,17 @@ const Toolbar = ({
                     📝 Protokoll anlegen
                 </button>
 
+                {/* Protokoll suchen bleibt immer aktiv */}
                 <button
                     className="button"
                     onClick={onSearchProtocol}
                     title="Protokoll suchen"
-                    disabled={false} // Immer aktiv, auch wenn kein Schüler ausgewählt
                 >
                     🔍 Protokoll suchen
                 </button>
             </div>
 
-            {/* Zweite Zeile: Datenmanagement Funktionen */}
+            {/* Zweite Zeile: Datenmanagement-Funktionen */}
             <div className="toolbar-row">
                 <button
                     className="button"
@@ -69,9 +69,9 @@ const Toolbar = ({
                 <button
                     className="button"
                     onClick={onExport}
-                    title="Daten exportieren"
+                    title="Daten exportieren / Teilen"
                 >
-                    💾 Export
+                    💾 Export / Teilen
                 </button>
                 
                 <button
