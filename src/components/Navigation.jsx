@@ -30,12 +30,17 @@ const Navigation = ({
     };
 
     const clearAllFilters = () => {
-        const clearedFilters = { search: '', schoolYear: '', school: '', className: '' };
+        const clearedFilters = {
+            search: '',
+            schoolYear: '',
+            school: '',
+            className: ''
+        };
         setSearchTerm('');
         setLocalFilters(clearedFilters);
         onFilterChange(clearedFilters);
-        onDateSelect('');
-        onStudentSelect(null);
+        onDateSelect(''); // Leert auch das Datumsfeld
+        onStudentSelect(null); // Deselektiert das Kind
     };
 
     const hasActiveFilters =
@@ -45,19 +50,6 @@ const Navigation = ({
         localFilters.className || 
         selectedDate ||
         selectedStudent;
-
-    const filteredStudents = students.filter(s =>
-        s.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    const genderEmoji = (gender) => {
-        if (!gender) return '👤';
-        const g = gender.toString().toLowerCase().trim();
-        if (g === 'm' || g === 'männlich' || g === 'male' || g === 'boy') return '👦';
-        if (g === 'w' || g === 'weiblich' || g === 'female' || g === 'girl') return '👧';
-        if (g === 'd' || g === 'divers' || g === 'non-binary' || g === 'nb') return '🧑';
-        return '👤';
-    };
 
     return (
         <nav className={`nav ${isOpen ? 'open' : ''}`}>
@@ -142,23 +134,27 @@ const Navigation = ({
             <div className="students-section">
                 <div className="section-header">
                     <h4>Kind</h4>
-                    <span className="student-count">{filteredStudents.length}</span>
+                    <span className="student-count">{students.length}</span>
                 </div>
 
-                {filteredStudents.length === 0 ? (
+                {students.length === 0 ? (
                     <div className="empty-state">
                         <p>Keine Kinder gefunden</p>
                     </div>
                 ) : (
                     <ul className="students-list">
-                        {filteredStudents.map((student) => (
+                        {students.map((student) => (
                             <li
                                 key={student.id}
                                 className={`student-item ${selectedStudent?.id === student.id ? 'selected' : ''}`}
                                 onClick={() => onStudentSelect(student)}
                             >
                                 <span className="student-avatar">
-                                    {genderEmoji(student.gender)}
+                                    {student.gender === 'w'
+                                        ? '👧'
+                                        : student.gender === 'm'
+                                            ? '👦'
+                                            : '👤'}
                                 </span>
                                 <div className="student-info">
                                     <div className="student-name">{student.name}</div>
