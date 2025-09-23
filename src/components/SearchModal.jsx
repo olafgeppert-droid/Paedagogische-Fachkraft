@@ -1,3 +1,6 @@
+// =======================
+// SearchModal.jsx (korrigiert)
+// =======================
 import React, { useState } from 'react';
 
 const SearchModal = ({ onClose, onSearch }) => {
@@ -8,7 +11,6 @@ const SearchModal = ({ onClose, onSearch }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Sicherstellen, dass value niemals undefined ist
         const safeValue = searchType === 'rating' ? (rating || '') : (searchTerm || '').trim();
 
         const criteria = { 
@@ -16,11 +18,9 @@ const SearchModal = ({ onClose, onSearch }) => {
             value: safeValue
         };
 
-        // Optional: nur ausführen, wenn value nicht leer ist, außer bei "all"
         if (criteria.type === 'all' || criteria.value.length > 0) {
             onSearch(criteria);
         } else {
-            // Wenn leer, suche abbrechen oder leeres Ergebnis zurückgeben
             onSearch({ type: criteria.type, value: '' });
         }
     };
