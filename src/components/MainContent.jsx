@@ -71,7 +71,6 @@ const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditE
                             <EntryCard
                                 key={entry.id}
                                 entry={entry}
-                                student={{ name: entry.studentName, id: entry.studentId }}
                                 onEdit={() => onEditEntry(entry)}
                             />
                         ))}
