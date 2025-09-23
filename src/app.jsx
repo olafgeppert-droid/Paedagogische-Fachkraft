@@ -359,13 +359,24 @@ const handleSearch = async (criteria) => {
     }
 };
 
-// =======================
-// Navigation-Handler
-// =======================
-const handleStudentClick = (student) => { setSelectedStudent(student); };
-const handleEditStudent = () => { if (selectedStudent) setModal('student'); };
-const handleOpenSearch = () => { setSearchModalOpen(true); };
+// Navigation-Handler (ersetzen)
+const handleStudentClick = (student) => {
+    // wähle den Schüler aus
+    setSelectedStudent(student);
 
+    // zurück zur Standardansicht (Studenten-Ansicht), damit die Hauptansicht die Einträge dieses Schülers zeigt
+    setViewMode('student');
+
+    // Suche zurücksetzen (falls vorher eine Suche aktiv war)
+    setSearchResults([]);
+
+    // Falls das Suchmodal noch offen ist, schließen
+    setSearchModalOpen(false);
+
+    // lade die Einträge (loadEntries wird ohnehin durch den Effekt getriggert, diese Zeile ist optional)
+    // loadEntries();
+};
+    
 // =======================
 // Filter für Schülerliste
 // =======================
