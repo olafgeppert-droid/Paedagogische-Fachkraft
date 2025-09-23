@@ -3,6 +3,7 @@ import React from 'react';
 const Navigation = ({
     isOpen = false,
     students = [],
+    filteredStudents = [],
     selectedStudent = null,
     selectedDate = '',
     filters = { search: '', schoolYear: '', school: '', className: '' },
@@ -14,22 +15,15 @@ const Navigation = ({
     onShowSettings = () => {},
     onShowHelp = () => {}
 }) => {
-    // lokale Kopie der Filter (für kontrollierte Inputs)
-    const [searchTerm, setSearchTerm] = React.useState(filters.search || '');
-    const [localFilters, setLocalFilters] = React.useState(filters || { search: '', schoolYear: '', school: '', className: '' });
-
-    // Sync: wenn parent die filters ändert, dann lokale Inputs updaten
-    React.useEffect(() => {
-        setSearchTerm(filters.search || '');
-        setLocalFilters(filters || { search: '', schoolYear: '', school: '', className: '' });
-    }, [filters]);
+    const [searchTerm, setSearchTerm] = React.useState(filters.search);
+    const [localFilters, setLocalFilters] = React.useState(filters);
 
     const handleSearchChange = (e) => {
         const value = e.target.value;
         setSearchTerm(value);
-        const next = { ...localFilters, search: value };
-        setLocalFilters(next);
-        onFilterChange(next);
+        const newFilters = { ...localFilters, search: value };
+        setLocalFilters(newFilters);
+        onFilterChange(newFilters);
     };
 
     const handleFilterChange = (filterType, value) => {
@@ -48,12 +42,15 @@ const Navigation = ({
         setSearchTerm('');
         setLocalFilters(clearedFilters);
         onFilterChange(clearedFilters);
-        onDateSelect(''); // Leert auch das Datumsfeld
-        onStudentSelect(null); // Deselektiert das Kind
+        onDateSelect('');
+        onStudentSelect(null);
     };
 
     const hasActiveFilters =
-        (localFilters && (localFilters.search || localFilters.schoolYear || localFilters.school || localFilters.className)) ||
+        localFilters.search || 
+        localFilters.schoolYear || 
+        localFilters.school || 
+        localFilters.className || 
         selectedDate ||
         selectedStudent;
 
@@ -76,7 +73,7 @@ const Navigation = ({
                     <label className="filter-label">Schuljahr</label>
                     <select
                         className="filter-select"
-                        value={localFilters.schoolYear || ''}
+                        value={localFilters.schoolYear}
                         onChange={(e) => handleFilterChange('schoolYear', e.target.value)}
                     >
                         <option value="">Alle Schuljahre</option>
@@ -90,7 +87,7 @@ const Navigation = ({
                     <label className="filter-label">Schule</label>
                     <select
                         className="filter-select"
-                        value={localFilters.school || ''}
+                        value={localFilters.school}
                         onChange={(e) => handleFilterChange('school', e.target.value)}
                     >
                         <option value="">Alle Schulen</option>
@@ -104,7 +101,7 @@ const Navigation = ({
                     <label className="filter-label">Klasse</label>
                     <select
                         className="filter-select"
-                        value={localFilters.className || ''}
+                        value={localFilters.className}
                         onChange={(e) => handleFilterChange('className', e.target.value)}
                         disabled={!localFilters.school}
                     >
@@ -121,7 +118,7 @@ const Navigation = ({
                     <input
                         type="date"
                         className="filter-select"
-                        value={selectedDate || ''}
+                        value={selectedDate}
                         onChange={(e) => onDateSelect(e.target.value)}
                     />
                 </div>
@@ -140,16 +137,16 @@ const Navigation = ({
             <div className="students-section">
                 <div className="section-header">
                     <h4>Kind</h4>
-                    <span className="student-count">{students.length}</span>
+                    <span className="student-count">{filteredStudents.length}</span>
                 </div>
 
-                {students.length === 0 ? (
+                {filteredStudents.length === 0 ? (
                     <div className="empty-state">
                         <p>Keine Kinder gefunden</p>
                     </div>
                 ) : (
                     <ul className="students-list">
-                        {students.map((student) => (
+                        {filteredStudents.map((student) => (
                             <li
                                 key={student.id}
                                 className={`student-item ${selectedStudent?.id === student.id ? 'selected' : ''}`}
