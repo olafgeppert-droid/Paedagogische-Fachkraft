@@ -50,6 +50,15 @@ const Navigation = ({
         s.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const genderEmoji = (gender) => {
+        if (!gender) return '👤';
+        const g = gender.toString().toLowerCase().trim();
+        if (g === 'm' || g === 'männlich' || g === 'male' || g === 'boy') return '👦';
+        if (g === 'w' || g === 'weiblich' || g === 'female' || g === 'girl') return '👧';
+        if (g === 'd' || g === 'divers' || g === 'non-binary' || g === 'nb') return '🧑';
+        return '👤';
+    };
+
     return (
         <nav className={`nav ${isOpen ? 'open' : ''}`}>
             <h3>Navigation</h3>
@@ -149,7 +158,7 @@ const Navigation = ({
                                 onClick={() => onStudentSelect(student)}
                             >
                                 <span className="student-avatar">
-                                    {student.gender === 'w' ? '👧' : student.gender === 'm' ? '👦' : '👤'}
+                                    {genderEmoji(student.gender)}
                                 </span>
                                 <div className="student-info">
                                     <div className="student-name">{student.name}</div>
