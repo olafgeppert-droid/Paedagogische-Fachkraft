@@ -1,4 +1,3 @@
-// src/database.js
 import { openDB } from 'idb';
 
 // =======================
@@ -262,35 +261,28 @@ export const loadSampleData = async (db, masterDataHandler, setStudents, setEntr
             { id: 2, name: 'Anna Beispiel', schoolYear: '2025/2026', school: 'Heinz-Sielmann-Grundschule', className: '2b', gender: 'w', nationality: 'TR', germanLevel: 1, notes: 'Braucht Unterstützung in Mathematik' },
             { id: 3, name: 'Lukas Schmidt', schoolYear: '2025/2026', school: 'Ostschule', className: '1b', gender: 'm', nationality: 'DE', germanLevel: 3, notes: 'Sehr sozial' }
         ];
-
         for (const student of sampleStudents) await tx.objectStore('students').put(student);
 
         const sampleEntries = [
             { id: 1, studentId: 1, date: '2025-09-01', activity: 'Mathematik: Addieren', topic: 'Mathematik', notes: 'Hat gut mitgemacht', bewertung: 'Sehr gut' },
-            { id: 2, studentId: 2, date: '2025-09-01', activity: 'Lesen: Texte', topic: 'Deutsch', notes: 'Brauchte Hilfestellung', bewertung: 'Gut' },
-            { id: 3, studentId: 3, date: '2025-09-02', activity: 'Sachkunde', topic: 'Sachkunde', notes: 'Sehr interessiert', bewertung: 'Sehr gut' },
-            { id: 4, studentId: 1, date: '2025-09-03', activity: 'Sport: Ballspiel', topic: 'Sport', notes: 'Viel Energie', bewertung: '' },
-            { id: 5, studentId: 2, date: '2025-09-04', activity: 'Mathematik: Subtrahieren', topic: 'Mathematik', notes: 'Hat Schwierigkeiten gezeigt', bewertung: 'Schlecht' },
-            { id: 6, studentId: 3, date: '2025-09-04', activity: 'Deutsch: Rechtschreibung', topic: 'Deutsch', notes: 'Exzellente Leistung', bewertung: 'Ausgezeichnet' }
+            { id: 2, studentId: 2, date: '2025-09-01', activity: 'Lesen: Texte', topic: 'Deutsch', notes: 'Brauchte Hilfestellung', bewertung: 'Gut' }
         ];
-
         for (const entry of sampleEntries) await tx.objectStore('entries').put(entry);
 
-        const defaultMasterData = {
-            subjects: ['Mathematik', 'Deutsch', 'Sachkunde', 'Sport'],
-            activities: ['Hausaufgaben', 'Klassenarbeit', 'Projektarbeit', 'Freiarbeit'],
-            notesTemplates: ['Gut gemacht', 'Weitere Unterstützung nötig', 'Sehr aufmerksam', 'Sehr sozial']
-        };
-        await tx.objectStore('masterData').put({ ...defaultMasterData, id: 1 });
         await tx.done;
+
+        if (masterDataHandler) masterDataHandler({
+            schoolYears: ['2025/2026'],
+            schools: { 'Ostschule': ['1a','1b'], 'Heinz-Sielmann-Grundschule': ['2b'] },
+            subjects: ['Mathematik','Deutsch'],
+            activities: ['Addieren','Lesen: Texte'],
+            notesTemplates: []
+        });
 
         if (setStudents) setStudents(await db.getAll('students'));
         if (setEntries) setEntries(await db.getAll('entries'));
-        if (masterDataHandler) masterDataHandler(defaultMasterData);
-
     } catch (err) {
         console.error('Fehler beim Laden der Beispieldaten:', err);
-        alert('Fehler beim Laden der Beispieldaten: ' + err.message);
     }
 };
 
@@ -307,9 +299,8 @@ export const clearAllData = async (db, setStudents, setEntries, setSettings, set
         if (setStudents) setStudents([]);
         if (setEntries) setEntries([]);
         if (setSettings) setSettings({ theme: 'hell', fontSize: 16, inputFontSize: 16, customColors: {} });
-        if (setMasterData) setMasterData({ subjects: [], activities: [], notesTemplates: [] });
+        if (setMasterData) setMasterData({ schoolYears: [], schools: {}, subjects: [], activities: [], notesTemplates: [] });
     } catch (err) {
         console.error('Fehler beim Löschen aller Daten:', err);
-        alert('Fehler beim Löschen aller Daten: ' + err.message);
     }
 };
