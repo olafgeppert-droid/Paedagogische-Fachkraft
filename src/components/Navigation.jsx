@@ -1,18 +1,18 @@
 import React from 'react';
 
 const Navigation = ({
-    isOpen,
-    students,
-    selectedStudent,
-    selectedDate,
-    filters,
-    masterData,
-    onStudentSelect,
-    onDateSelect,
-    onFilterChange,
-    onShowStats,
-    onShowSettings,
-    onShowHelp
+    isOpen = false,
+    students = [],
+    selectedStudent = null,
+    selectedDate = '',
+    filters = { search: '', schoolYear: '', school: '', className: '' },
+    masterData = { schoolYears: [], schools: {} },
+    onStudentSelect = () => {},
+    onDateSelect = () => {},
+    onFilterChange = () => {},
+    onShowStats = () => {},
+    onShowSettings = () => {},
+    onShowHelp = () => {}
 }) => {
     const [searchTerm, setSearchTerm] = React.useState(filters.search);
     const [localFilters, setLocalFilters] = React.useState(filters);
@@ -150,9 +150,9 @@ const Navigation = ({
                                 onClick={() => onStudentSelect(student)}
                             >
                                 <span className="student-avatar">
-                                    {student.gender === 'weiblich'
+                                    {student.gender === 'w'
                                         ? '👧'
-                                        : student.gender === 'männlich'
+                                        : student.gender === 'm'
                                             ? '👦'
                                             : '👤'}
                                 </span>
