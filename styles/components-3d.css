@@ -658,4 +658,45 @@
     box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
 }
 
+.masterdata-container {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.masterdata-column {
+    flex: 1;
+    min-width: 250px;
+    background: var(--card-bg, #f8fafc);
+    padding: 16px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color, #d1d5db);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.masterdata-column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+}
+
+.masterdata-column li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.masterdata-modal .modal-footer {
+    position: sticky;
+    bottom: 0;
+    background: var(--modal-bg, #ffffff);
+    padding: 1rem 2rem;
+    border-top: 2px solid var(--border-color, #d1d5db);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    z-index: 10;
+}
+
 /* … DIE DATEI GEHT SO WEITER … */
