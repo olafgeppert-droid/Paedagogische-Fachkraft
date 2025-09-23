@@ -658,6 +658,9 @@
     box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
 }
 
+/* ==========================
+   MASTERDATA MODAL LAYOUT
+   ========================== */
 .masterdata-container {
     display: flex;
     gap: 24px;
@@ -687,6 +690,40 @@
     margin-bottom: 0.5rem;
 }
 
+/* Schulen & Klassen */
+.school-card {
+    background: var(--card-bg, #f8fafc);
+    border: 2px solid var(--border-color, #d1d5db);
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.school-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.classes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.class-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid var(--border-color, #d1d5db);
+    border-radius: 8px;
+    background: var(--card-bg, #f8fafc);
+}
+
+/* Sticky Footer im Masterdata Modal */
 .masterdata-modal .modal-footer {
     position: sticky;
     bottom: 0;
