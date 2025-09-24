@@ -1,8 +1,5 @@
 **DATEI: Paedagogische-Fachkraft-main/src/database.js**
-```javascript
-// =======================
-// database.js – Teil 1
-// =======================
+
 import { openDB } from 'idb';
 
 // =======================
