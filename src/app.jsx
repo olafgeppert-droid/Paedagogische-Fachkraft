@@ -233,10 +233,30 @@ const App = () => {
     };
 
     // =======================
-    // Toolbar-Funktionen
+    // Toolbar-Handler
     // =======================
-    const handleUndo = async () => { if (db) { await undo(db); await loadEntries(); triggerRender(); } };
-    const handleRedo = async () => { if (db) { await redo(db); await loadEntries(); triggerRender(); } };
+    const handleOpenAddStudent = () => setModal('add-student');
+    const handleOpenEditStudent = () => { if (!selectedStudent) return; setModal('edit-student'); };
+    const handleOpenAddEntry = () => { if (!selectedStudent) return; setModal('add-entry'); };
+    const handlePrint = () => { if (!selectedStudent) return; console.log('Drucken', selectedStudent); };
+    const handleExport = () => { console.log('Export'); };
+    const handleOpenSearch = () => { if (students.length === 0) return; setSearchModalOpen(true); };
+    const handleCloseSearch = () => { setSearchModalOpen(false); setSearchResults([]); };
+    const handleSearch = async (term) => {
+        if (!db || !term.trim()) return;
+        try {
+            const allStudents = await getStudents(db);
+            let allEntries = [];
+            for (let student of allStudents) {
+                const entriesData = await getEntriesByStudentId(db, student.id);
+                allEntries = allEntries.concat(entriesData.map(e => ({ ...e, studentName: student.name })));
+            }
+            const filtered = allEntries.filter(e =>
+                Object.values(e).some(value => typeof value === 'string' && value.toLowerCase().includes(term.toLowerCase()))
+            );
+            setSearchResults(filtered);
+        } catch (err) { console.error(err); }
+    };
 
     const handleImportData = async (data) => {
         if (!db) return;
@@ -251,6 +271,8 @@ const App = () => {
         } catch (err) { console.error(err); }
     };
 
+    const handleUndo = async () => { if (db) { await undo(db); await loadEntries(); triggerRender(); } };
+    const handleRedo = async () => { if (db) { await redo(db); await loadEntries(); triggerRender(); } };
     const handleLoadSampleData = async () => {
         if (!db) return;
         try {
@@ -263,7 +285,6 @@ const App = () => {
             }
         } catch (err) { console.error(err); }
     };
-
     const handleClearAllData = async () => {
         if (!db) return;
         if (!window.confirm('Möchten Sie wirklich alle Daten löschen?')) return;
@@ -276,29 +297,6 @@ const App = () => {
     };
 
     // =======================
-    // Suche
-    // =======================
-    const handleOpenSearch = () => setSearchModalOpen(true);
-    const handleCloseSearch = () => { setSearchModalOpen(false); setSearchResults([]); };
-    const handleSearch = async (term) => {
-        if (!db || !term.trim()) return;
-        try {
-            const allStudents = await getStudents(db);
-            let allEntries = [];
-            for (let student of allStudents) {
-                const entriesData = await getEntriesByStudentId(db, student.id);
-                allEntries = allEntries.concat(entriesData.map(e => ({ ...e, studentName: student.name })));
-            }
-            const filtered = allEntries.filter(e =>
-                Object.values(e).some(value =>
-                    typeof value === 'string' && value.toLowerCase().includes(term.toLowerCase())
-                )
-            );
-            setSearchResults(filtered);
-        } catch (err) { console.error(err); }
-    };
-
-    // =======================
     // Render
     // =======================
     return (
@@ -307,11 +305,11 @@ const App = () => {
             <Toolbar
                 students={students}
                 selectedStudent={selectedStudent}
-                onAddStudent={() => setModal('add-student')}
-                onEditStudent={() => selectedStudent && setModal('edit-student')}
-                onAddEntry={() => setModal('add-entry')}
-                onPrint={() => console.log('Drucken')}
-                onExport={() => console.log('Export')}
+                onAddStudent={handleOpenAddStudent}
+                onEditStudent={handleOpenEditStudent}
+                onAddEntry={handleOpenAddEntry}
+                onPrint={handlePrint}
+                onExport={handleExport}
                 onImport={handleImportData}
                 onUndo={handleUndo}
                 onRedo={handleRedo}
@@ -340,50 +338,13 @@ const App = () => {
 
             {/* Modals */}
             {modal === 'add-student' && <StudentModal onClose={() => setModal(null)} onSave={handleAddStudent} />}
-            {modal === 'edit-student' && selectedStudent &&
-                <StudentModal
-                    student={selectedStudent}
-                    onClose={() => setModal(null)}
-                    onSave={handleUpdateStudent}
-                    onDelete={handleDeleteStudent}
-                />}
-            {modal === 'add-entry' && selectedStudent &&
-                <EntryModal
-                    student={selectedStudent}
-                    onClose={() => setModal(null)}
-                    onSave={handleAddEntry}
-                    masterData={masterData}
-                />}
-            {modal === 'edit-entry' && editingEntry &&
-                <EntryModal
-                    student={selectedStudent}
-                    entry={editingEntry}
-                    onClose={() => setModal(null)}
-                    onSave={handleUpdateEntry}
-                    masterData={masterData}
-                />}
-            {modal === 'settings' &&
-                <SettingsModal
-                    settings={settings}
-                    setSettings={setSettings}
-                    onClose={() => setModal(null)}
-                    applySettings={applySettings}
-                    masterData={masterData}
-                    setMasterData={setMasterData}
-                />}
-            {modal === 'statistics' &&
-                <StatisticsModal
-                    entries={entries}
-                    students={students}
-                    onClose={() => setModal(null)}
-                />}
+            {modal === 'edit-student' && selectedStudent && <StudentModal student={selectedStudent} onClose={() => setModal(null)} onSave={handleUpdateStudent} onDelete={handleDeleteStudent} />}
+            {modal === 'add-entry' && selectedStudent && <EntryModal student={selectedStudent} onClose={() => setModal(null)} onSave={handleAddEntry} masterData={masterData} />}
+            {modal === 'edit-entry' && editingEntry && <EntryModal student={selectedStudent} entry={editingEntry} onClose={() => setModal(null)} onSave={handleUpdateEntry} masterData={masterData} />}
+            {modal === 'settings' && <SettingsModal settings={settings} setSettings={setSettings} onClose={() => setModal(null)} applySettings={applySettings} masterData={masterData} setMasterData={setMasterData} />}
+            {modal === 'statistics' && <StatisticsModal entries={entries} students={students} onClose={() => setModal(null)} />}
             {modal === 'help' && <HelpModal onClose={() => setModal(null)} />}
-            {searchModalOpen &&
-                <SearchModal
-                    onClose={handleCloseSearch}
-                    onSearch={handleSearch}
-                    results={searchResults}
-                />}
+            {searchModalOpen && <SearchModal onClose={handleCloseSearch} onSearch={handleSearch} results={searchResults} />}
         </div>
     );
 };
