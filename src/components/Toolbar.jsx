@@ -49,7 +49,6 @@ const Toolbar = ({
                     className="button"
                     onClick={onSearchProtocol}
                     title="Protokoll suchen"
-                    disabled={!(students && students.length > 0)}
                 >
                     🔍 Protokoll suchen
                 </button>
