@@ -314,22 +314,21 @@ const App = () => {
     return (
         <div className="app-container">
             <Header />
-            <Toolbar
-                students={students}                // <- für Protokoll-Suchen Button
-                selectedStudent={selectedStudent}
-                selectedDate={selectedDate}
-                onAddStudent={() => setModal('add-student')}
-                onEditStudent={() => setModal('edit-student')}
-                onAddEntry={() => setModal('add-entry')}
-                onSearchProtocol={handleOpenSearch}
-                onPrint={() => console.log('Drucken')}  // Platzhalter
-                onExport={() => console.log('Export')}  // Platzhalter
-                onImport={handleImportData}
-                onUndo={handleUndo}
-                onRedo={handleRedo}
-                canUndo={true}  // Beispiel, evtl anpassen
-                canRedo={true}  // Beispiel, evtl anpassen
-            />
+<Toolbar
+    students={students}
+    selectedStudent={selectedStudent}
+    onAddStudent={() => setModal('add-student')}
+    onEditStudent={() => selectedStudent && setModal('edit-student')}
+    onAddEntry={() => setModal('add-entry')}
+    onPrint={() => {}}
+    onExport={() => {}}
+    onImport={handleImportData} // Name muss zu Toolbar passen
+    onUndo={handleUndo}
+    onRedo={handleRedo}
+    canUndo={true} // Beispiel, hier kannst du echten State nutzen
+    canRedo={true}
+    onSearchProtocol={handleOpenSearch}
+/>
             <div className="content-area">
                 <Navigation
                     students={students}
