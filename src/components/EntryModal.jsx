@@ -2,14 +2,27 @@
 import React, { useState } from 'react';
 
 const EntryModal = ({ onClose, onSave, masterData, student, date, existingEntry }) => {
-    const [formData, setFormData] = useState(existingEntry || {
-        subject: '',
-        observations: '',
-        measures: '',
-        erfolg: '',
-        erfolgRating: '',
-        studentId: student?.id || null,
-        date: date || new Date().toISOString().split('T')[0],
+    const [formData, setFormData] = useState(() => {
+        if (existingEntry) {
+            // Map old field names to new ones if they exist
+            return {
+                ...existingEntry,
+                subject: existingEntry.subject || existingEntry.topic || '', // New or old
+                observations: existingEntry.observations || existingEntry.notes || '', // New or old
+                measures: existingEntry.measures || existingEntry.activity || '', // New or old
+                erfolg: existingEntry.erfolg || '',
+                erfolgRating: existingEntry.erfolgRating || existingEntry.bewertung || '', // New or old
+            };
+        }
+        return {
+            subject: '',
+            observations: '',
+            measures: '',
+            erfolg: '',
+            erfolgRating: '',
+            studentId: student?.id || null,
+            date: date || new Date().toISOString().split('T')[0],
+        };
     });
 
     const [showConfirmClose, setShowConfirmClose] = useState(false);
@@ -25,7 +38,14 @@ const EntryModal = ({ onClose, onSave, masterData, student, date, existingEntry 
     };
 
     const handleCancel = () => {
-        const initialFormData = existingEntry || {
+        const initialFormData = existingEntry ? {
+            ...existingEntry,
+            subject: existingEntry.subject || existingEntry.topic || '',
+            observations: existingEntry.observations || existingEntry.notes || '',
+            measures: existingEntry.measures || existingEntry.activity || '',
+            erfolg: existingEntry.erfolg || '',
+            erfolgRating: existingEntry.erfolgRating || existingEntry.bewertung || '',
+        } : {
             subject: '',
             observations: '',
             measures: '',
@@ -34,6 +54,7 @@ const EntryModal = ({ onClose, onSave, masterData, student, date, existingEntry 
             studentId: student?.id || null,
             date: date || new Date().toISOString().split('T')[0],
         };
+
         if (JSON.stringify(formData) !== JSON.stringify(initialFormData)) {
             setShowConfirmClose(true);
         } else {
@@ -90,13 +111,17 @@ const EntryModal = ({ onClose, onSave, masterData, student, date, existingEntry 
                         {/* Fach / Thema */}
                         <div className="form-group">
                             <label className="form-label">Fach / Thema</label>
-                            <input
-                                type="text"
-                                className="form-input multiline"
+                            <select
+                                className="form-select"
                                 value={formData.subject}
                                 onChange={(e) => handleChange('subject', e.target.value)}
                                 required
-                            />
+                            >
+                                <option value="">Bitte wählen</option>
+                                {masterData.subjects && masterData.subjects.map((subject) => (
+                                    <option key={subject} value={subject}>{subject}</option>
+                                ))}
+                            </select>
                         </div>
 
                         {/* Beobachtungen */}
@@ -145,6 +170,27 @@ const EntryModal = ({ onClose, onSave, masterData, student, date, existingEntry 
                             </select>
                         </div>
 
+                        {/* Notizen-Vorlagen (wenn vorhanden) */}
+                        {masterData.notesTemplates && masterData.notesTemplates.length > 0 && (
+                            <div className="form-group">
+                                <label className="form-label">Notizen-Vorlagen</label>
+                                <select
+                                    className="form-select"
+                                    onChange={(e) => {
+                                        if (e.target.value) {
+                                            handleChange('observations', (formData.observations ? formData.observations + '\n' : '') + e.target.value);
+                                            e.target.value = ''; // Reset select
+                                        }
+                                    }}
+                                >
+                                    <option value="">Vorlage auswählen…</option>
+                                    {masterData.notesTemplates.map((tpl, idx) => (
+                                        <option key={idx} value={tpl}>{tpl}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
                         {/* Buttons */}
                         <div className="form-actions">
                             <button type="button" className="button" onClick={handleCancel}>
@@ -162,107 +208,21 @@ const EntryModal = ({ onClose, onSave, masterData, student, date, existingEntry 
 };
 
 // =======================
-// Styles (optional Inline Styles, falls nicht in CSS)
+// Styles (optional Inline Styles, falls nicht in CSS) - Beibehalten für Vollständigkeit,
+// aber die tatsächlichen Stile kommen aus den CSS-Dateien
 // =======================
-const modalOverlayStyle = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-};
-
-const modalStyle = {
-    backgroundColor: '#fff',
-    borderRadius: '8px',
-    padding: '20px',
-    maxWidth: '600px',
-    width: '100%',
-    maxHeight: '90vh',
-    overflowY: 'auto',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-};
-
-const headerStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '1rem',
-};
-
-const closeButtonStyle = {
-    background: 'none',
-    border: 'none',
-    fontSize: '1.5rem',
-    cursor: 'pointer',
-};
-
-const formGroupStyle = {
-    marginBottom: '1rem',
-    display: 'flex',
-    flexDirection: 'column',
-};
-
-const labelStyle = {
-    fontWeight: 'bold',
-    marginBottom: '0.25rem',
-};
-
-const inputStyle = {
-    padding: '0.5rem',
-    fontSize: '1rem',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    overflowWrap: 'break-word',
-};
-
-const textareaStyle = {
-    padding: '0.5rem',
-    fontSize: '1rem',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    minHeight: '80px',
-    resize: 'vertical',
-    overflowY: 'auto',
-    whiteSpace: 'pre-wrap',
-    wordWrap: 'break-word',
-};
-
-const selectStyle = {
-    padding: '0.5rem',
-    fontSize: '1rem',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-};
-
-const formActionsStyle = {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '1rem',
-};
-
-const buttonStyle = {
-    padding: '0.5rem 1rem',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-};
-
-const buttonPrimaryStyle = {
-    ...buttonStyle,
-    backgroundColor: '#4caf50',
-    color: '#fff',
-};
-
-const buttonDangerStyle = {
-    ...buttonStyle,
-    backgroundColor: '#f44336',
-    color: '#fff',
-};
+const modalOverlayStyle = { /* ... */ };
+const modalStyle = { /* ... */ };
+const headerStyle = { /* ... */ };
+const closeButtonStyle = { /* ... */ };
+const formGroupStyle = { /* ... */ };
+const labelStyle = { /* ... */ };
+const inputStyle = { /* ... */ };
+const textareaStyle = { /* ... */ };
+const selectStyle = { /* ... */ };
+const formActionsStyle = { /* ... */ };
+const buttonStyle = { /* ... */ };
+const buttonPrimaryStyle = { /* ... */ };
+const buttonDangerStyle = { /* ... */ };
 
 export default EntryModal;
