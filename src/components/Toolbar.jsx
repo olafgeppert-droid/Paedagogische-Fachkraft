@@ -1,6 +1,7 @@
 import React from 'react';
 
 const Toolbar = ({
+    students,
     selectedStudent,
     selectedDate,
     onAddStudent,
@@ -16,7 +17,7 @@ const Toolbar = ({
     canRedo
 }) => {
     // Debug-Ausgabe, um sicherzustellen, dass die Prop vorhanden ist
-    console.log("Toolbar props:", { onSearchProtocol });
+    console.log("Toolbar props:", { onSearchProtocol, students });
 
     return (
         <div className="toolbar">
@@ -48,17 +49,20 @@ const Toolbar = ({
                     📝 Protokoll anlegen
                 </button>
 
-                {/* Protokoll suchen bleibt immer aktiv */}
+                {/* Protokoll suchen aktiviert, sobald Schüler existieren */}
                 <button
                     className="button"
                     onClick={() => {
-                        if (typeof onSearchProtocol === "function") {
-                            onSearchProtocol();
-                        } else {
-                            console.error("Fehler: onSearchProtocol ist nicht definiert oder keine Funktion");
+                        if (students && students.length > 0) {
+                            if (typeof onSearchProtocol === "function") {
+                                onSearchProtocol();
+                            } else {
+                                console.error("Fehler: onSearchProtocol ist nicht definiert oder keine Funktion");
+                            }
                         }
                     }}
                     title="Protokoll suchen"
+                    disabled={!students || students.length === 0}
                 >
                     🔍 Protokoll suchen
                 </button>
