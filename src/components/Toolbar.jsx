@@ -1,12 +1,12 @@
 import React from 'react';
 
 const Toolbar = ({
-    students,
+    students,              // <- für Protokoll-Suchen Aktivierung
     selectedStudent,
     selectedDate,
     onAddStudent,
-    onEditStudent,      // Schüler bearbeiten
-    onSearchProtocol,   // Protokoll suchen
+    onEditStudent,
+    onSearchProtocol,
     onAddEntry,
     onPrint,
     onExport,
@@ -16,8 +16,8 @@ const Toolbar = ({
     canUndo,
     canRedo
 }) => {
-    // Debug-Ausgabe, um sicherzustellen, dass die Prop vorhanden ist
-    console.log("Toolbar props:", { onSearchProtocol, students });
+
+    const hasStudents = students && students.length > 0;
 
     return (
         <div className="toolbar">
@@ -25,7 +25,7 @@ const Toolbar = ({
             <div className="toolbar-row">
                 <button
                     className="button"
-                    onClick={onAddStudent}
+                    onClick={() => onAddStudent && onAddStudent()}
                     title="Neuen Schüler hinzufügen"
                 >
                     👥 Neuer Schüler
@@ -33,7 +33,7 @@ const Toolbar = ({
                 
                 <button
                     className="button"
-                    onClick={onEditStudent}
+                    onClick={() => onEditStudent && onEditStudent()}
                     title="Ausgewählten Schüler bearbeiten"
                     disabled={!selectedStudent}
                 >
@@ -42,27 +42,22 @@ const Toolbar = ({
                 
                 <button
                     className="button"
-                    onClick={onAddEntry}
+                    onClick={() => onAddEntry && onAddEntry()}
                     title="Neues Protokoll anlegen"
                     disabled={!selectedStudent}
                 >
                     📝 Protokoll anlegen
                 </button>
 
-                {/* Protokoll suchen aktiviert, sobald Schüler existieren */}
+                {/* Protokoll suchen aktiv, sobald mindestens ein Schüler existiert */}
                 <button
                     className="button"
                     onClick={() => {
-                        if (students && students.length > 0) {
-                            if (typeof onSearchProtocol === "function") {
-                                onSearchProtocol();
-                            } else {
-                                console.error("Fehler: onSearchProtocol ist nicht definiert oder keine Funktion");
-                            }
-                        }
+                        if (typeof onSearchProtocol === 'function') onSearchProtocol();
+                        else console.error('onSearchProtocol ist keine Funktion');
                     }}
                     title="Protokoll suchen"
-                    disabled={!students || students.length === 0}
+                    disabled={!hasStudents}
                 >
                     🔍 Protokoll suchen
                 </button>
@@ -72,7 +67,7 @@ const Toolbar = ({
             <div className="toolbar-row">
                 <button
                     className="button"
-                    onClick={onPrint}
+                    onClick={() => onPrint && onPrint()}
                     title="Drucken"
                     disabled={!selectedStudent}
                 >
@@ -81,7 +76,7 @@ const Toolbar = ({
                 
                 <button
                     className="button"
-                    onClick={onExport}
+                    onClick={() => onExport && onExport()}
                     title="Daten exportieren / Teilen"
                 >
                     💾 Export / Teilen
@@ -89,7 +84,7 @@ const Toolbar = ({
                 
                 <button
                     className="button"
-                    onClick={onImport}
+                    onClick={() => onImport && onImport()}
                     title="Daten importieren"
                 >
                     📥 Import
@@ -97,7 +92,7 @@ const Toolbar = ({
                 
                 <button
                     className="button"
-                    onClick={onUndo}
+                    onClick={() => onUndo && onUndo()}
                     disabled={!canUndo}
                     title="Rückgängig"
                 >
@@ -106,7 +101,7 @@ const Toolbar = ({
                 
                 <button
                     className="button"
-                    onClick={onRedo}
+                    onClick={() => onRedo && onRedo()}
                     disabled={!canRedo}
                     title="Wiederherstellen"
                 >
