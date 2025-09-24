@@ -69,7 +69,6 @@ const App = () => {
     const [settings, setSettings] = useState({ theme: 'hell', fontSize: 16, inputFontSize: 16, customColors: {} });
     const [masterData, setMasterData] = useState({ schoolYears: [], schools: {}, subjects: [], activities: [], notesTemplates: [] });
     const [modal, setModal] = useState(null);
-    const [navOpen, setNavOpen] = useState(false);
     const [editingEntry, setEditingEntry] = useState(null);
     const [searchModalOpen, setSearchModalOpen] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
@@ -234,8 +233,11 @@ const App = () => {
     };
 
     // =======================
-    // Toolbar / Funktionen
+    // Toolbar-Funktionen
     // =======================
+    const handleUndo = async () => { if (db) { await undo(db); await loadEntries(); triggerRender(); } };
+    const handleRedo = async () => { if (db) { await redo(db); await loadEntries(); triggerRender(); } };
+
     const handleImportData = async (data) => {
         if (!db) return;
         try {
@@ -248,9 +250,6 @@ const App = () => {
             }
         } catch (err) { console.error(err); }
     };
-
-    const handleUndo = async () => { if (db) { await undo(db); await loadEntries(); triggerRender(); } };
-    const handleRedo = async () => { if (db) { await redo(db); await loadEntries(); triggerRender(); } };
 
     const handleLoadSampleData = async () => {
         if (!db) return;
@@ -279,15 +278,8 @@ const App = () => {
     // =======================
     // Suche
     // =======================
-    const handleOpenSearch = () => {
-        setSearchModalOpen(true);
-    };
-
-    const handleCloseSearch = () => {
-        setSearchModalOpen(false);
-        setSearchResults([]);
-    };
-
+    const handleOpenSearch = () => setSearchModalOpen(true);
+    const handleCloseSearch = () => { setSearchModalOpen(false); setSearchResults([]); };
     const handleSearch = async (term) => {
         if (!db || !term.trim()) return;
         try {
@@ -295,9 +287,7 @@ const App = () => {
             let allEntries = [];
             for (let student of allStudents) {
                 const entriesData = await getEntriesByStudentId(db, student.id);
-                allEntries = allEntries.concat(
-                    entriesData.map(e => ({ ...e, studentName: student.name }))
-                );
+                allEntries = allEntries.concat(entriesData.map(e => ({ ...e, studentName: student.name })));
             }
             const filtered = allEntries.filter(e =>
                 Object.values(e).some(value =>
@@ -314,21 +304,21 @@ const App = () => {
     return (
         <div className="app-container">
             <Header />
-<Toolbar
-    students={students}
-    selectedStudent={selectedStudent}
-    onAddStudent={() => setModal('add-student')}
-    onEditStudent={() => selectedStudent && setModal('edit-student')}
-    onAddEntry={() => setModal('add-entry')}
-    onPrint={() => {}}
-    onExport={() => {}}
-    onImport={handleImportData} // Name muss zu Toolbar passen
-    onUndo={handleUndo}
-    onRedo={handleRedo}
-    canUndo={true} // Beispiel, hier kannst du echten State nutzen
-    canRedo={true}
-    onSearchProtocol={handleOpenSearch}
-/>
+            <Toolbar
+                students={students}
+                selectedStudent={selectedStudent}
+                onAddStudent={() => setModal('add-student')}
+                onEditStudent={() => selectedStudent && setModal('edit-student')}
+                onAddEntry={() => setModal('add-entry')}
+                onPrint={() => console.log('Drucken')}
+                onExport={() => console.log('Export')}
+                onImport={handleImportData}
+                onUndo={handleUndo}
+                onRedo={handleRedo}
+                canUndo={true}
+                canRedo={true}
+                onSearchProtocol={handleOpenSearch}
+            />
             <div className="content-area">
                 <Navigation
                     students={students}
@@ -344,46 +334,35 @@ const App = () => {
                     selectedStudent={selectedStudent}
                     selectedDate={selectedDate}
                     setSelectedDate={setSelectedDate}
-                    onEditEntry={(entry) => {
-                        setEditingEntry(entry);
-                        setModal('edit-entry');
-                    }}
+                    onEditEntry={(entry) => { setEditingEntry(entry); setModal('edit-entry'); }}
                 />
             </div>
 
             {/* Modals */}
-            {modal === 'add-student' && (
-                <StudentModal
-                    onClose={() => setModal(null)}
-                    onSave={handleAddStudent}
-                />
-            )}
-            {modal === 'edit-student' && selectedStudent && (
+            {modal === 'add-student' && <StudentModal onClose={() => setModal(null)} onSave={handleAddStudent} />}
+            {modal === 'edit-student' && selectedStudent &&
                 <StudentModal
                     student={selectedStudent}
                     onClose={() => setModal(null)}
                     onSave={handleUpdateStudent}
                     onDelete={handleDeleteStudent}
-                />
-            )}
-            {modal === 'add-entry' && selectedStudent && (
+                />}
+            {modal === 'add-entry' && selectedStudent &&
                 <EntryModal
                     student={selectedStudent}
                     onClose={() => setModal(null)}
                     onSave={handleAddEntry}
                     masterData={masterData}
-                />
-            )}
-            {modal === 'edit-entry' && editingEntry && (
+                />}
+            {modal === 'edit-entry' && editingEntry &&
                 <EntryModal
                     student={selectedStudent}
                     entry={editingEntry}
                     onClose={() => setModal(null)}
                     onSave={handleUpdateEntry}
                     masterData={masterData}
-                />
-            )}
-            {modal === 'settings' && (
+                />}
+            {modal === 'settings' &&
                 <SettingsModal
                     settings={settings}
                     setSettings={setSettings}
@@ -391,25 +370,20 @@ const App = () => {
                     applySettings={applySettings}
                     masterData={masterData}
                     setMasterData={setMasterData}
-                />
-            )}
-            {modal === 'statistics' && (
+                />}
+            {modal === 'statistics' &&
                 <StatisticsModal
                     entries={entries}
                     students={students}
                     onClose={() => setModal(null)}
-                />
-            )}
-            {modal === 'help' && (
-                <HelpModal onClose={() => setModal(null)} />
-            )}
-            {searchModalOpen && (
+                />}
+            {modal === 'help' && <HelpModal onClose={() => setModal(null)} />}
+            {searchModalOpen &&
                 <SearchModal
                     onClose={handleCloseSearch}
                     onSearch={handleSearch}
                     results={searchResults}
-                />
-            )}
+                />}
         </div>
     );
 };
