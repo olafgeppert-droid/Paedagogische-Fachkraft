@@ -53,7 +53,7 @@ const darkenColor = (color, percent) => {
         0x1000000 +
         (R > 0 ? R : 0) * 0x10000 +
         (G > 0 ? G : 0) * 0x100 +
-        (B > 0 ? 0 : B)
+        (B > 0 ? B : 0)
     ).toString(16).slice(1);
 };
 
@@ -327,14 +327,15 @@ const App = () => {
             <Toolbar
                 selectedStudent={selectedStudent}
                 selectedDate={selectedDate}
-                onAddStudent={() => setModal('student')}
-                onEditStudent={() => selectedStudent && setModal('student')}
+                onAddStudent={() => { setSelectedStudent(null); setModal('student'); }} // immer „Neuen Schüler anlegen“
+                onEditStudent={() => selectedStudent && setModal('student')} // Bearbeiten weiterhin möglich
                 onAddEntry={() => selectedStudent && setModal('entry')}
                 onPrint={handlePrint}
                 onExport={handleExport}
                 onImport={handleImport}
                 onUndo={handleUndo}
                 onRedo={handleRedo}
+                onSearchProtocol={handleOpenSearch} // immer aktiv
                 canUndo={true}
                 canRedo={true}
             />
