@@ -212,7 +212,7 @@ const App = () => {
         } catch (err) { console.error(err); }
     };
 
-      // =======================
+    // =======================
     // Einträge-Funktionen
     // =======================
     const handleAddEntry = async (entry) => {
@@ -284,13 +284,12 @@ const App = () => {
         setSearchModalOpen(true);
     };
 
-    const handleCloseSearch = () => {
-        setSearchModalOpen(false);
+    const handleSearchResultsClear = () => {
         setSearchResults([]);
     };
 
-    const handleSearch = async (term) => {
-        if (!db || !term.trim()) return;
+    const handleSearch = async (criteria) => {
+        if (!db) return;
         try {
             const allStudents = await getStudents(db);
             let allEntries = [];
@@ -300,11 +299,18 @@ const App = () => {
                     entriesData.map(e => ({ ...e, studentName: student.name }))
                 );
             }
-            const filtered = allEntries.filter(e =>
-                Object.values(e).some(value =>
-                    typeof value === 'string' && value.toLowerCase().includes(term.toLowerCase())
-                )
-            );
+
+            let filtered = allEntries;
+            if (criteria.type && criteria.value) {
+                const searchValue = criteria.value.toLowerCase();
+                if (criteria.type === 'rating') {
+                    filtered = allEntries.filter(e => (e.rating || '').toLowerCase().includes(searchValue));
+                } else if (criteria.type === 'name') {
+                    filtered = allEntries.filter(e => (e.studentName || '').toLowerCase().includes(searchValue));
+                } else if (criteria.type === 'topic') {
+                    filtered = allEntries.filter(e => (e.topic || '').toLowerCase().includes(searchValue));
+                }
+            }
             setSearchResults(filtered);
         } catch (err) { console.error(err); }
     };
@@ -404,7 +410,7 @@ const App = () => {
             )}
             {searchModalOpen && (
                 <SearchModal
-                    onClose={handleCloseSearch}
+                    onClose={handleSearchResultsClear}
                     onSearch={handleSearch}
                     results={searchResults}
                 />
