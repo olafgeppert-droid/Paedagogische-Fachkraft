@@ -1,4 +1,3 @@
-// src/app.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header.jsx';
 import Toolbar from './components/Toolbar.jsx';
@@ -284,12 +283,13 @@ const App = () => {
         setSearchModalOpen(true);
     };
 
-    const handleSearchResultsClear = () => {
+    const handleCloseSearch = () => {
+        setSearchModalOpen(false);
         setSearchResults([]);
     };
 
-    const handleSearch = async (criteria) => {
-        if (!db) return;
+    const handleSearch = async (term) => {
+        if (!db || !term.trim()) return;
         try {
             const allStudents = await getStudents(db);
             let allEntries = [];
@@ -299,18 +299,11 @@ const App = () => {
                     entriesData.map(e => ({ ...e, studentName: student.name }))
                 );
             }
-
-            let filtered = allEntries;
-            if (criteria.type && criteria.value) {
-                const searchValue = criteria.value.toLowerCase();
-                if (criteria.type === 'rating') {
-                    filtered = allEntries.filter(e => (e.rating || '').toLowerCase().includes(searchValue));
-                } else if (criteria.type === 'name') {
-                    filtered = allEntries.filter(e => (e.studentName || '').toLowerCase().includes(searchValue));
-                } else if (criteria.type === 'topic') {
-                    filtered = allEntries.filter(e => (e.topic || '').toLowerCase().includes(searchValue));
-                }
-            }
+            const filtered = allEntries.filter(e =>
+                Object.values(e).some(value =>
+                    typeof value === 'string' && value.toLowerCase().includes(term.toLowerCase())
+                )
+            );
             setSearchResults(filtered);
         } catch (err) { console.error(err); }
     };
@@ -322,17 +315,20 @@ const App = () => {
         <div className="app-container">
             <Header />
             <Toolbar
+                students={students}                // <- für Protokoll-Suchen Button
+                selectedStudent={selectedStudent}
+                selectedDate={selectedDate}
                 onAddStudent={() => setModal('add-student')}
+                onEditStudent={() => setModal('edit-student')}
                 onAddEntry={() => setModal('add-entry')}
-                onSettings={() => setModal('settings')}
-                onStatistics={() => setModal('statistics')}
-                onHelp={() => setModal('help')}
-                onImportData={handleImportData}
+                onSearchProtocol={handleOpenSearch}
+                onPrint={() => console.log('Drucken')}  // Platzhalter
+                onExport={() => console.log('Export')}  // Platzhalter
+                onImport={handleImportData}
                 onUndo={handleUndo}
                 onRedo={handleRedo}
-                onLoadSampleData={handleLoadSampleData}
-                onClearAllData={handleClearAllData}
-                onSearchProtocol={handleOpenSearch}
+                canUndo={true}  // Beispiel, evtl anpassen
+                canRedo={true}  // Beispiel, evtl anpassen
             />
             <div className="content-area">
                 <Navigation
@@ -410,7 +406,7 @@ const App = () => {
             )}
             {searchModalOpen && (
                 <SearchModal
-                    onClose={handleSearchResultsClear}
+                    onClose={handleCloseSearch}
                     onSearch={handleSearch}
                     results={searchResults}
                 />
