@@ -303,18 +303,81 @@ const App = () => {
     const handleOpenSearch = () => { setSearchModalOpen(true); };
     const handleCloseSearch = () => { setSearchModalOpen(false); setSearchResults([]); };
 
-    const handleSearch = async (term) => {
-        if (!db || !term.trim()) return;
-        const allStudents = await getStudents(db);
-        let allEntries = [];
-        for (let student of allStudents) {
-            const entriesData = await getEntriesByStudentId(db, student.id);
-            allEntries = allEntries.concat(entriesData.map(e => ({ ...e, studentName: student.name })));
+    // =======================
+    // Such-Handler
+    // =======================
+    const handleSearch = async (criteria) => {
+        if (!db) return;
+
+        let searchTerm = '';
+        let searchType = 'all';
+        if (typeof criteria === 'string') searchTerm = criteria.trim();
+        else { searchTerm = (criteria.value ?? '').toString().trim(); searchType = (criteria.type ?? 'all').toLowerCase(); }
+
+        const isExact = /^".*"$/.test(searchTerm);
+        if (isExact) searchTerm = searchTerm.slice(1, -1).toLowerCase();
+        else searchTerm = searchTerm.toLowerCase();
+
+        try {
+            const allEntries = await db.getAll('entries');
+            const allStudents = await getStudents(db); // Alle Schüler einmalig abrufen
+
+            let results = allEntries.filter(e => {
+                const studentObj = allStudents.find(s => s.id === e.studentId);
+                const studentNameLower = studentObj ? studentObj.name.toLowerCase() : '';
+
+                // Hilfsfunktion, um ein Feld (oder seine alten Entsprechungen) zu prüfen
+                const checkField = (newField, oldField1, oldField2, value, exactMatch) => {
+                    const fieldValue1 = (e[newField] || '').toString().toLowerCase();
+                    const fieldValue2 = (e[oldField1] || '').toString().toLowerCase();
+                    const fieldValue3 = (e[oldField2] || '').toString().toLowerCase(); // Optional: Für activity/measures
+
+                    const match1 = exactMatch ? fieldValue1 === value : fieldValue1.includes(value);
+                    const match2 = exactMatch ? fieldValue2 === value : fieldValue2.includes(value);
+                    const match3 = exactMatch ? fieldValue3 === value : fieldValue3.includes(value);
+
+                    return match1 || match2 || match3;
+                };
+
+                switch (searchType) {
+                    case 'topic':
+                    case 'thema': // 'thema' ist ein alter Alias, 'subject' ist neu, 'topic' ebenfalls alt, 'activity' kann auch Thema sein
+                        return checkField('subject', 'topic', 'activity', searchTerm, isExact);
+                    case 'rating':
+                    case 'bewertung':
+                        const ratingValue = (e.erfolgRating || e.bewertung || '').toString().toLowerCase().trim();
+                        if (searchTerm === '' || searchTerm === 'leer') {
+                            return ratingValue === ''; // Suche nach leeren Bewertungen
+                        }
+                        return ratingValue === searchTerm; // Suche nach 'positiv' oder 'negativ'
+                    case 'name':
+                        return studentNameLower.includes(searchTerm);
+                    case 'all':
+                    default:
+                        // Durchsuche alle relevanten Felder (neu und alt)
+                        const searchableFields = [
+                            e.subject, e.topic, e.activity, // Thema, alter Topic/Activity
+                            e.observations, e.notes,      // Beobachtungen, alte Notes
+                            e.measures,                   // Maßnahmen
+                            e.erfolg,                     // Erfolg (Text)
+                            e.erfolgRating, e.bewertung   // Erfolgsbewertung, alte Bewertung
+                        ].filter(f => f != null && f !== '').map(f => f.toString().toLowerCase());
+
+                        if (studentNameLower.includes(searchTerm)) return true; // Schülernamen immer prüfen
+                        return searchableFields.some(f => isExact ? f === searchTerm : f.includes(searchTerm));
+                }
+            });
+
+            results = results.map(e => ({ ...e, studentName: allStudents.find(s => s.id === e.studentId)?.name || `Schüler ${e.studentId}` }));
+            setSearchResults(results);
+            setViewMode('search');
+            setSearchModalOpen(false);
+        } catch (err) {
+            console.error('Fehler bei Suche:', err);
+            setSearchResults([]);
+            setViewMode('search');
+            setSearchModalOpen(false);
         }
-        const filtered = allEntries.filter(e => Object.values(e).some(value => typeof value === 'string' && value.toLowerCase().includes(term.toLowerCase())));
-        setSearchResults(filtered);
-        setViewMode('search');
-        setSearchModalOpen(false);
     };
 
     const handleStudentClick = (student) => { setSelectedStudent(student); setViewMode('student'); setSearchResults([]); setSearchModalOpen(false); };
@@ -347,10 +410,10 @@ const App = () => {
                 selectedDate={selectedDate}
                 onStudentSelect={handleStudentClick}
                 onDateSelect={setSelectedDate}
+                onFilterChange={({ search }) => setStudentFilterTerm(search)}
                 onShowStats={() => setModal('statistics')}
                 onShowSettings={() => setModal('settings')}
                 onShowHelp={() => setModal('help')}
-                onFilterChange={({ search }) => setStudentFilterTerm(search)}
             />
 
             <MainContent
