@@ -13,7 +13,9 @@ const Toolbar = ({
     onUndo,
     onRedo,
     canUndo,
-    canRedo
+    canRedo,
+    // onLoadSampleData, // ENTFERNT: Nicht mehr direkt in Toolbar
+    // onClearAllData    // ENTFERNT: Nicht mehr direkt in Toolbar
 }) => {
     return (
         <div className="toolbar">
@@ -99,6 +101,26 @@ const Toolbar = ({
                     ↪️ Wiederherstellen
                 </button>
             </div>
+
+            {/* Dritte Zeile: Globale Datenaktionen (ENTFERNT, WURDE NACH SETTINGS VERSCHOBEN) */}
+            {/*
+            <div className="toolbar-row">
+                <button
+                    className="button button-warning"
+                    onClick={onLoadSampleData}
+                    title="Beispieldaten laden (überschreibt alle Daten)"
+                >
+                    📂 Beispieldaten
+                </button>
+                <button
+                    className="button button-danger"
+                    onClick={onClearAllData}
+                    title="ALLE Daten löschen (endgültig!)"
+                >
+                    🗑️ Alle Daten löschen
+                </button>
+            </div>
+            */}
         </div>
     );
 };
