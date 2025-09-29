@@ -43,7 +43,8 @@ const App = () => {
     const [students, setStudents] = useState([]); // Alle Schüler
     const [entries, setEntries] = useState([]); // Einträge basierend auf ViewMode (Schüler, Tag, Suche)
     const [selectedStudent, setSelectedStudent] = useState(null);
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    // KORREKTUR: selectedDate beginnt leer, um "kein Datum ausgewählt" zu ermöglichen
+    const [selectedDate, setSelectedDate] = useState(''); 
     const [viewMode, setViewMode] = useState('student'); // 'student', 'day', 'search'
     const [settings, setSettings] = useState({ theme: 'hell', fontSize: 16, inputFontSize: 16, customColors: {} });
     // KORREKTUR: 'subjects' und 'activities' aus masterData-Initialisierung entfernt
@@ -361,6 +362,7 @@ const App = () => {
             const firstStudent = loadedData.students.length > 0 ? loadedData.students[0] : null;
             setSelectedStudent(firstStudent);
            
+            // KORREKTUR: Beim Laden von Beispieldaten wird das Datum auf heute gesetzt
             setSelectedDate(new Date().toISOString().split('T')[0]);
             setStudentFilters({ search: '', schoolYear: '', school: '', className: '' });
            
@@ -390,7 +392,8 @@ const App = () => {
             });
 
             setSelectedStudent(null);
-            setSelectedDate(new Date().toISOString().split('T')[0]);
+            // KORREKTUR: Beim Löschen aller Daten wird das Datumfeld geleert
+            setSelectedDate('');
             setStudentFilters({ search: '', schoolYear: '', school: '', className: '' });
 
             alert('Alle Daten erfolgreich gelöscht!');
