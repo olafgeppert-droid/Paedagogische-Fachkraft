@@ -133,7 +133,7 @@ const EntryModal = ({ onClose, onSave, masterData, student, date, existingEntry 
                         {/* Erfolg (Textfeld) */}
                         <div className="form-group">
                             <label className="form-label">Erfolg</label>
-                            <textarea
+                            <input
                                 type="text"
                                 className="form-input"
                                 value={formData.erfolg}
