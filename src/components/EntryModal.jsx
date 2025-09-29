@@ -1,4 +1,3 @@
-// src/components/EntryModal.jsx
 import React, { useState } from 'react';
  
 const EntryModal = ({ onClose, onSave, masterData, student, date, existingEntry }) => {
