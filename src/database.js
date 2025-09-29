@@ -1,3 +1,4 @@
+// src/database.js
 import { openDB } from 'idb';
  
 // =======================
@@ -315,7 +316,7 @@ export const loadSampleData = async (db) => {
             { id: 3, studentId: 3, date: '2025-09-02', subject: 'Sachkunde', observations: 'Sehr interessiert', measures: 'Vertiefende Aufgaben', erfolg: 'Hervorragende Mitarbeit', erfolgRating: 'positiv' },
             { id: 4, studentId: 1, date: '2025-09-03', subject: 'Sport', observations: 'Viel Energie', measures: 'Mehr Bewegungsmöglichkeiten', erfolg: 'Gut ausgepowert', erfolgRating: '' }, // Beispieldaten für leere Erfolgsbewertung
             { id: 5, studentId: 4, date: '2024-10-15', subject: 'Kunst', observations: 'Hat ein kreatives Bild gemalt.', measures: 'Lob und Ermutigung, Bild im Klassenzimmer ausstellen.', erfolg: 'Stolz auf die eigene Leistung.', erfolgRating: 'positiv' },
-            { id: 6, studentId: 5, date: '2024-11-05', subject: 'Deutsch', observations: 'Schwierigkeiten beim Verständnis von Aufgabenstellungen.', measures: 'Aufgabenstellungen vereinfachen und visuell unterstützen.', erfolg: 'Leichte Verbesserung, benötigt weitere Unterstützung.\nZeigt sich motiviert, trotz der anfänglichen Schwierigkeiten.', erfolgRating: 'negativ' } // Mehrzeiliger Erfolg für Test
+            { id: 6, studentId: 5, date: '2024-11-05', subject: 'Deutsch', observations: 'Schwierigkeiten beim Verständnis von Aufgabenstellungen.', measures: 'Aufgabenstellungen vereinfachen und visuell unterstützen.', erfolg: 'Leichte Verbesserung, benötigt weitere Unterstützung.', erfolgRating: 'negativ' }
         ];
         for (const entry of sampleEntries) await tx.objectStore('entries').put(entry);
  
