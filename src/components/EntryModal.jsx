@@ -133,9 +133,9 @@ const EntryModal = ({ onClose, onSave, masterData, student, date, existingEntry 
                         {/* Erfolg (Textfeld) */}
                         <div className="form-group">
                             <label className="form-label">Erfolg</label>
-                            <input
-                                type="text"
-                                className="form-input"
+                            {/* KORREKTUR: Geändert von input type="text" zu textarea für mehrzeilige Eingabe */}
+                            <textarea
+                                className="form-textarea"
                                 value={formData.erfolg}
                                 onChange={(e) => handleChange('erfolg', e.target.value)}
                             />
