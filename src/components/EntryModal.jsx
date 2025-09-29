@@ -1,3 +1,4 @@
+// src/components/EntryModal.jsx
 import React, { useState } from 'react';
  
 const EntryModal = ({ onClose, onSave, masterData, student, date, existingEntry }) => {
@@ -132,9 +133,9 @@ const EntryModal = ({ onClose, onSave, masterData, student, date, existingEntry 
                         {/* Erfolg (Textfeld) */}
                         <div className="form-group">
                             <label className="form-label">Erfolg</label>
-                            {/* KORREKTUR: Geändert von input type="text" zu textarea für mehrzeilige Eingabe */}
-                            <textarea
-                                className="form-textarea"
+                            <input
+                                type="text"
+                                className="form-input"
                                 value={formData.erfolg}
                                 onChange={(e) => handleChange('erfolg', e.target.value)}
                             />

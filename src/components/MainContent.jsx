@@ -27,7 +27,7 @@ const MainContent = ({ viewMode, selectedStudent, selectedDate, entries, onEditE
         );
     }
 
-    if (viewMode === 'day' && selectedDate) { // KORREKTUR: selectedDate ist nun ein String, daher ist "selectedDate" prüfen ausreichend
+    if (viewMode === 'day' && selectedDate) {
         const entriesByStudent = {};
         entries.forEach((entry) => {
             if (!entriesByStudent[entry.studentId]) entriesByStudent[entry.studentId] = [];
@@ -109,10 +109,9 @@ const EntryCard = ({ entry, student, onEdit }) => {
                 <span className="entry-date">{new Date(entry.date).toLocaleDateString('de-DE')}</span>
             </div>
             <p><strong>Schüler:</strong> {studentName}</p>
-            {/* KORREKTUR: Zeilenumbrüche für Beobachtungen, Maßnahmen und Erfolg beibehalten */}
-            <p style={{ whiteSpace: 'pre-wrap' }}><strong>Beobachtungen:</strong> {entry.observations || entry.notes}</p>
-            <p style={{ whiteSpace: 'pre-wrap' }}><strong>Maßnahmen:</strong> {entry.measures}</p>
-            {entry.erfolg && <p style={{ whiteSpace: 'pre-wrap' }}><strong>Erfolg:</strong> {entry.erfolg}</p>}
+            <p><strong>Beobachtungen:</strong> {entry.observations || entry.notes}</p>
+            <p><strong>Maßnahmen:</strong> {entry.measures}</p> {/* Korrektur: `|| entry.activity` entfernt */}
+            {entry.erfolg && <p><strong>Erfolg:</strong> {entry.erfolg}</p>}
             {entry.erfolgRating && entry.erfolgRating !== 'none' && (
                 <p><strong>Bewertung:</strong> {entry.erfolgRating || entry.bewertung}</p>
             )}
