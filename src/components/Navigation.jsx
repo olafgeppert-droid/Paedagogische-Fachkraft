@@ -1,4 +1,3 @@
-// src/components/Navigation.jsx
 import React, { useState, useEffect } from 'react';
  
 const Navigation = ({
@@ -47,7 +46,7 @@ const Navigation = ({
         setLocalSchoolYear('');
         setLocalSchool('');
         setLocalClassName('');
-        onDateSelect(''); // Datum komplett zurücksetzen
+        onDateSelect(new Date().toISOString().split('T')[0]); // Reset date to today
         onStudentSelect(null); // Deselect any student
     };
  
