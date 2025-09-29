@@ -46,7 +46,8 @@ const Navigation = ({
         setLocalSchoolYear('');
         setLocalSchool('');
         setLocalClassName('');
-        onDateSelect(new Date().toISOString().split('T')[0]); // Reset date to today
+        // KORREKTUR: Datum auf leeren String setzen, nicht auf heute
+        onDateSelect(''); 
         onStudentSelect(null); // Deselect any student
     };
  
@@ -56,7 +57,8 @@ const Navigation = ({
         localSchoolYear ||
         localSchool ||
         localClassName ||
-        selectedDate !== new Date().toISOString().split('T')[0] || // Compare to today's date string
+        // KORREKTUR: Prüfen, ob selectedDate nicht leer ist
+        selectedDate !== '' || 
         selectedStudent;
  
     // Filter students based on current internal filter states
