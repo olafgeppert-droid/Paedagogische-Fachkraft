@@ -40,13 +40,13 @@ const Navigation = ({
         });
     }, [localSearchTerm, localSchoolYear, localSchool, localClassName, onFilterChange]);
  
-    // ANPASSUNG FÜR KORREKTURPUNKT 1: Datum beim Leeren der Filter auf leer setzen
+ 
     const clearAllFilters = () => {
         setLocalSearchTerm('');
         setLocalSchoolYear('');
         setLocalSchool('');
         setLocalClassName('');
-        onDateSelect(''); // <--- GEÄNDERT: Datum auf leeren String setzen
+        onDateSelect(new Date().toISOString().split('T')[0]); // Reset date to today
         onStudentSelect(null); // Deselect any student
     };
  

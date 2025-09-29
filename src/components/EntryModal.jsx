@@ -130,11 +130,12 @@ const EntryModal = ({ onClose, onSave, masterData, student, date, existingEntry 
                             />
                         </div>
  
-                        {/* ANPASSUNG FÜR KORREKTURPUNKT 2: Erfolg (Textfeld mit Zeilenumbruch) */}
+                        {/* Erfolg (Textfeld) */}
                         <div className="form-group">
                             <label className="form-label">Erfolg</label>
-                            <textarea
-                                className="form-textarea" // <--- GEÄNDERT: von form-input zu form-textarea
+                            <input
+                                type="text"
+                                className="form-input"
                                 value={formData.erfolg}
                                 onChange={(e) => handleChange('erfolg', e.target.value)}
                             />
