@@ -1,4 +1,3 @@
-// src/database.js
 import { openDB } from 'idb';
  
 // =======================
